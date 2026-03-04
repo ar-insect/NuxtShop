@@ -82,7 +82,7 @@ export default defineNuxtConfig({
     },
   },
   experimental: {
-    appManifest: true
+    appManifest: false
   },
   // Configure MDC (Markdown Components) for Nuxt Content
   mdc: {
@@ -125,6 +125,7 @@ export default defineNuxtConfig({
     },
     public: {
       // 客户端公共配置
+      disableCaptcha: process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1' || process.env.NODE_ENV === 'test'
     }
   },
   typescript: {

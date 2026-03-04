@@ -19,10 +19,27 @@ When('我点击第一个推荐商品进入详情页', async ({ page }) => {
 
 When('我点击"加入购物车"按钮', async ({ page }) => {
   const addToCartBtn = page.locator('button:has-text("加入购物车")').first();
-  await expect(addToCartBtn).toBeVisible();
+  try {
+    await expect(addToCartBtn).toBeVisible({ timeout: 2000 });
+  } catch {
+    // 未登录时，先走登录弹窗
+    const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
+    const hasLoginHint = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);
+    if (hasLoginHint) {
+      await loginHintBtn.click();
+      const modal = page.locator('.modal-mask');
+      await expect(modal).toBeVisible({ timeout: 10000 });
+      await modal.locator('input[name="username"]').fill('admin');
+      await modal.locator('input[name="password"]').fill('123456');
+      await modal.locator('button[type="submit"]').click();
+      // 等待登录完成
+      await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+    }
+    // 登录后再找按钮
+    await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
+  }
   await addToCartBtn.click();
-  // 等待可能的状态更新
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(800);
 });
 
 Then('我应该在购物车页面看到该商品', async ({ page }) => {

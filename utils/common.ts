@@ -60,3 +60,29 @@ export const deepClone = <T>(obj: T): T => {
   
   return clone
 }
+
+export const limit = (value: number, min: number = 0, max: number = Number.POSITIVE_INFINITY) => {
+  if (!Number.isFinite(value)) return min
+  if (!Number.isFinite(min)) min = 0
+  if (!Number.isFinite(max)) max = Number.POSITIVE_INFINITY
+  if (min > max) [min, max] = [max, min]
+  return Math.min(max, Math.max(min, value))
+}
+
+export const max = (...values: number[]) => {
+  if (!values || values.length === 0) return -Infinity
+  let m = -Infinity
+  for (const v of values) {
+    if (Number.isFinite(v) && v > m) m = v
+  }
+  return m
+}
+
+export const min = (...values: number[]) => {
+  if (!values || values.length === 0) return Infinity
+  let m = Infinity
+  for (const v of values) {
+    if (Number.isFinite(v) && v < m) m = v
+  }
+  return m
+}

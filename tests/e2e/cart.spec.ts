@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('购物车功能', () => {
   test('购物车流程：添加商品并验证', async ({ page }) => {
+    // 0. 先登录
+    await page.goto('/login');
+    await page.fill('input[name="username"]', 'admin');
+    await page.fill('input[name="password"]', '123456');
+    await page.click('button[type="submit"]');
+    await page.waitForURL((url) => !url.toString().includes('/login'));
+
     // 1. 访问首页
     await page.goto('/');
     
@@ -15,7 +22,7 @@ test.describe('购物车功能', () => {
     // const productTitle = await firstProductLink.textContent();
     await firstProductLink.click();
     
-    // 4. 在详情页点击“加入购物车”
+    // 4. 在详情页点击“加入购物车”（已登录状态）
     // 使用 .first() 以确保点击的是详情页的主按钮，而不是底部推荐列表中的按钮
     const addToCartBtn = page.locator('button:has-text("加入购物车")').first();
     await expect(addToCartBtn).toBeVisible();

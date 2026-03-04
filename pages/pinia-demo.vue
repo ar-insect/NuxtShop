@@ -12,12 +12,12 @@
         </div>
         
         <div class="controls">
-          <button class="btn btn-primary" @click="counter.increment()">+</button>
-          <button class="btn btn-secondary" @click="counter.decrement()">-</button>
-          <button class="btn btn-danger" @click="counter.reset()">重置</button>
-          <button class="btn btn-info" :disabled="loading" @click="counter.simulateAsyncAction()">
-            {{ loading ? '加载中...' : '异步加10' }}
-          </button>
+          <BaseButton size="sm" @click="counter.increment()">+</BaseButton>
+          <BaseButton size="sm" variant="secondary" @click="counter.decrement()">-</BaseButton>
+          <BaseButton size="sm" variant="danger" @click="counter.reset()">重置</BaseButton>
+          <BaseButton size="sm" :loading="loading" @click="counter.simulateAsyncAction()">
+            异步加10
+          </BaseButton>
         </div>
         
         <div class="store-state">
@@ -44,8 +44,8 @@
           </div>
           
           <div class="user-actions">
-            <button class="btn btn-sm" @click="handleUpdateProfile">修改名称</button>
-            <button class="btn btn-danger btn-sm" @click="userStore.logout()">退出登录</button>
+            <BaseButton size="sm" @click="handleUpdateProfile">修改名称</BaseButton>
+            <BaseButton size="sm" variant="danger" @click="userStore.logout()">退出登录</BaseButton>
           </div>
         </div>
         
@@ -59,9 +59,7 @@
               @keyup.enter="handleLogin"
             >
           </div>
-          <button class="btn btn-success" :disabled="loginLoading" @click="handleLogin">
-            {{ loginLoading ? '登录中...' : '模拟登录' }}
-          </button>
+          <BaseButton :loading="loginLoading" @click="handleLogin">模拟登录</BaseButton>
         </div>
       </section>
     </div>
@@ -73,10 +71,9 @@
 </template>
 
 <script setup lang="ts">
-// 自动导入 stores (Nuxt 3 特性)
-// 如果没有自动导入，可以手动 import { useCounterStore } from '~/stores/counter'
 import { useCounterStore } from '~/stores/counter'
 import { useUserStore } from '~/stores/user'
+import BaseButton from '~/components/ui/BaseButton.vue'
 
 const counter = useCounterStore()
 const userStore = useUserStore()
@@ -249,14 +246,6 @@ h2 {
 }
 
 /* Buttons */
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-}
 
 .btn:disabled {
   opacity: 0.6;

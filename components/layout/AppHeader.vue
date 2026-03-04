@@ -25,6 +25,7 @@
             <li v-for="link in mainLinks" :key="link.to">
               <NuxtLink 
                 :to="link.to"
+                @click.prevent="navigateTo(link.to)"
                 class="px-3 py-2 text-sm font-medium hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 transition-all duration-200"
                 active-class="text-[var(--primary-color)] bg-[var(--primary-color)]/10 font-semibold shadow-sm"
                 :style="{ borderRadius: 'var(--border-radius)', color: 'var(--text-secondary)' }"
@@ -149,7 +150,6 @@ const { user, logout } = useAuth()
 const { cartCount } = useCart()
 const { wishlistItems } = useWishlist()
 const { openLoginModal } = useLoginModal()
-
 const mainLinks = [
   { to: '/', text: '首页' },
   { to: '/products', text: '商品' },

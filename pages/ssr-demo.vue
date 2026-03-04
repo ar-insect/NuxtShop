@@ -2,44 +2,40 @@
   <div class="ssr-demo">
     <h1>服务端渲染 (SSR) 调试演示</h1>
     
-    <div class="card">
-      <h2>1. 数据展示区域</h2>
-      <p>下面的数据是在服务端获取并渲染的（查看源代码可见内容）。</p>
-      
-      <div v-if="pending" class="loading">
-        加载中...
+    <div class="space-y-8">
+      <BaseCard title="1. 数据展示区域">
+      <p>下面的数据是在服务端获取并渲染的。</p>
+      <div class="mt-3">
+        <div v-if="pending" class="loading">加载中...</div>
+        <div v-else-if="error" class="error">加载失败: {{ error.message }}</div>
+        <div v-else class="data-display">
+          <ul>
+            <li><strong>ID:</strong> {{ data?.id }}</li>
+            <li><strong>消息:</strong> {{ data?.message }}</li>
+            <li><strong>服务端时间:</strong> {{ data?.serverTime }}</li>
+            <li><strong>处理结果:</strong> {{ data?.data }}</li>
+            <li><strong>User Agent:</strong> <span class="ua">{{ data?.headers }}</span></li>
+          </ul>
+        </div>
       </div>
-      
-      <div v-else-if="error" class="error">
-        加载失败: {{ error.message }}
-      </div>
-      
-      <div v-else class="data-display">
-        <ul>
-          <li><strong>ID:</strong> {{ data?.id }}</li>
-          <li><strong>消息:</strong> {{ data?.message }}</li>
-          <li><strong>服务端时间:</strong> {{ data?.serverTime }}</li>
-          <li><strong>处理结果:</strong> {{ data?.data }}</li>
-          <li><strong>User Agent:</strong> <span class="ua">{{ data?.headers }}</span></li>
-        </ul>
-      </div>
-    </div>
+      </BaseCard>
 
-    <div class="card">
-      <h2>2. 调试说明</h2>
+      <BaseCard title="2. 调试说明">
       <ol>
-        <li>确保已选择 <strong>"fullstack: nuxt"</strong> 或 <strong>"server: nuxt"</strong> 调试配置启动。</li>
-        <li>打开 <code>server/api/ssr-test.get.ts</code> 文件，在第 5 行 <code>const query = ...</code> 处设置断点。</li>
-        <li>刷新此页面 (Cmd+R)。</li>
-        <li>观察 VS Code 应该会捕获到断点，您可以查看 <code>event</code> 对象和变量。</li>
+        <li>确保已选择 "fullstack: nuxt" 或 "server: nuxt" 调试配置启动。</li>
+        <li>打开 server/api/ssr-test.get.ts，在 const query = ... 处设置断点。</li>
+        <li>刷新此页面。</li>
+        <li>VS Code 将捕获断点，可查看变量。</li>
       </ol>
-    </div>
+      </BaseCard>
 
-    <div class="card">
-      <h2>3. 客户端交互</h2>
-      <p>点击下方按钮将在客户端重新发起请求（也会触发服务端 API，但通过 fetch 调用）。</p>
-      <button @click="refreshData">刷新数据</button>
-      <button @click="updateId">更新 ID 并刷新</button>
+      <BaseCard title="3. 客户端交互">
+      <p>点击下方按钮将在客户端重新发起请求。</p>
+      <div class="mt-2 flex gap-2">
+        <BaseButton @click="refreshData">刷新数据</BaseButton>
+        <BaseButton variant="secondary" @click="updateId">更新 ID 并刷新</BaseButton>
+      </div>
+      </BaseCard>
     </div>
 
     <div style="margin-top: 20px;">
@@ -49,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import BaseCard from '~/components/ui/BaseCard.vue'
+import BaseButton from '~/components/ui/BaseButton.vue'
 const currentId = ref('demo-1')
 
 // useFetch 在服务端渲染期间会直接调用 API 函数（模拟请求），
@@ -75,15 +73,6 @@ const updateId = () => {
   padding: 2rem;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.card {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  background-color: var(--card-bg);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 h2 {
@@ -114,21 +103,6 @@ li {
   word-break: break-all;
   font-size: 0.9em;
   color: var(--text-secondary);
-}
-
-button {
-  padding: 0.5rem 1rem;
-  margin-right: 1rem;
-  cursor: pointer;
-  background-color: #00dc82;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-button:hover {
-  background-color: #00c474;
 }
 
 .loading {

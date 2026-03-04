@@ -5,7 +5,13 @@ export const useLoginModal = () => {
   const isOpen = useState<boolean>('login-modal-open', () => false)
 
   const openLoginModal = () => {
-    isOpen.value = true
+    // Ensure modal reliably opens even if currently in an inconsistent state
+    if (isOpen.value) {
+      isOpen.value = false
+      queueMicrotask(() => { isOpen.value = true })
+    } else {
+      isOpen.value = true
+    }
   }
 
   const closeLoginModal = () => {

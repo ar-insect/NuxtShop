@@ -1,4 +1,4 @@
-import type { Product } from './useProducts'
+import type { Product } from '~/modules/product/composables/useProducts'
 
 /**
  * Composable for managing the user's wishlist.
@@ -95,11 +95,21 @@ export const useWishlist = () => {
     return wishlistItems.value.some(item => item.id === productId)
   }
 
+  const refreshWishlist = async () => {
+    try {
+      const latest = await $fetch<Product[]>('/api/wishlist')
+      wishlistItems.value = Array.isArray(latest) ? latest : []
+    } catch {
+      wishlistItems.value = []
+    }
+  }
+
   return {
     wishlistItems,
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
-    isInWishlist
+    isInWishlist,
+    refreshWishlist
   }
 }

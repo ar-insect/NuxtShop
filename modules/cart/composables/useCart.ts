@@ -130,6 +130,15 @@ export const useCart = () => {
     return cartItems.value.reduce((total, item) => total + item.quantity, 0)
   })
 
+  const refreshCart = async () => {
+    try {
+      const latest = await $fetch<CartItem[]>('/api/cart')
+      cartItems.value = Array.isArray(latest) ? latest : []
+    } catch {
+      cartItems.value = []
+    }
+  }
+
   return {
     cartItems,
     addToCart,
@@ -137,6 +146,7 @@ export const useCart = () => {
     updateQuantity,
     clearCart,
     cartTotal,
-    cartCount
+    cartCount,
+    refreshCart
   }
 }

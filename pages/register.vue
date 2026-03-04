@@ -190,7 +190,7 @@ const handleRegister = async () => {
   
   loading.value = true
   try {
-    const success = await register(username.value, password.value, phone.value)
+    const success = await register(username.value, password.value, confirmPassword.value, phone.value)
     if (success) {
       step.value = 3
     }

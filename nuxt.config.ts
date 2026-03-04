@@ -50,10 +50,6 @@ export default defineNuxtConfig({
       pathPrefix: false
     },
     {
-      path: '~/components/product',
-      pathPrefix: false
-    },
-    {
       path: '~/components/user',
       pathPrefix: false
     },

@@ -1,4 +1,4 @@
-import type { Product } from './useProducts'
+import type { Product } from '~/modules/product/composables/useProducts'
 
 /**
  * Composable for managing user browsing history.

@@ -1,3 +1,5 @@
+import { useCart } from '~/modules/cart/composables/useCart'
+import { useWishlist } from '~/composables/useWishlist'
 /**
  * User interface representing a logged-in user.
  * @interface User
@@ -34,6 +36,8 @@ export const useAuth = () => {
   })
   const toast = useToast()
   const router = useRouter()
+  const { refreshCart } = useCart()
+  const { refreshWishlist } = useWishlist()
 
   /**
    * Authenticates a user with username and password.
@@ -45,24 +49,17 @@ export const useAuth = () => {
    */
   const login = async (username: string, password: string) => {
     try {
-      const { data, error } = await useFetch('/api/auth/login', {
+      const res = await $fetch('/api/auth/login', {
         method: 'POST',
         body: { username, password }
-      })
-
-      if (error.value) {
-        toast.error(error.value.statusMessage || 'Login failed')
-        return false
-      }
-
-      if (data.value) {
-        token.value = data.value.token
-        user.value = data.value.user
-        toast.success('Login successful')
-        await router.push('/')
-        return true
-      }
-      return false
+      }) as { token: string, user: User }
+      token.value = res.token
+      user.value = res.user as User
+      toast.success('Login successful')
+      await refreshCart()
+      await refreshWishlist()
+      await router.push('/')
+      return true
     } catch (e: any) {
       toast.error(e.message || 'An error occurred')
       return false
@@ -78,20 +75,14 @@ export const useAuth = () => {
    * @param {string} phone - The phone number
    * @returns {Promise<boolean>} True if registration successful, false otherwise
    */
-  const register = async (username: string, password: string, phone?: string) => {
+  const register = async (username: string, password: string, confirmPassword: string, phone?: string) => {
     try {
-      const { error } = await useFetch('/api/auth/register', {
+      await $fetch('/api/auth/register', {
         method: 'POST',
-        body: { username, password, phone }
+        body: { username, password, confirmPassword, phone }
       })
-
-      if (error.value) {
-        toast.error(error.value.statusMessage || 'Registration failed')
-        return false
-      }
-
       toast.success('Registration successful! Please login.')
-      // router.push('/login') // Removed redirect, handled by UI flow
+      await login(username, password)
       return true
     } catch (e: any) {
       toast.error(e.message || 'An error occurred during registration')

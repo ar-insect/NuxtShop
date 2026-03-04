@@ -45,19 +45,13 @@ export const useAuth = () => {
    */
   const login = async (username: string, password: string) => {
     try {
-      const { data, error } = await useFetch('/api/auth/login', {
+      const data = await $fetch<{ token: string; user: User }>('/api/auth/login', {
         method: 'POST',
         body: { username, password }
       })
-
-      if (error.value) {
-        toast.error(error.value.statusMessage || 'Login failed')
-        return false
-      }
-
-      if (data.value) {
-        token.value = data.value.token
-        user.value = data.value.user
+      if (data) {
+        token.value = data.token
+        user.value = data.user
         toast.success('Login successful')
         await router.push('/')
         return true
@@ -80,21 +74,15 @@ export const useAuth = () => {
    */
   const register = async (username: string, password: string, phone?: string) => {
     try {
-      const { error } = await useFetch('/api/auth/register', {
+      await $fetch('/api/auth/register', {
         method: 'POST',
         body: { username, password, phone }
       })
-
-      if (error.value) {
-        toast.error(error.value.statusMessage || 'Registration failed')
-        return false
-      }
-
       toast.success('Registration successful! Please login.')
       // router.push('/login') // Removed redirect, handled by UI flow
       return true
     } catch (e: any) {
-      toast.error(e.message || 'An error occurred during registration')
+      toast.error(e?.data?.statusMessage || e.message || 'An error occurred during registration')
       return false
     }
   }

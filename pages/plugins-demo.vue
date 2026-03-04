@@ -1,41 +1,38 @@
 <template>
-  <div class="plugins-demo">
-    <h1>全局插件演示</h1>
+  <div class="plugins-demo space-y-6">
+    <BaseCard title="全局插件演示" />
     
-    <div class="card">
-      <h2>1. 模板中使用插件</h2>
+    <BaseCard title="1. 模板中使用插件">
       <p>直接在模板中使用 <code>$myHelper</code>:</p>
       <div class="result">
         {{ $myHelper('来自模板的问候') }}
       </div>
-    </div>
+    </BaseCard>
 
-    <div class="card">
-      <h2>2. Script 中使用插件</h2>
+    <BaseCard title="2. Script 中使用插件">
       <p>通过 <code>useNuxtApp()</code> 获取:</p>
       <div class="result">
         {{ scriptResult }}
       </div>
-      <button @click="triggerPlugin">重新调用插件</button>
-    </div>
+      <BaseButton @click="triggerPlugin">重新调用插件</BaseButton>
+    </BaseCard>
 
-    <div class="card">
-      <h2>3. 插件说明</h2>
+    <BaseCard title="3. 插件说明">
       <ul>
         <li>插件文件位于: <code>plugins/test-plugin.ts</code></li>
         <li>Nuxt 自动扫描 plugins 目录，无需手动配置。</li>
         <li>使用 <code>provide</code> 返回的对象会自动注入到 Nuxt 实例中。</li>
         <li>注入的属性会自动带上 <code>$</code> 前缀。</li>
       </ul>
-    </div>
+    </BaseCard>
 
-    <div style="margin-top: 20px;">
-      <NuxtLink to="/">返回首页</NuxtLink>
-    </div>
+    <NuxtLink to="/">返回首页</NuxtLink>
   </div>
-</template>
+  </template>
 
 <script setup lang="ts">
+import BaseCard from '~/components/ui/BaseCard.vue'
+import BaseButton from '~/components/ui/BaseButton.vue'
 const { $myHelper } = useNuxtApp()
 const scriptResult = ref('')
 
@@ -54,15 +51,6 @@ const triggerPlugin = () => {
   margin: 0 auto;
 }
 
-.card {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  background-color: var(--card-bg);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
 h2 {
   margin-top: 0;
   color: var(--text-color);
@@ -78,20 +66,6 @@ h2 {
   color: var(--primary-color);
   font-weight: bold;
   margin: 1rem 0;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  background-color: #00dc82;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-button:hover {
-  background-color: #00c474;
 }
 
 ul {

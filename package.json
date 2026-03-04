@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20.18.3"
+    "node": ">=22.14.0"
   },
   "scripts": {
     "build": "nuxt build",
@@ -36,6 +36,7 @@
     "@nuxt/eslint": "^1.15.2",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.27",
     "eslint": "^9.39.3",
     "eslint-plugin-vue": "^10.8.0",

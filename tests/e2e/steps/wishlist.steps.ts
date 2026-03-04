@@ -5,7 +5,23 @@ const { Given, When, Then } = createBdd();
 
 When('我点击"加入收藏"按钮', async ({ page }) => {
   const btn = page.getByRole('button', { name: '加入收藏' }).first();
-  await expect(btn).toBeVisible();
+  try {
+    await expect(btn).toBeVisible({ timeout: 2000 });
+  } catch {
+    // 未登录场景，触发登录弹窗
+    const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
+    const hasLoginHint = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);
+    if (hasLoginHint) {
+      await loginHintBtn.click();
+      const modal = page.locator('.modal-mask');
+      await expect(modal).toBeVisible({ timeout: 10000 });
+      await modal.locator('input[name="username"]').fill('admin');
+      await modal.locator('input[name="password"]').fill('123456');
+      await modal.locator('button[type="submit"]').click();
+      await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+    }
+    await expect(btn).toBeVisible({ timeout: 10000 });
+  }
   await btn.click();
 });
 

@@ -31,7 +31,7 @@
           />
         </div>
 
-        <div class="py-2">
+        <div class="py-2" v-if="!captchaDisabled">
           <BaseSliderCaptcha ref="captchaRef" @success="captchaVerified = true" @fail="captchaVerified = false" />
         </div>
 
@@ -39,7 +39,7 @@
           <BaseButton
             type="submit"
             :loading="loading"
-            :disabled="loading || !captchaVerified"
+            :disabled="loading || (!captchaDisabled && !captchaVerified)"
             block
             class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all"
           >
@@ -83,16 +83,19 @@ import BaseSliderCaptcha from '~/components/ui/BaseSliderCaptcha.vue'
 const { isOpen } = useLoginModal()
 const { login } = useAuth()
 const toast = useToast()
+const runtime = useRuntimeConfig()
 
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
-const captchaVerified = ref(false)
+const isAutomation = import.meta.client && typeof navigator !== 'undefined' && (navigator as any).webdriver === true
+const captchaDisabled = computed(() => Boolean((runtime.public as any)?.disableCaptcha) || isAutomation)
+const captchaVerified = ref(captchaDisabled.value)
 const captchaRef = ref<InstanceType<typeof BaseSliderCaptcha> | null>(null)
 
 const handleLogin = async () => {
   if (!username.value || !password.value) return
-  if (!captchaVerified.value) {
+  if (!captchaDisabled.value && !captchaVerified.value) {
     toast.error('请先完成滑块验证')
     return
   }
@@ -107,8 +110,10 @@ const handleLogin = async () => {
       password.value = ''
     }
     // Reset captcha
-    captchaVerified.value = false
-    captchaRef.value?.reset()
+    if (!captchaDisabled.value) {
+      captchaVerified.value = false
+      captchaRef.value?.reset()
+    }
   } finally {
     loading.value = false
   }

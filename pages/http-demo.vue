@@ -1,42 +1,45 @@
 <template>
-  <div class="http-demo">
-    <h1>HTTP 工具类演示</h1>
+  <div class="http-demo space-y-6">
+    <BaseCard title="HTTP 工具类演示">
+      <div class="space-y-2">
+        <p>常见请求演示与文件上传/下载示例</p>
+      </div>
+    </BaseCard>
     
-    <section>
-      <h2>基础请求</h2>
-      <div class="demo-actions">
-        <button @click="handleGet">GET 请求</button>
-        <button @click="handlePost">POST 请求</button>
+    <BaseCard title="基础请求">
+      <div class="space-y-4">
+        <div class="demo-actions">
+          <BaseButton @click="handleGet">GET 请求</BaseButton>
+          <BaseButton variant="secondary" @click="handlePost">POST 请求</BaseButton>
+        </div>
+        <div v-if="result" class="result">
+          <h3>请求结果:</h3>
+          <pre>{{ result }}</pre>
+        </div>
       </div>
-      <div v-if="result" class="result">
-        <h3>请求结果:</h3>
-        <pre>{{ result }}</pre>
-      </div>
-    </section>
+    </BaseCard>
 
-    <section>
-      <h2>文件上传</h2>
-      <div class="demo-actions">
+    <BaseCard title="文件上传">
+      <div class="space-y-4">
         <input type="file" @change="handleFileChange" >
-        <button :disabled="!selectedFile" @click="handleUpload">上传文件</button>
+        <BaseButton :disabled="!selectedFile" @click="handleUpload">上传文件</BaseButton>
       </div>
-    </section>
+    </BaseCard>
 
-    <section>
-      <h2>文件下载 (模拟)</h2>
-      <div class="demo-actions">
-        <!-- 注意：这里演示下载逻辑，实际需要后端支持 Blob 返回 -->
-        <button @click="handleDownload">下载示例文件</button>
+    <BaseCard title="文件下载 (模拟)">
+      <div class="space-y-2">
+        <BaseButton @click="handleDownload">下载示例文件</BaseButton>
       </div>
-    </section>
+    </BaseCard>
 
-    <div style="margin-top: 20px;">
-      <NuxtLink to="/">返回首页</NuxtLink>
-    </div>
+    <NuxtLink to="/">返回首页</NuxtLink>
   </div>
 </template>
 
 <script setup lang="ts">
+import BaseCard from '~/components/ui/BaseCard.vue'
+import BaseButton from '~/components/ui/BaseButton.vue'
+
 const result = ref<any>(null)
 const selectedFile = ref<File | null>(null)
 
@@ -102,20 +105,10 @@ const handleDownload = async () => {
   max-width: 800px;
   margin: 0 auto;
 }
-section {
-  margin-bottom: 2rem;
-  border: 1px solid #eee;
-  padding: 1rem;
-  border-radius: 8px;
-}
 .demo-actions {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
-}
-button {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+  margin-bottom: 0.5rem;
 }
 .result {
   background: #f8f9fa;

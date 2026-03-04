@@ -16,7 +16,7 @@ test.describe('商品浏览功能', () => {
     await expect(images.first()).toBeVisible();
   });
 
-  test('点击商品应跳转到详情页', async ({ page }) => {
+  test('点击商品应跳转到详情页（未登录提示）', async ({ page }) => {
     await page.goto('/');
     
     const recommendedSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
@@ -32,8 +32,7 @@ test.describe('商品浏览功能', () => {
     // 验证 URL 是否包含 /products/
     await expect(page).toHaveURL(/\/products\/\d+/);
     
-    // 验证详情页元素
-    // 使用 .first() 以避免匹配到页面底部可能存在的推荐商品中的按钮
-    await expect(page.locator('button:has-text("加入购物车")').first()).toBeVisible();
+    // 未登录场景下，应看到登录引导按钮
+    await expect(page.locator('text=立即登录').first()).toBeVisible();
   });
 });

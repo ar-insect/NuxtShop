@@ -9,9 +9,10 @@ const { Given, When, Then } = createBdd();
 
 When('我点击导航栏的登录按钮', async ({ page }) => {
   const loginBtn = page.locator('header button', { hasText: '登录' });
+  await expect(loginBtn).toBeVisible({ timeout: 15000 });
   await loginBtn.click();
-  // 等待登录弹窗出现
-  await expect(page.locator('.modal-mask')).toBeVisible();
+  // 等待登录弹窗出现（考虑到 ClientOnly 水合与过渡）
+  await expect(page.locator('.modal-mask')).toBeVisible({ timeout: 15000 });
 });
 
 When('我在弹窗中输入用户名 {string} 和密码 {string}', async ({ page }, username, password) => {

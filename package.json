@@ -2,6 +2,9 @@
   "name": "nuxt-shop",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.18.3"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

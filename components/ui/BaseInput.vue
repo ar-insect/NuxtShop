@@ -12,6 +12,7 @@
         :type="type"
         :value="modelValue"
         class="focus:outline-none focus:border-[var(--primary-color)] block w-full sm:text-sm border py-2 transition-colors"
+        v-bind="$attrs"
         :class="[
           error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500' : '',
           disabled ? 'opacity-60 cursor-not-allowed' : '',
@@ -59,6 +60,7 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false })
 interface Props {
   modelValue?: string | number
   label?: string

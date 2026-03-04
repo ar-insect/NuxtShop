@@ -1,0 +1,261 @@
+<template>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <div class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
+      <div class="lg:col-span-7">
+        <BaseCard title="收货地址">
+          <div class="p-6 space-y-6">
+            <!-- Saved Addresses -->
+            <div v-if="savedAddresses.length > 0" class="grid gap-4 sm:grid-cols-2 mb-6">
+              <div 
+                v-for="address in savedAddresses" 
+                :key="address.id" 
+                class="relative border rounded-lg p-4 cursor-pointer transition-all hover:shadow-sm"
+                :class="selectedAddressId === address.id ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5 ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)] hover:border-[var(--text-secondary)]'"
+                @click="selectAddress(address)"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-[var(--text-color)]">{{ address.name }}</span>
+                      <span class="text-sm text-[var(--text-secondary)]">{{ address.phone }}</span>
+                    </div>
+                    <p class="mt-2 text-sm text-[var(--text-secondary)]">{{ address.detail }}</p>
+                  </div>
+                  <div v-if="selectedAddressId === address.id" class="text-[var(--primary-color)]">
+                    <CheckCircleIcon class="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Add New Address Button -->
+              <div 
+                class="flex flex-col items-center justify-center border border-dashed border-[var(--border-color)] rounded-lg p-4 cursor-pointer hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-colors min-h-[100px]"
+                :class="isNewAddressMode ? 'border-[var(--primary-color)] text-[var(--primary-color)] bg-[var(--primary-color)]/5' : 'text-[var(--text-secondary)]'"
+                @click="isNewAddressMode = true; selectedAddressId = ''"
+              >
+                <PlusIcon class="h-6 w-6 mb-1" />
+                <span class="text-sm font-medium">使用新地址</span>
+              </div>
+            </div>
+
+            <!-- New Address Form -->
+            <div v-if="isNewAddressMode || savedAddresses.length === 0" class="border-t border-[var(--border-color)] pt-6">
+              <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">填写新地址</h4>
+              <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+                <div>
+                  <BaseInput v-model="form.firstName" label="姓氏" placeholder="例如：张" />
+                </div>
+                <div>
+                  <BaseInput v-model="form.lastName" label="名字" placeholder="例如：三" />
+                </div>
+                <div class="sm:col-span-2">
+                  <BaseInput v-model="form.address" label="详细地址" placeholder="街道、门牌号等" />
+                </div>
+                <div>
+                  <BaseInput v-model="form.city" label="城市" placeholder="例如：上海" />
+                </div>
+                <div>
+                  <BaseInput v-model="form.postalCode" label="邮政编码" placeholder="例如：200000" />
+                </div>
+                <div class="sm:col-span-2">
+                  <BaseInput v-model="form.phone" label="联系电话" placeholder="用于接收配送通知" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </BaseCard>
+
+        <BaseCard title="支付方式" class="mt-8">
+          <div class="p-6">
+            <div class="space-y-4">
+              <div 
+                v-for="method in paymentMethods" 
+                :key="method.id"
+                class="flex items-center p-4 border rounded-lg cursor-pointer transition-all"
+                :class="selectedPayment === method.id ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5' : 'border-[var(--border-color)] hover:border-[var(--text-secondary)]'"
+                @click="selectedPayment = method.id"
+              >
+                <input 
+                  :id="method.id" 
+                  v-model="selectedPayment" 
+                  type="radio" 
+                  name="payment-method"
+                  :value="method.id"
+                  class="h-4 w-4 text-[var(--primary-color)] focus:outline-none border-gray-300"
+                >
+                <label :for="method.id" class="ml-3 block text-sm font-medium text-[var(--text-color)] cursor-pointer flex-1">
+                  {{ method.name }}
+                </label>
+                <component :is="method.icon" class="h-6 w-6 text-[var(--text-secondary)]" />
+              </div>
+            </div>
+          </div>
+        </BaseCard>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="mt-10 lg:mt-0 lg:col-span-5">
+        <BaseCard title="订单摘要" class="sticky top-6">
+          <div class="p-6">
+            <ul role="list" class="divide-y divide-[var(--border-color)]">
+              <li v-for="item in cartItems" :key="item.id" class="flex py-6">
+                <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-[var(--border-color)] bg-[var(--bg-color)] p-2">
+                  <img :src="item.image" :alt="item.title" class="h-full w-full object-contain object-center" >
+                </div>
+
+                <div class="ml-4 flex flex-1 flex-col">
+                  <div>
+                    <div class="flex justify-between text-base font-medium text-[var(--text-color)]">
+                      <h3 class="line-clamp-2 pr-4">{{ item.title }}</h3>
+                      <p class="ml-4">¥{{ (item.price * item.quantity).toFixed(2) }}</p>
+                    </div>
+                    <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ item.category }}</p>
+                  </div>
+                  <div class="flex flex-1 items-end justify-between text-sm">
+                    <p class="text-[var(--text-secondary)]">数量 {{ item.quantity }}</p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <div class="border-t border-[var(--border-color)] pt-6 space-y-4">
+              <div class="flex justify-between text-sm text-[var(--text-color)]">
+                <p>商品小计</p>
+                <p>¥{{ cartTotal.toFixed(2) }}</p>
+              </div>
+              <div class="flex justify-between text-sm text-[var(--text-color)]">
+                <p>运费</p>
+                <p>¥0.00</p>
+              </div>
+              <div class="flex justify-between text-base font-medium text-[var(--text-color)] pt-4 border-t border-[var(--border-color)]">
+                <p>订单总计</p>
+                <p>¥{{ cartTotal.toFixed(2) }}</p>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <BaseButton 
+                block 
+                size="lg" 
+                :loading="isProcessing"
+                :disabled="cartItems.length === 0 || !isFormValid"
+                @click="handleCheckout"
+              >
+                {{ isProcessing ? '处理中...' : '确认支付' }}
+              </BaseButton>
+            </div>
+          </div>
+        </BaseCard>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { CreditCardIcon, QrCodeIcon, PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
+
+definePageMeta({
+  middleware: 'auth'
+})
+
+const { cartItems, cartTotal, clearCart } = useCart()
+const { createOrder } = useOrders()
+const router = useRouter()
+const toast = useToast()
+
+const isProcessing = ref(false)
+const selectedPayment = ref('alipay')
+const isNewAddressMode = ref(false)
+const selectedAddressId = ref('')
+const savedAddresses = ref<any[]>([])
+
+if (import.meta.client) {
+  const saved = localStorage.getItem('nuxt-shop-addresses')
+  if (saved) {
+    try {
+      savedAddresses.value = JSON.parse(saved)
+      const defaultAddr = savedAddresses.value.find(a => a.isDefault)
+      if (defaultAddr) {
+        selectedAddressId.value = defaultAddr.id
+      } else if (savedAddresses.value.length > 0) {
+        selectedAddressId.value = savedAddresses.value[0].id
+      } else {
+        isNewAddressMode.value = true
+      }
+    } catch (e) {
+      console.error('Failed to parse addresses', e)
+    }
+  } else {
+    isNewAddressMode.value = true
+  }
+}
+
+const selectAddress = (address: any) => {
+  selectedAddressId.value = address.id
+  isNewAddressMode.value = false
+}
+
+const paymentMethods = [
+  { id: 'alipay', name: '支付宝', icon: QrCodeIcon },
+  { id: 'wechat', name: '微信支付', icon: QrCodeIcon },
+  { id: 'credit_card', name: '信用卡', icon: CreditCardIcon },
+]
+
+const form = reactive({
+  firstName: '',
+  lastName: '',
+  address: '',
+  city: '',
+  postalCode: '',
+  phone: ''
+})
+
+const isFormValid = computed(() => {
+  if (!isNewAddressMode.value && selectedAddressId.value) return true
+  return form.firstName && form.lastName && form.address && form.city && form.phone
+})
+
+const handleCheckout = async () => {
+  if (!isFormValid.value) return
+
+  isProcessing.value = true
+  
+  // Mock API delay
+  await new Promise(resolve => setTimeout(resolve, 2000))
+
+  let addressData
+  if (isNewAddressMode.value) {
+    addressData = {
+      name: `${form.firstName}${form.lastName}`,
+      phone: form.phone,
+      address: `${form.city} ${form.address}`
+    }
+  } else {
+    const selected = savedAddresses.value.find(a => a.id === selectedAddressId.value)
+    if (selected) {
+      addressData = {
+        name: selected.name,
+        phone: selected.phone,
+        address: selected.detail
+      }
+    }
+  }
+
+  if (addressData) {
+    createOrder(
+      cartItems.value,
+      cartTotal.value,
+      addressData
+    )
+
+    await clearCart()
+    isProcessing.value = false
+    
+    toast.success('订单支付成功！')
+    router.push('/orders')
+  } else {
+    isProcessing.value = false
+    toast.error('请选择收货地址')
+  }
+}
+</script>

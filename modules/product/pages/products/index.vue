@@ -1,0 +1,257 @@
+<template>
+  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="border-b border-[var(--border-color)] pb-5 mb-8">
+      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">商品列表</h1>
+      <p class="mt-2 text-lg text-[var(--text-secondary)]">
+        浏览我们要选的优质商品。
+      </p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="mb-8 flex flex-col sm:flex-row gap-4">
+      <div class="flex-1">
+        <ProductAutocomplete
+          v-model="searchText"
+          :products="products || []"
+          placeholder="搜索商品名称或描述..."
+          @select="handleProductSelect"
+          @search="handleSearch"
+        />
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+        <BaseButton
+          :variant="!activeCategory ? 'primary' : 'outline'"
+          @click="setCategory()"
+        >
+          全部
+        </BaseButton>
+        <BaseButton
+          v-for="cat in categories"
+          :key="cat"
+          :variant="activeCategory === cat ? 'primary' : 'outline'"
+          class="whitespace-nowrap capitalize"
+          @click="setCategory(cat)"
+        >
+          {{ categoryLabels[cat] || cat }}
+        </BaseButton>
+        <BaseButton
+          v-if="activeCategory || activeQuery"
+          variant="ghost"
+          class="text-red-600 hover:text-red-700 hover:bg-red-50"
+          @click="clearFilters"
+        >
+          清除
+        </BaseButton>
+      </div>
+    </div>
+
+      <!-- Loading State -->
+      <div v-if="pending" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"/>
+      </div>
+
+      <!-- Product Grid -->
+      <div v-else-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <BaseCard
+          v-for="product in products"
+          :key="product.id"
+          class="h-full flex flex-col hover:shadow-lg transition-shadow duration-300"
+          :style="{ borderRadius: 'var(--border-radius)' }"
+        >
+          <NuxtLink
+            :to="`/products/${product.id}`"
+            class="block aspect-w-1 aspect-h-1 w-full overflow-hidden bg-[var(--bg-color)] rounded-t-lg relative group focus:outline-none"
+          >
+            <img
+              :src="product.image"
+              :alt="product.title"
+              class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            >
+            <div class="absolute top-2 right-2 bg-[var(--card-bg)] px-2 py-1 rounded-full text-xs font-bold text-[var(--text-color)] shadow-sm">
+              ¥{{ product.price }}
+            </div>
+          </NuxtLink>
+          <div class="p-4 flex-1 flex flex-col">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-lg font-medium text-[var(--text-color)] line-clamp-1" :title="product.title">
+                <span v-html="highlightText(product.title, activeQuery)"/>
+              </h3>
+            </div>
+            <p class="text-sm text-[var(--text-secondary)] mb-4 line-clamp-2 flex-1" :title="product.description">
+              <span v-html="highlightText(product.description, activeQuery)"/>
+            </p>
+          </div>
+        </BaseCard>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-[var(--text-color)]">未找到商品</h3>
+        <p class="mt-2 text-[var(--text-secondary)]">
+          尝试调整搜索词或筛选条件。
+        </p>
+        <BaseButton
+          variant="outline"
+          class="mt-6"
+          @click="clearFilters"
+        >
+          清除筛选
+        </BaseButton>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1 && !pending && products.length > 0" class="mt-8 flex justify-center">
+        <BasePagination
+          :model-value="page"
+          :total-pages="totalPages"
+          :get-to="paginationTo"
+        />
+      </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
+import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
+import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+
+const route = useRoute()
+const router = useRouter()
+const { getProducts } = useProducts()
+const { categoryLabels } = useCategoryMapper()
+
+const page = computed(() => Number(route.query.page) || 1)
+const limit = 16 // Show 16 products per page
+
+const activeCategory = computed<string | undefined>(() => {
+  const v = route.query.category
+  return typeof v === 'string' && v.trim() ? v : undefined
+})
+
+const activeQuery = computed<string>(() => {
+  const v = route.query.q
+  return typeof v === 'string' ? v.trim() : ''
+})
+
+useSeoMeta({
+  title: computed(() => {
+    if (activeCategory.value && categoryLabels[activeCategory.value]) {
+      return `${categoryLabels[activeCategory.value]} - 商品列表`
+    }
+    if (activeQuery.value) {
+      return `搜索：${activeQuery.value} - 商品列表`
+    }
+    return '商品列表'
+  }),
+  description: computed(() => {
+    if (activeCategory.value && categoryLabels[activeCategory.value]) {
+      return `浏览我们的${categoryLabels[activeCategory.value]}系列商品。`
+    }
+    return '浏览我们精选的各类优质商品。'
+  }),
+  ogTitle: computed(() => activeCategory.value ? `${categoryLabels[activeCategory.value]} - NuxtShop` : '商品列表 - NuxtShop'),
+  ogDescription: '浏览我们精选的各类优质商品。'
+})
+
+// Use watch to react to route changes and refresh data
+const { data, pending } = await useAsyncData(
+  'products',
+  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value),
+  {
+    watch: [page, activeCategory, activeQuery], // Re-fetch when page, category or query changes
+    default: () => ({ items: [], total: 0 })
+  }
+)
+
+const products = computed(() => {
+  return data.value?.items || []
+})
+
+const total = computed(() => data.value?.total || 0)
+const totalPages = computed(() => Math.ceil(total.value / limit))
+
+const categories = [
+  "electronics",
+  "jewelery",
+  "men's clothing",
+  "women's clothing"
+]
+
+const paginationTo = (p: number) => {
+  return { path: '/products', query: { ...route.query, page: p } }
+}
+
+const searchText = ref<string>(activeQuery.value)
+
+// Sync search text with route query
+watch(activeQuery, (newVal) => {
+  searchText.value = newVal
+})
+
+const setCategory = (category?: string) => {
+  router.push({
+    path: '/products',
+    query: {
+      ...route.query,
+      category: category || undefined,
+      page: 1 // Reset to page 1 on filter change
+    }
+  })
+}
+
+const clearFilters = () => {
+  searchText.value = ''
+  router.push({
+    path: '/products',
+    query: {
+      page: 1
+    }
+  })
+}
+
+// Debounce search
+let debounceTimer: NodeJS.Timeout | null = null
+const debouncedSearch = (newVal: string) => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    // Only update if query actually changed to avoid redundant pushes
+    if (newVal !== activeQuery.value) {
+      router.push({
+        path: '/products',
+        query: {
+          ...route.query,
+          q: newVal || undefined,
+          page: 1 // Reset to page 1 on search
+        }
+      })
+    }
+  }, 300)
+}
+
+watch(searchText, (newVal) => {
+  debouncedSearch(newVal)
+})
+
+const handleProductSelect = (product: Product) => {
+  searchText.value = product.title
+  debouncedSearch(product.title)
+  // Optionally navigate to product detail directly
+  // router.push(`/products/${product.id}`)
+}
+
+const handleSearch = (query: string) => {
+  searchText.value = query
+  // debouncedSearch is triggered by watch(searchText)
+}
+
+const highlightText = (text: string, query: string) => {
+  if (!query) return text
+  // Escape special characters in query to avoid regex errors
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escapedQuery})`, 'gi')
+  return text.replace(regex, '<mark class="bg-yellow-200 text-gray-900 rounded-sm px-0.5">$1</mark>')
+}
+</script>

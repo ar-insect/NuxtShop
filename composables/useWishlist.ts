@@ -95,6 +95,10 @@ export const useWishlist = () => {
     return wishlistItems.value.some(item => item.id === productId)
   }
 
+  const resetWishlistLocal = () => {
+    wishlistItems.value = []
+  }
+
   const refreshWishlist = async () => {
     try {
       const latest = await $fetch<Product[]>('/api/wishlist')
@@ -110,6 +114,7 @@ export const useWishlist = () => {
     removeFromWishlist,
     toggleWishlist,
     isInWishlist,
+    resetWishlistLocal,
     refreshWishlist
   }
 }

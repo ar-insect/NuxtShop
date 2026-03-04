@@ -36,8 +36,8 @@ export const useAuth = () => {
   })
   const toast = useToast()
   const router = useRouter()
-  const { refreshCart } = useCart()
-  const { refreshWishlist } = useWishlist()
+  const { resetCartLocal, refreshCart } = useCart()
+  const { resetWishlistLocal, refreshWishlist } = useWishlist()
 
   /**
    * Authenticates a user with username and password.
@@ -56,6 +56,9 @@ export const useAuth = () => {
       token.value = res.token
       user.value = res.user as User
       toast.success('Login successful')
+      resetCartLocal()
+      resetWishlistLocal()
+      await nextTick()
       await refreshCart()
       await refreshWishlist()
       await router.push('/')
@@ -98,6 +101,8 @@ export const useAuth = () => {
     token.value = null
     user.value = null
     toast.info('Logged out')
+    resetCartLocal()
+    resetWishlistLocal()
     router.push('/login')
   }
 

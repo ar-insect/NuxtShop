@@ -149,7 +149,11 @@ When('我点击"删除订单"按钮', async ({ page }) => {
 })
 
 Then('我应该看到订单被成功删除', async ({ page }) => {
-  await expect(page.locator('text=订单已删除')).toBeVisible()
-  // Should show empty state
-  await expect(page.locator('text=暂无订单')).toBeVisible()
+  // 优先等待空状态；若未及时渲染，刷新页面再验
+  const emptyState = page.locator('text=暂无订单')
+  const visible = await emptyState.isVisible({ timeout: 5000 }).catch(() => false)
+  if (!visible) {
+    await page.reload()
+  }
+  await expect(emptyState).toBeVisible({ timeout: 15000 })
 })

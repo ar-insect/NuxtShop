@@ -1,10 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 
+process.env.NUXT_PUBLIC_DISABLE_CAPTCHA ??= '1';
+
 const testDir = defineBddConfig({
   features: 'tests/e2e/features/*.feature',
   steps: 'tests/e2e/steps/*.steps.ts',
 });
+
+const port = 4000;
 
 export default defineConfig({
   testDir,
@@ -14,7 +18,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { open: 'always' }]],
   use: {
-    baseURL: 'http://localhost:4000',
+    baseURL: `http://localhost:${port}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -28,8 +32,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'PORT=4000 npm run preview',
-    url: 'http://localhost:4000',
+    command: `npm run dev -- --port ${port} --host 0.0.0.0`,
+    url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

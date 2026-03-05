@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get all orders for the user
+  // 获取该用户的全部订单
   const ordersStr = await redis.get(`orders:${userId}`)
   if (!ordersStr) {
     throw createError({

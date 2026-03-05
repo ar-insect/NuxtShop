@@ -1,11 +1,11 @@
 import { getSessionId } from '../utils/session'
 
 /**
- * Retrieves the user's wishlist from Redis.
- * Uses the session ID to identify the user's wishlist.
+ * 从 Redis 获取用户收藏夹数据。
+ * 使用会话 ID 来区分不同用户/会话的收藏夹。
  * 
- * @param {H3Event} event - The H3 event object.
- * @returns {Promise<any[]>} The list of products in the wishlist.
+ * @param {H3Event} event - H3 事件对象
+ * @returns {Promise<any[]>} 收藏商品列表
  */
 export default defineEventHandler(async (event) => {
   const sessionId = getSessionId(event)

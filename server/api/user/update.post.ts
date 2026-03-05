@@ -4,8 +4,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { name, avatar } = body
 
-  // In a real app, get userId from session/token
-  // Here we hardcode userId = 1 for the demo admin user
+  // 真实项目中应从 session/token 获取 userId
+  // 这里为演示方便，写死 userId = 1（管理员用户）
   const userId = 1
 
   const redis = useRedis()
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   try {
     const key = `user:profile:${userId}`
     
-    // Get existing profile to merge
+    // 获取现有资料并合并更新
     const existingData = await redis.get(key)
     const currentProfile = existingData ? JSON.parse(existingData) : {}
 

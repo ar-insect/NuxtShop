@@ -1,8 +1,8 @@
 /**
- * Validates if a string is a valid email address.
+ * 校验字符串是否为合法的邮箱地址。
  * 
- * @param {string} email - The email address to validate.
- * @returns {boolean} True if the email is valid, false otherwise.
+ * @param {string} email - 待校验的邮箱地址
+ * @returns {boolean} 合法返回 true，否则返回 false
  */
 export const isEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -10,10 +10,10 @@ export const isEmail = (email: string): boolean => {
 }
 
 /**
- * Validates if a string is a valid mobile phone number (Mainland China).
+ * 校验字符串是否为合法的手机号（中国大陆）。
  * 
- * @param {string} phone - The phone number to validate.
- * @returns {boolean} True if the phone number is valid, false otherwise.
+ * @param {string} phone - 待校验的手机号
+ * @returns {boolean} 合法返回 true，否则返回 false
  */
 export const isMobile = (phone: string): boolean => {
   const re = /^1[3-9]\d{9}$/
@@ -21,10 +21,10 @@ export const isMobile = (phone: string): boolean => {
 }
 
 /**
- * Validates if a string is a valid URL.
+ * 校验字符串是否为合法的 URL。
  * 
- * @param {string} url - The URL to validate.
- * @returns {boolean} True if the URL is valid, false otherwise.
+ * @param {string} url - 待校验的 URL
+ * @returns {boolean} 合法返回 true，否则返回 false
  */
 export const isUrl = (url: string): boolean => {
   try {
@@ -36,11 +36,11 @@ export const isUrl = (url: string): boolean => {
 }
 
 /**
- * Checks if a value is empty.
- * Returns true for null, undefined, empty string, empty array, or empty object.
+ * 判断值是否为空。
+ * 对 null、undefined、空字符串、空数组、空对象返回 true。
  * 
- * @param {any} value - The value to check.
- * @returns {boolean} True if the value is empty, false otherwise.
+ * @param {any} value - 待判断的值
+ * @returns {boolean} 为空返回 true，否则返回 false
  */
 export const isEmpty = (value: any): boolean => {
   if (value === null || value === undefined) return true

@@ -1,19 +1,19 @@
 import { useRedis } from '~/server/utils/redis'
 
 /**
- * Handles user login.
- * Validates credentials and returns a mock JWT token and user details.
- * Also attempts to fetch updated user profile data from Redis.
+ * 处理用户登录。
+ * 校验用户名与密码，返回 token 与用户信息。
+ * 同时尝试从 Redis 读取并合并最新的用户资料信息。
  * 
- * @param {H3Event} event - The H3 event object.
- * @returns {Promise<{ token: string, user: Object }>} The authentication result containing token and user info.
- * @throws {H3Error} 401 Unauthorized if credentials are invalid.
+ * @param {H3Event} event - H3 事件对象
+ * @returns {Promise<{ token: string, user: Object }>} 包含 token 与用户信息的认证结果
+ * @throws {H3Error} 当凭据不正确时抛出 401
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { username, password } = body
 
-  // First, try to authenticate against registered users in Redis
+  // 优先尝试使用 Redis 中已注册的用户数据进行认证
   if (username && password) {
     const redis = useRedis()
     try {
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
             avatar: record.avatar
           }
 
-          // Try to get updated profile from Redis
+          // 尝试从 Redis 获取并合并最新资料
           try {
             const key = `user:profile:${baseUser.id}`
             const profileData = await redis.get(key)
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
             console.error('Error fetching user profile from Redis:', e)
           }
 
-          // Issue a simple token bound to username
+          // 生成与用户名绑定的简易 token
           const token = 'user-jwt-token-' + baseUser.username
           return {
             token,
@@ -51,13 +51,13 @@ export default defineEventHandler(async (event) => {
         }
       }
     } catch (e) {
-      // fall through to static admin logic on error
+      // 出错时降级走静态管理员逻辑
       console.error('Login with Redis failed:', e)
     }
   }
 
   if (username === 'admin' && password === '123456') {
-    // Mock token generation
+    // 生成管理员的 mock token
     const token = 'mock-jwt-token-' + Date.now()
     
     const baseUser = {
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
       avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
     }
 
-    // Try to get updated profile from Redis
+    // 尝试从 Redis 获取并合并最新资料
     const redis = useRedis()
     if (redis) {
       try {

@@ -1,10 +1,10 @@
 /**
- * Creates a debounced function that delays invoking the provided function until after `delay` milliseconds have elapsed since the last time it was invoked.
+ * 创建防抖函数：在最后一次调用后延迟 `delay` 毫秒再执行传入函数。
  * 
  * @template T
- * @param {T} fn - The function to debounce.
- * @param {number} [delay=300] - The number of milliseconds to delay.
- * @returns {(...args: Parameters<T>) => void} A new debounced function.
+ * @param {T} fn - 需要防抖的函数
+ * @param {number} [delay=300] - 延迟时间（毫秒）
+ * @returns {(...args: Parameters<T>) => void} 防抖后的新函数
  */
 export const debounce = <T extends (...args: any[]) => any>(fn: T, delay: number = 300) => {
   let timer: any = null
@@ -17,12 +17,12 @@ export const debounce = <T extends (...args: any[]) => any>(fn: T, delay: number
 }
 
 /**
- * Creates a throttled function that only invokes the provided function at most once per every `limit` milliseconds.
+ * 创建节流函数：在每 `limit` 毫秒内最多执行一次传入函数。
  * 
  * @template T
- * @param {T} fn - The function to throttle.
- * @param {number} [limit=300] - The number of milliseconds to throttle invocations to.
- * @returns {(...args: Parameters<T>) => void} A new throttled function.
+ * @param {T} fn - 需要节流的函数
+ * @param {number} [limit=300] - 节流间隔（毫秒）
+ * @returns {(...args: Parameters<T>) => void} 节流后的新函数
  */
 export const throttle = <T extends (...args: any[]) => any>(fn: T, limit: number = 300) => {
   let inThrottle: boolean
@@ -38,12 +38,12 @@ export const throttle = <T extends (...args: any[]) => any>(fn: T, limit: number
 }
 
 /**
- * Creates a deep clone of an object or array.
- * Handles nested objects, arrays, Dates, and RegExps.
+ * 深拷贝对象或数组。
+ * 支持嵌套对象、数组、Date 与 RegExp。
  * 
  * @template T
- * @param {T} obj - The object to clone.
- * @returns {T} A deep copy of the object.
+ * @param {T} obj - 需要拷贝的对象
+ * @returns {T} 深拷贝后的结果
  */
 export const deepClone = <T>(obj: T): T => {
   if (obj === null || typeof obj !== 'object') return obj

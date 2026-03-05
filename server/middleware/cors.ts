@@ -6,7 +6,7 @@ export default defineEventHandler((event) => {
     'Access-Control-Max-Age': '86400',
   }
 
-  // Reflect the origin if present to support credentials
+  // 若存在 Origin，则回写以支持携带凭证的跨域请求
   const origin = getRequestHeader(event, 'origin')
   if (origin) {
     setResponseHeader(event, 'Access-Control-Allow-Origin', origin)
@@ -16,7 +16,7 @@ export default defineEventHandler((event) => {
 
   setResponseHeaders(event, headers)
 
-  // Handle preflight requests
+  // 处理预检请求（Preflight）
   if (event.method === 'OPTIONS') {
     setResponseStatus(event, 204)
     return 'OK'

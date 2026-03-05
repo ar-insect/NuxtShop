@@ -156,12 +156,12 @@ useSeoMeta({
   ogDescription: '浏览我们精选的各类优质商品。'
 })
 
-// Use watch to react to route changes and refresh data
+// 通过 watch 响应路由变化并刷新数据
 const { data, pending } = await useAsyncData(
   'products',
   () => getProducts(page.value, limit, activeCategory.value, activeQuery.value),
   {
-    watch: [page, activeCategory, activeQuery], // Re-fetch when page, category or query changes
+    watch: [page, activeCategory, activeQuery], // 当页码/分类/搜索词变化时重新拉取
     default: () => ({ items: [], total: 0 })
   }
 )
@@ -186,7 +186,7 @@ const paginationTo = (p: number) => {
 
 const searchText = ref<string>(activeQuery.value)
 
-// Sync search text with route query
+// 将搜索框内容与路由 query 同步
 watch(activeQuery, (newVal) => {
   searchText.value = newVal
 })
@@ -197,7 +197,7 @@ const setCategory = (category?: string) => {
     query: {
       ...route.query,
       category: category || undefined,
-      page: 1 // Reset to page 1 on filter change
+      page: 1 // 筛选条件变化时重置到第 1 页
     }
   })
 }
@@ -212,19 +212,19 @@ const clearFilters = () => {
   })
 }
 
-// Debounce search
+// 搜索防抖
 let debounceTimer: NodeJS.Timeout | null = null
 const debouncedSearch = (newVal: string) => {
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
-    // Only update if query actually changed to avoid redundant pushes
+    // 仅在 query 实际变化时更新，避免重复 push
     if (newVal !== activeQuery.value) {
       router.push({
         path: '/products',
         query: {
           ...route.query,
           q: newVal || undefined,
-          page: 1 // Reset to page 1 on search
+          page: 1 // 搜索时重置到第 1 页
         }
       })
     }
@@ -238,18 +238,18 @@ watch(searchText, (newVal) => {
 const handleProductSelect = (product: Product) => {
   searchText.value = product.title
   debouncedSearch(product.title)
-  // Optionally navigate to product detail directly
+  // 如需选择后直接跳转到商品详情，可取消下面注释
   // router.push(`/products/${product.id}`)
 }
 
 const handleSearch = (query: string) => {
   searchText.value = query
-  // debouncedSearch is triggered by watch(searchText)
+  // debouncedSearch 会由 watch(searchText) 触发
 }
 
 const highlightText = (text: string, query: string) => {
   if (!query) return text
-  // Escape special characters in query to avoid regex errors
+  // 转义 query 中的特殊字符，避免正则错误
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${escapedQuery})`, 'gi')
   return text.replace(regex, '<mark class="bg-yellow-200 text-gray-900 rounded-sm px-0.5">$1</mark>')

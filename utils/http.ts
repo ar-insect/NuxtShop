@@ -2,8 +2,8 @@ import { $fetch } from 'ofetch'
 import type { FetchOptions } from 'ofetch'
 
 /**
- * Interface representing the standard API response structure.
- * @template T - The type of the data payload.
+ * 标准 API 响应结构接口。
+ * @template T - data 的类型
  */
 export interface ApiResponse<T = any> {
   code: number
@@ -12,57 +12,57 @@ export interface ApiResponse<T = any> {
 }
 
 /**
- * A wrapper class for HTTP requests based on `ofetch`.
- * Provides methods for common HTTP verbs and file uploads with interceptors.
+ * 基于 `ofetch` 的 HTTP 请求封装类。
+ * 提供常用 HTTP 方法与文件上传，并支持拦截器与统一错误处理。
  */
 class Http {
   private baseUrl: string
 
   /**
-   * Creates an instance of Http.
-   * @param {string} [baseUrl='/api'] - The base URL for all requests.
+   * 创建 Http 实例。
+   * @param {string} [baseUrl='/api'] - 所有请求的基础路径
    */
   constructor(baseUrl: string = '/api') {
     this.baseUrl = baseUrl
   }
 
   /**
-   * Core request method that handles the actual fetch call.
-   * Configures default options, interceptors, and error handling.
+   * 核心请求方法：执行实际的 fetch 调用。
+   * 负责默认选项、拦截器与错误处理的配置。
    * 
    * @template T
-   * @param {string} url - The URL to request.
-   * @param {FetchOptions<any>} [options={}] - Request options.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 请求 URL
+   * @param {FetchOptions<any>} [options={}] - 请求选项
+   * @returns {Promise<T>} 响应数据
    * @private
    */
   private async request<T>(url: string, options: FetchOptions<any> = {}): Promise<T> {
     const defaultOptions: FetchOptions<any> = {
       baseURL: this.baseUrl,
-      // Request interceptor
+      // 请求拦截器
       onRequest() {
-        // Add global token here if needed
+        // 如有需要，可在此处添加全局 token
         // const token = useCookie('token').value
         // if (token) {
         //   options.headers = { ...options.headers, Authorization: `Bearer ${token}` }
         // }
       },
-      // Response interceptor
+      // 响应拦截器
       onResponse({ response }) {
         if (!response.ok) {
-          // Handle HTTP errors
+          // 处理 HTTP 错误
           throw new Error(`HTTP Error: ${response.status}`)
         }
-        // Handle backend specific error codes here if needed
+        // 如有需要，可在此处处理后端业务错误码
         // if (response._data.code !== 200) { ... }
       },
       onResponseError({ response }) {
-        // Handle response errors
+        // 处理响应错误
         console.error('Response Error:', response.statusText)
       }
     }
 
-    // Merge options
+    // 合并 options
     const newOptions: FetchOptions<any> = {
       ...defaultOptions,
       ...options,
@@ -76,13 +76,13 @@ class Http {
   }
 
   /**
-   * Performs a GET request.
+   * 发起 GET 请求。
    * 
    * @template T
-   * @param {string} url - The URL to request.
-   * @param {any} [params] - Query parameters.
-   * @param {FetchOptions<any>} [options] - Additional request options.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 请求 URL
+   * @param {any} [params] - Query 参数
+   * @param {FetchOptions<any>} [options] - 额外请求选项
+   * @returns {Promise<T>} 响应数据
    */
   public get<T>(url: string, params?: any, options?: FetchOptions<any>): Promise<T> {
     return this.request<T>(url, {
@@ -93,13 +93,13 @@ class Http {
   }
 
   /**
-   * Performs a POST request.
+   * 发起 POST 请求。
    * 
    * @template T
-   * @param {string} url - The URL to request.
-   * @param {any} [body] - The request body.
-   * @param {FetchOptions<any>} [options] - Additional request options.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 请求 URL
+   * @param {any} [body] - 请求体
+   * @param {FetchOptions<any>} [options] - 额外请求选项
+   * @returns {Promise<T>} 响应数据
    */
   public post<T>(url: string, body?: any, options?: FetchOptions<any>): Promise<T> {
     return this.request<T>(url, {
@@ -110,13 +110,13 @@ class Http {
   }
 
   /**
-   * Performs a PUT request.
+   * 发起 PUT 请求。
    * 
    * @template T
-   * @param {string} url - The URL to request.
-   * @param {any} [body] - The request body.
-   * @param {FetchOptions<any>} [options] - Additional request options.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 请求 URL
+   * @param {any} [body] - 请求体
+   * @param {FetchOptions<any>} [options] - 额外请求选项
+   * @returns {Promise<T>} 响应数据
    */
   public put<T>(url: string, body?: any, options?: FetchOptions<any>): Promise<T> {
     return this.request<T>(url, {
@@ -127,13 +127,13 @@ class Http {
   }
 
   /**
-   * Performs a DELETE request.
+   * 发起 DELETE 请求。
    * 
    * @template T
-   * @param {string} url - The URL to request.
-   * @param {any} [params] - Query parameters.
-   * @param {FetchOptions<any>} [options] - Additional request options.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 请求 URL
+   * @param {any} [params] - Query 参数
+   * @param {FetchOptions<any>} [options] - 额外请求选项
+   * @returns {Promise<T>} 响应数据
    */
   public delete<T>(url: string, params?: any, options?: FetchOptions<any>): Promise<T> {
     return this.request<T>(url, {
@@ -144,20 +144,20 @@ class Http {
   }
 
   /**
-   * Uploads a file via POST request (Multipart Form Data).
+   * 通过 POST 上传文件（multipart/form-data）。
    * 
    * @template T
-   * @param {string} url - The URL to upload to.
-   * @param {File | Blob} file - The file to upload.
-   * @param {string} [fieldName='file'] - The form field name for the file.
-   * @param {Record<string, any>} [otherParams={}] - Additional form data parameters.
-   * @returns {Promise<T>} The response data.
+   * @param {string} url - 上传目标 URL
+   * @param {File | Blob} file - 要上传的文件
+   * @param {string} [fieldName='file'] - 文件字段名
+   * @param {Record<string, any>} [otherParams={}] - 额外表单字段
+   * @returns {Promise<T>} 响应数据
    */
   public upload<T>(url: string, file: File | Blob, fieldName: string = 'file', otherParams: Record<string, any> = {}): Promise<T> {
     const formData = new FormData()
     formData.append(fieldName, file)
     
-    // Add other parameters
+    // 附加其他表单字段
     Object.keys(otherParams).forEach(key => {
       formData.append(key, otherParams[key])
     })

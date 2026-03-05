@@ -2,13 +2,13 @@ import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useOrders } from '~/modules/order/composables/useOrders'
 /**
- * User interface representing a logged-in user.
+ * 表示已登录用户的接口。
  * @interface User
- * @property {number} id - Unique identifier for the user
- * @property {string} username - User's login username
- * @property {string} name - User's display name
- * @property {string} role - User's role (e.g., 'admin', 'user')
- * @property {string} avatar - URL to the user's avatar image
+ * @property {number} id - 用户唯一标识
+ * @property {string} username - 登录用户名
+ * @property {string} name - 展示名称
+ * @property {string} role - 用户角色（如 admin、user）
+ * @property {string} avatar - 头像 URL
  */
 export interface User {
   id: number
@@ -19,20 +19,20 @@ export interface User {
 }
 
 /**
- * Composable for managing authentication state and actions.
- * Provides methods to login, logout, and access current user information.
+ * 认证状态与行为的组合式函数。
+ * 提供登录、退出、注册及读取当前用户信息的方法。
  * 
- * @returns {Object} Authentication state and methods
- * @property {Ref<User | null>} user - Current logged-in user state
- * @property {CookieRef<string | null>} token - Authentication token cookie
- * @property {ComputedRef<boolean>} isAuthenticated - Computed property indicating if user is logged in
- * @property {Function} login - Function to handle user login
- * @property {Function} logout - Function to handle user logout
+ * @returns {Object} 认证状态与方法
+ * @property {Ref<User | null>} user - 当前登录用户状态
+ * @property {CookieRef<string | null>} token - 认证 token（Cookie）
+ * @property {ComputedRef<boolean>} isAuthenticated - 是否已登录
+ * @property {Function} login - 登录方法
+ * @property {Function} logout - 退出登录方法
  */
 export const useAuth = () => {
   const user = useState<User | null>('auth-user', () => null)
   const token = useCookie('auth-token', {
-    maxAge: 60 * 60 * 24 * 7, // 1 week
+    maxAge: 60 * 60 * 24 * 7, // 1 周
     sameSite: 'lax'
   })
   const toast = useToast()
@@ -42,19 +42,19 @@ export const useAuth = () => {
   const { resetOrdersLocal, refreshOrders } = useOrders()
 
   /**
-   * Authenticates a user with username and password.
+   * 使用用户名与密码进行登录认证。
    * 
    * @async
-   * @param {string} username - The username to login with
-   * @param {string} password - The password to login with
-   * @returns {Promise<boolean>} True if login successful, false otherwise
+   * @param {string} username - 用户名
+   * @param {string} password - 密码
+   * @returns {Promise<boolean>} 登录成功返回 true，否则返回 false
    */
   const login = async (username: string, password: string) => {
     try {
-      const res = await $fetch('/api/auth/login', {
+      const res = await $fetch<{ token: string; user: User }>('/api/auth/login' as any, {
         method: 'POST',
         body: { username, password }
-      }) as { token: string, user: User }
+      })
       token.value = res.token
       user.value = res.user as User
       toast.success('Login successful')
@@ -74,17 +74,17 @@ export const useAuth = () => {
   }
 
   /**
-   * Registers a new user.
+   * 注册新用户。
    * 
    * @async
-   * @param {string} username - The username to register
-   * @param {string} password - The password
-   * @param {string} phone - The phone number
-   * @returns {Promise<boolean>} True if registration successful, false otherwise
+   * @param {string} username - 注册用户名
+   * @param {string} password - 密码
+   * @param {string} phone - 手机号
+   * @returns {Promise<boolean>} 注册成功返回 true，否则返回 false
    */
   const register = async (username: string, password: string, confirmPassword: string, phone?: string) => {
     try {
-      await $fetch('/api/auth/register', {
+      await $fetch('/api/auth/register' as any, {
         method: 'POST',
         body: { username, password, confirmPassword, phone }
       })
@@ -98,8 +98,8 @@ export const useAuth = () => {
   }
 
   /**
-   * Logs out the current user by clearing token and user state.
-   * Redirects to login page after logout.
+   * 退出当前用户：清空 token 与用户状态。
+   * 退出后跳转到登录页。
    */
   const logout = () => {
     token.value = null

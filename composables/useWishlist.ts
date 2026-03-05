@@ -1,27 +1,26 @@
 import type { Product } from '~/modules/product/composables/useProducts'
 
 /**
- * Composable for managing the user's wishlist.
- * Handles adding, removing, and toggling items in the wishlist.
- * Syncs data with the server.
+ * 收藏夹管理组合式函数。
+ * 负责收藏夹条目的添加、移除与切换，并与服务端同步数据。
  * 
- * @returns {Object} Wishlist state and methods
- * @property {Ref<Product[]>} wishlistItems - Reactive array of products in the wishlist
- * @property {Function} addToWishlist - Adds a product to the wishlist
- * @property {Function} removeFromWishlist - Removes a product from the wishlist
- * @property {Function} toggleWishlist - Toggles a product's presence in the wishlist
- * @property {Function} isInWishlist - Checks if a product is in the wishlist
+ * @returns {Object} 收藏夹状态与方法
+ * @property {Ref<Product[]>} wishlistItems - 收藏的商品列表（响应式）
+ * @property {Function} addToWishlist - 添加收藏
+ * @property {Function} removeFromWishlist - 取消收藏
+ * @property {Function} toggleWishlist - 切换收藏状态
+ * @property {Function} isInWishlist - 判断是否已收藏
  */
 export const useWishlist = () => {
   const wishlistItems = useState<Product[]>('wishlist', () => [])
 
-  // Sync with server
+  // 与服务端同步
   const { data, refresh } = useFetch<Product[]>('/api/wishlist', {
     key: 'wishlist-data',
     lazy: true
   })
 
-  // Watch for data changes from server
+  // 监听服务端数据变化
   watch(data, (newWishlist) => {
     if (newWishlist) {
       wishlistItems.value = newWishlist
@@ -29,7 +28,7 @@ export const useWishlist = () => {
   }, { immediate: true })
 
   /**
-   * Persists the current wishlist state to the server.
+   * 将当前收藏夹状态持久化到服务端。
    * @async
    * @private
    */
@@ -45,10 +44,10 @@ export const useWishlist = () => {
   }
 
   /**
-   * Adds a product to the wishlist if it's not already there.
+   * 添加商品到收藏夹（若尚未收藏）。
    * 
    * @async
-   * @param {Product} product - The product to add
+   * @param {Product} product - 要收藏的商品
    */
   const addToWishlist = async (product: Product) => {
     if (!isInWishlist(product.id)) {
@@ -58,10 +57,10 @@ export const useWishlist = () => {
   }
 
   /**
-   * Removes a product from the wishlist by its ID.
+   * 根据商品 ID 将其从收藏夹移除。
    * 
    * @async
-   * @param {number} productId - The ID of the product to remove
+   * @param {number} productId - 要移除的商品 ID
    */
   const removeFromWishlist = async (productId: number) => {
     const index = wishlistItems.value.findIndex(item => item.id === productId)
@@ -72,10 +71,10 @@ export const useWishlist = () => {
   }
 
   /**
-   * Toggles a product in the wishlist (adds if missing, removes if present).
+   * 切换商品的收藏状态（未收藏则添加，已收藏则移除）。
    * 
    * @async
-   * @param {Product} product - The product to toggle
+   * @param {Product} product - 需要切换收藏状态的商品
    */
   const toggleWishlist = async (product: Product) => {
     if (isInWishlist(product.id)) {
@@ -86,10 +85,10 @@ export const useWishlist = () => {
   }
 
   /**
-   * Checks if a product is currently in the wishlist.
+   * 判断商品是否已在收藏夹中。
    * 
-   * @param {number} productId - The ID of the product to check
-   * @returns {boolean} True if the product is in the wishlist, false otherwise
+   * @param {number} productId - 商品 ID
+   * @returns {boolean} 已收藏返回 true，否则返回 false
    */
   const isInWishlist = (productId: number) => {
     return wishlistItems.value.some(item => item.id === productId)

@@ -101,7 +101,7 @@ Given('收藏夹中已有商品', async ({ page }) => {
     await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
     const recommendedSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
     await expect(recommendedSection.locator('.grid').first()).toBeVisible();
-    await recommendedSection.locator('a[href^=\"/products/\"]').first().click();
+    await recommendedSection.locator('a[href^="/products/"]').first().click();
     // 若需要登录，则先登录
     const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
     const needsLogin = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);

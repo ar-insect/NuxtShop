@@ -1,9 +1,9 @@
 /**
- * Interface for toast notification options.
+ * Toast 通知选项接口。
  * @interface ToastOptions
- * @property {string} message - The message to display
- * @property {'success' | 'error' | 'warning' | 'info'} [type] - The type of toast (default: 'info')
- * @property {number} [duration] - Duration in milliseconds to show the toast
+ * @property {string} message - 展示的消息内容
+ * @property {'success' | 'error' | 'warning' | 'info'} [type] - 通知类型（默认：info）
+ * @property {number} [duration] - 展示时长（毫秒）
  */
 export interface ToastOptions {
   message: string
@@ -12,12 +12,12 @@ export interface ToastOptions {
 }
 
 /**
- * Interface for internal toast state.
- * Extends ToastOptions with ID and visibility status.
+ * Toast 内部状态接口。
+ * 在 ToastOptions 基础上增加 id 与可见性状态。
  * @interface ToastState
  * @extends {ToastOptions}
- * @property {string} id - Unique identifier for the toast
- * @property {boolean} visible - Whether the toast is currently visible
+ * @property {string} id - Toast 唯一标识
+ * @property {boolean} visible - 当前是否可见
  */
 export interface ToastState extends ToastOptions {
   id: string
@@ -25,31 +25,31 @@ export interface ToastState extends ToastOptions {
 }
 
 /**
- * Composable for managing toast notifications.
- * Provides methods to show success, error, warning, and info messages.
+ * Toast 通知管理组合式函数。
+ * 提供 success/error/warning/info 的快捷方法。
  * 
- * @returns {Object} Toast state and methods
- * @property {Ref<ToastState[]>} toasts - Reactive array of active toasts
- * @property {Function} show - Shows a toast with custom options
- * @property {Function} remove - Removes a specific toast by ID
- * @property {Function} clear - Removes all toasts
- * @property {Function} success - Shortcut to show a success toast
- * @property {Function} error - Shortcut to show an error toast
- * @property {Function} warning - Shortcut to show a warning toast
- * @property {Function} info - Shortcut to show an info toast
+ * @returns {Object} Toast 状态与方法
+ * @property {Ref<ToastState[]>} toasts - 当前激活的 Toast 列表（响应式）
+ * @property {Function} show - 展示一个 Toast（自定义选项）
+ * @property {Function} remove - 根据 id 移除某个 Toast
+ * @property {Function} clear - 清空所有 Toast
+ * @property {Function} success - 快捷展示 success Toast
+ * @property {Function} error - 快捷展示 error Toast
+ * @property {Function} warning - 快捷展示 warning Toast
+ * @property {Function} info - 快捷展示 info Toast
  */
 export const useToast = () => {
   const toasts = useState<ToastState[]>('toasts', () => [])
 
   /**
-   * Shows a new toast notification.
+   * 展示一个新的 Toast 通知。
    * 
-   * @param {ToastOptions | string} options - Toast options object or message string
-   * @returns {string} The ID of the created toast
+   * @param {ToastOptions | string} options - Toast 选项对象或消息字符串
+   * @returns {string} 创建的 Toast id
    */
   const show = (options: ToastOptions | string) => {
     const opts = typeof options === 'string' ? { message: options } : options
-    // Generate a unique ID
+    // 生成唯一 id
     const id = Date.now().toString(36) + Math.random().toString(36).substring(2)
     
     const toast: ToastState = {
@@ -72,9 +72,9 @@ export const useToast = () => {
   }
 
   /**
-   * Removes a toast notification by its ID.
+   * 根据 id 移除一个 Toast 通知。
    * 
-   * @param {string} id - The ID of the toast to remove
+   * @param {string} id - 要移除的 Toast id
    */
   const remove = (id: string) => {
     const index = toasts.value.findIndex(t => t.id === id)
@@ -84,7 +84,7 @@ export const useToast = () => {
   }
   
   /**
-   * Clears all active toast notifications.
+   * 清空所有激活的 Toast 通知。
    */
   const clear = () => {
     toasts.value = []

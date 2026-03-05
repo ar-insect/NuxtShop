@@ -145,7 +145,7 @@ const onConfirm = () => {
 </script>
 
 <style scoped>
-/* Ensure image fits within container */
+/* 确保图片在容器内自适应 */
 img {
   max-width: 100%;
 }

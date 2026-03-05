@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const binKey = `avatar:bin:${id}`
   const metaKey = `avatar:meta:${id}`
 
-  // Fetch binary buffer and metadata
+  // 读取二进制数据与元数据
   const [buf, metaStr] = await Promise.all([
     redis.getBuffer(binKey),
     redis.get(metaKey)

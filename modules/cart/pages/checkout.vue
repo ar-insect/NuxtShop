@@ -220,7 +220,7 @@ const handleCheckout = async () => {
 
   isProcessing.value = true
   
-  // Mock API delay
+  // 模拟 API 延迟
   await new Promise(resolve => setTimeout(resolve, 2000))
 
   let addressData

@@ -16,22 +16,22 @@ export default defineEventHandler(async (event) => {
 
   const historyKey = `history:${sessionId}`
   
-  // Get current history
+  // 获取当前历史记录
   const currentData = await redis.get(historyKey)
   let history = currentData ? JSON.parse(currentData) : []
 
-  // Remove existing item with same ID (to move it to top)
+  // 移除相同 ID 的旧记录（用于置顶）
   history = history.filter((item: any) => item.id !== body.id)
 
-  // Add new item to the beginning
+  // 新记录插入到列表头部
   history.unshift(body)
 
-  // Limit to 20 items
+  // 最多保留 20 条
   if (history.length > 20) {
     history = history.slice(0, 20)
   }
 
-  // Save back to Redis
+  // 写回 Redis
   await redis.set(historyKey, JSON.stringify(history))
 
   return { success: true, history }

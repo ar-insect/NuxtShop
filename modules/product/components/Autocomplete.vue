@@ -83,12 +83,12 @@ const showResults = ref(false)
 const activeIndex = ref(-1)
 const containerRef = ref<HTMLElement | null>(null)
 
-// Sync internal query with prop
+// 同步内部 query 与外部 v-model
 watch(() => props.modelValue, (newVal) => {
   query.value = newVal
 })
 
-// Filter logic
+// 过滤逻辑
 const filteredProducts = computed(() => {
   if (!query.value) return []
   
@@ -96,7 +96,7 @@ const filteredProducts = computed(() => {
   return (props.products || []).filter(p => 
     p.title.toLowerCase().includes(lowerQuery) || 
     p.description.toLowerCase().includes(lowerQuery)
-  ).slice(0, 8) // Limit to 8 results
+  ).slice(0, 8) // 最多显示 8 条
 })
 
 const selectProduct = (product: Product) => {
@@ -110,19 +110,19 @@ const selectActive = () => {
   if (activeIndex.value >= 0 && filteredProducts.value[activeIndex.value]) {
     selectProduct(filteredProducts.value[activeIndex.value])
   } else {
-    // If no active item, just trigger search with current query (close autocomplete)
+    // 若没有高亮项，则直接收起下拉
     showResults.value = false
   }
 }
 
-// Highlight matching text
+// 高亮匹配文本
 const highlightMatch = (text: string) => {
   if (!query.value) return text
   const regex = new RegExp(`(${query.value})`, 'gi')
   return text.replace(regex, '<span class="text-[var(--primary-color)] font-bold">$1</span>')
 }
 
-// Input handlers
+// 输入处理
 const handleInput = (value: string) => {
   query.value = value
   emit('update:modelValue', value)
@@ -138,7 +138,7 @@ const handleClear = () => {
   showResults.value = false
 }
 
-// Navigation
+// 键盘导航
 const navigateResults = (step: number) => {
   if (!showResults.value || filteredProducts.value.length === 0) return
   
@@ -146,9 +146,7 @@ const navigateResults = (step: number) => {
   activeIndex.value = (activeIndex.value + step + count) % count
 }
 
-// Click outside to close
-
-// Click outside to close
+// 点击外部关闭
 const handleClickOutside = (event: MouseEvent) => {
   if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
     showResults.value = false

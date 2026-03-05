@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Registered user token: user-jwt-token-<username>
+  // 已注册用户的 token：user-jwt-token-<username>
   if (token.startsWith('user-jwt-token-')) {
     const username = token.replace('user-jwt-token-', '')
     const redis = useRedis()
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // In a real app, verify token and fetch user from DB
+  // 真实项目中应校验 token，并从数据库读取用户信息
   if (token.startsWith('mock-jwt-token-')) {
     const baseUser = {
       id: 1,
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
       avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
     }
 
-    // Try to get updated profile from Redis
+    // 尝试从 Redis 获取并合并最新资料
     const redis = useRedis()
     if (redis) {
       try {

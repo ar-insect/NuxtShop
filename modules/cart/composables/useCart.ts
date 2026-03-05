@@ -1,42 +1,41 @@
 import type { Product } from '~/modules/product/composables/useProducts'
 
 /**
- * Interface representing an item in the shopping cart.
- * Extends the Product interface with a quantity property.
+ * 表示购物车中的一条商品项。
+ * 在 Product 基础上增加 quantity 数量字段。
  * @interface CartItem
  * @extends {Product}
- * @property {number} quantity - Number of units of this product in the cart
+ * @property {number} quantity - 该商品在购物车中的数量
  */
 export interface CartItem extends Product {
   quantity: number
 }
 
 /**
- * Composable for managing shopping cart state and operations.
- * Handles adding, removing, updating items, and syncing with the server.
+ * 购物车状态与操作的组合式函数。
+ * 负责添加、移除、更新数量，并与服务端同步数据。
  * 
- * @returns {Object} Cart state and methods
- * @property {Ref<CartItem[]>} cartItems - Reactive array of items in the cart
- * @property {Function} addToCart - Adds a product to the cart or increments quantity if exists
- * @property {Function} removeFromCart - Removes a product from the cart by ID
- * @property {Function} updateQuantity - Updates the quantity of a specific cart item
- * @property {Function} clearCart - Removes all items from the cart
- * @property {ComputedRef<number>} cartTotal - Computed total price of all items in cart
- * @property {ComputedRef<number>} cartCount - Computed total number of items in cart
+ * @returns {Object} 购物车状态与方法
+ * @property {Ref<CartItem[]>} cartItems - 购物车商品列表（响应式）
+ * @property {Function} addToCart - 添加商品（已存在则数量 +1）
+ * @property {Function} removeFromCart - 根据商品 ID 移除
+ * @property {Function} updateQuantity - 更新某个商品的数量
+ * @property {Function} clearCart - 清空购物车
+ * @property {ComputedRef<number>} cartTotal - 购物车总价（计算属性）
+ * @property {ComputedRef<number>} cartCount - 购物车商品总数（计算属性）
  */
 export const useCart = () => {
   const cartItems = useState<CartItem[]>('cart', () => [])
 
-  // Sync with server
+  // 与服务端同步
   const { data } = useFetch<CartItem[]>('/api/cart', {
     key: 'cart-data',
-    server: false, // Client-side only to avoid double fetch with useState? No, we want SSR.
-    // Actually, useFetch defaults to key based on url.
-    // If we use useState, we want to hydrate it.
+    server: false, // 仅客户端请求，避免与 useState 造成重复拉取
+    // useFetch 默认会根据 URL 推导 key；显式指定便于复用与调试
     lazy: true
   })
 
-  // Watch for data changes from server
+  // 监听服务端数据变化
   watch(data, (newCart) => {
     if (newCart && cartItems.value.length === 0) {
       cartItems.value = newCart
@@ -44,7 +43,7 @@ export const useCart = () => {
   }, { immediate: true })
 
   /**
-   * Persists the current cart state to the server.
+   * 将当前购物车状态持久化到服务端。
    * @async
    * @private
    */
@@ -60,11 +59,11 @@ export const useCart = () => {
   }
 
   /**
-   * Adds a product to the cart.
-   * If the product already exists, increments its quantity.
+   * 添加商品到购物车。
+   * 若商品已存在，则数量 +1。
    * 
    * @async
-   * @param {Product} product - The product to add
+   * @param {Product} product - 要添加的商品
    */
   const addToCart = async (product: Product) => {
     const existingItem = cartItems.value.find(item => item.id === product.id)
@@ -77,10 +76,10 @@ export const useCart = () => {
   }
 
   /**
-   * Removes a product from the cart by its ID.
+   * 根据商品 ID 从购物车移除。
    * 
    * @async
-   * @param {number} productId - The ID of the product to remove
+   * @param {number} productId - 要移除的商品 ID
    */
   const removeFromCart = async (productId: number) => {
     const index = cartItems.value.findIndex(item => item.id === productId)
@@ -91,12 +90,12 @@ export const useCart = () => {
   }
 
   /**
-   * Updates the quantity of a specific product in the cart.
-   * Ensures quantity is at least 1.
+   * 更新购物车中某个商品的数量。
+   * 数量最小为 1。
    * 
    * @async
-   * @param {number} productId - The ID of the product to update
-   * @param {number} quantity - The new quantity value
+   * @param {number} productId - 商品 ID
+   * @param {number} quantity - 新数量
    */
   const updateQuantity = async (productId: number, quantity: number) => {
     const item = cartItems.value.find(item => item.id === productId)
@@ -107,7 +106,7 @@ export const useCart = () => {
   }
 
   /**
-   * Clears all items from the cart.
+   * 清空购物车。
    * 
    * @async
    */
@@ -117,7 +116,7 @@ export const useCart = () => {
   }
 
   const cartTotal = computed(() => {
-    // Calculate total in cents to avoid floating point precision errors
+    // 以“分”为单位计算，避免浮点精度误差
     const totalInCents = cartItems.value.reduce((total, item) => {
       const priceInCents = Math.round(Number(item.price) * 100)
       return total + priceInCents * item.quantity

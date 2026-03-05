@@ -1,9 +1,9 @@
 export default defineNuxtRouteMiddleware(() => {
   const { isAuthenticated } = useAuth()
 
-  // If the user is not authenticated and trying to access a protected route
+  // 若用户未登录且访问受保护路由
   if (!isAuthenticated.value) {
-    // Redirect to login page
+    // 跳转到登录页
     return navigateTo('/login')
   }
 })

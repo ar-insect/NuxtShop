@@ -1,11 +1,11 @@
 
 /**
- * Composable for mapping product category keys to human-readable labels.
- * Provides a mapping of English category names to Chinese labels.
+ * 商品分类映射组合式函数。
+ * 将英文分类 key 映射为更友好的中文展示文案。
  * 
- * @returns {Object} Category mapping utilities
- * @property {Record<string, string>} categoryLabels - Object containing category key-to-label mappings
- * @property {Function} getCategoryLabel - Function to retrieve a label for a given category key
+ * @returns {Object} 分类映射工具
+ * @property {Record<string, string>} categoryLabels - 分类 key 到展示文案的映射表
+ * @property {Function} getCategoryLabel - 根据分类 key 获取展示文案
  */
 export const useCategoryMapper = () => {
   const categoryLabels: Record<string, string> = {
@@ -16,11 +16,11 @@ export const useCategoryMapper = () => {
   }
 
   /**
-   * Returns the translated label for a given category key.
-   * If no mapping exists, returns the original key.
+   * 获取分类 key 对应的中文展示文案。
+   * 若不存在映射，则返回原始 key。
    * 
-   * @param {string} key - The category key to map (e.g., "electronics")
-   * @returns {string} The translated label (e.g., "电子产品")
+   * @param {string} key - 分类 key（如 "electronics"）
+   * @returns {string} 展示文案（如 "电子产品"）
    */
   const getCategoryLabel = (key: string): string => {
     return categoryLabels[key] || key

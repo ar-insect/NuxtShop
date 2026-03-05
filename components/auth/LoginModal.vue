@@ -31,7 +31,7 @@
           />
         </div>
 
-        <div class="py-2" v-if="!captchaDisabled">
+        <div v-if="!captchaDisabled" class="py-2">
           <BaseSliderCaptcha ref="captchaRef" @success="captchaVerified = true" @fail="captchaVerified = false" />
         </div>
 

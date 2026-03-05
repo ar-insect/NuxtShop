@@ -1,24 +1,23 @@
 import type { Product } from '~/modules/product/composables/useProducts'
 
 /**
- * Composable for managing user browsing history.
- * Tracks recently viewed products.
+ * 浏览历史管理组合式函数。
+ * 记录用户最近浏览的商品。
  * 
- * @returns {Object} History state and methods
- * @property {Ref<Product[]>} historyItems - Reactive array of recently viewed products
- * @property {Function} fetchHistory - Fetches history from the server
- * @property {Function} addToHistory - Adds a product to the history
- * @property {Function} clearHistory - Clears the browsing history
+ * @returns {Object} 浏览历史状态与方法
+ * @property {Ref<Product[]>} historyItems - 最近浏览商品列表（响应式）
+ * @property {Function} fetchHistory - 从服务端获取历史记录
+ * @property {Function} addToHistory - 添加一条历史记录
+ * @property {Function} clearHistory - 清空浏览历史
  */
 export const useHistory = () => {
   const historyItems = useState<Product[]>('history', () => [])
 
-  // Sync with server on mount (client-side only to avoid hydration mismatch if SSR data differs)
-  // Actually, for history, it's user-specific, so SSR is fine if we use useAsyncData but it might be tricky with session cookies on first load.
-  // Let's stick to client-side fetch for history to be safe and fast on navigation.
+  // 在客户端触发时与服务端同步（避免 SSR 数据差异导致的水合不一致）
+  // 历史记录属于用户维度，理论上可用 useAsyncData 做 SSR，但首屏 Cookie 会话可能更复杂
+  // 这里统一使用客户端请求，保证导航时稳定且快速
   /**
-   * Fetches the user's browsing history from the server.
-   * Updates the historyItems state.
+   * 从服务端获取用户浏览历史，并更新 historyItems。
    * 
    * @async
    */
@@ -32,16 +31,16 @@ export const useHistory = () => {
   }
 
   /**
-   * Adds a product to the browsing history.
-   * Performs an optimistic update and limits history to 20 items.
+   * 添加商品到浏览历史。
+   * 采用乐观更新，并将历史记录限制为 20 条。
    * 
    * @async
-   * @param {Product} product - The product to add to history
+   * @param {Product} product - 要加入历史记录的商品
    */
   const addToHistory = async (product: Product) => {
     if (!product || !product.id) return
 
-    // Optimistic update
+    // 乐观更新
     const index = historyItems.value.findIndex(item => item.id === product.id)
     if (index > -1) {
       historyItems.value.splice(index, 1)
@@ -58,12 +57,12 @@ export const useHistory = () => {
       })
     } catch (e) {
       console.error('Failed to add to history:', e)
-      // Revert on failure? Maybe not critical for history.
+      // 失败时是否回滚：对历史记录而言通常不关键，可忽略
     }
   }
 
   /**
-   * Clears the user's browsing history.
+   * 清空用户浏览历史。
    * 
    * @async
    */

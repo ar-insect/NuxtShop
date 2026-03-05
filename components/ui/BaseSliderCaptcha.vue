@@ -112,7 +112,7 @@ const stopDrag = () => {
     sliderWidth.value = containerWidth
     emit('success')
   } else {
-    // Reset
+    // 重置
     verified.value = false
     sliderLeft.value = 0
     sliderWidth.value = 0
@@ -120,7 +120,7 @@ const stopDrag = () => {
   }
 }
 
-// Reset method exposed to parent
+// 暴露给父组件的重置方法
 const reset = () => {
   verified.value = false
   isMoving.value = false

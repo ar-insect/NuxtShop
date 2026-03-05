@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-// https://nuxt.com/docs/api/configuration/nuxt-config
+// Nuxt 配置文档：https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -11,7 +11,7 @@ export default defineNuxtConfig({
   devServer: {
     port: 4000
   },
-  // Sync README.md to content/index.md
+  // 将 README.md 同步到 content/index.md
   hooks: {
     'build:before': () => {
       const readmePath = path.resolve(process.cwd(), 'README.md')
@@ -26,7 +26,7 @@ export default defineNuxtConfig({
         const contentPath = path.resolve(process.cwd(), 'content/index.md')
         if (fs.existsSync(readmePath)) {
           fs.copyFileSync(readmePath, contentPath)
-          // Touch content/index.md to trigger HMR if needed, though copy should be enough
+          // 如有需要可触发 content/index.md 的 HMR（通常 copy 已足够）
         }
       }
     }
@@ -80,7 +80,7 @@ export default defineNuxtConfig({
   experimental: {
     appManifest: false
   },
-  // Configure MDC (Markdown Components) for Nuxt Content
+  // 配置 Nuxt Content 的 MDC（Markdown Components）
   mdc: {
     highlight: {
       theme: 'github-dark',
@@ -88,8 +88,8 @@ export default defineNuxtConfig({
     }
   },
   routeRules: {
-    // Enable ISR (Incremental Static Regeneration)
-    // Only enable in production to allow HMR in development
+    // 启用 ISR（增量静态再生）
+    // 仅在生产环境启用，避免开发环境影响 HMR
     '/docs': { swr: process.env.NODE_ENV === 'production' },
     '/products/**': { swr: process.env.NODE_ENV === 'production' ? 3600 : false },
   },
@@ -105,7 +105,7 @@ export default defineNuxtConfig({
       }
     },
     devStorage: {
-      // Use memory driver for development to avoid persistent caching issues
+      // 开发环境使用内存存储，避免持久化缓存带来的干扰
       cache: {
         driver: 'memory'
       }

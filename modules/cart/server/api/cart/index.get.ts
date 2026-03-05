@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const redis = useRedis()
   
   if (!redis) {
-    // Fallback to empty array if Redis is not available
+    // Redis 不可用时，降级返回空数组
     return []
   }
 

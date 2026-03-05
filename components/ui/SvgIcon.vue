@@ -17,17 +17,17 @@ const props = defineProps<{
 const iconComponent = computed(() => {
   let iconName = props.name
   
-  // Convert kebab-case to PascalCase
+  // 将 kebab-case 转为 PascalCase
   if (iconName.includes('-')) {
     iconName = iconName.split('-')
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
       .join('')
   } else {
-    // Ensure first letter is uppercase
+    // 确保首字母大写
     iconName = iconName.charAt(0).toUpperCase() + iconName.slice(1)
   }
   
-  // Append 'Icon' suffix if missing
+  // 若缺少 'Icon' 后缀则补齐
   if (!iconName.endsWith('Icon')) {
     iconName += 'Icon'
   }

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Basic password strength check
+  // 基础密码强度校验
   if (password.length < 6) {
     throw createError({
       statusCode: 400,
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
   const redis = useRedis()
   
-  // Check if user already exists
+  // 检查用户是否已存在
   const existingUser = await redis.get(`user:auth:${username}`)
   if (existingUser) {
     throw createError({
@@ -37,22 +37,22 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // In a real app, password should be hashed (e.g., bcrypt)
-  // For this demo, we store plain text or simple hash
-  // Let's store a simple JSON object
+  // 真实项目中密码应进行哈希（如 bcrypt）
+  // 本示例为了演示方便，存储明文或简单哈希
+  // 这里存储一个简单的 JSON 对象
   const newUser = {
     id: Date.now(),
     username,
-    password, // TODO: Hash this in production
+    password, // TODO：生产环境请对密码进行哈希
     role: 'user',
     avatar: `https://ui-avatars.com/api/?name=${username}&background=random`,
     createdAt: new Date().toISOString()
   }
 
-  // Store user auth info
+  // 存储用户认证信息
   await redis.set(`user:auth:${username}`, JSON.stringify(newUser))
   
-  // Store initial profile
+  // 存储初始用户资料
   await redis.set(`user:profile:${newUser.id}`, JSON.stringify({
     name: username,
     avatar: newUser.avatar

@@ -1,8 +1,8 @@
 /**
- * Formats a date object or timestamp into a YYYY-MM-DD string.
+ * 将日期对象或时间戳格式化为 YYYY-MM-DD 字符串。
  * 
- * @param {Date | number | string} date - The date to format (Date object, timestamp, or date string).
- * @returns {string} The formatted date string, or an empty string if the date is invalid.
+ * @param {Date | number | string} date - 待格式化的日期（Date/时间戳/日期字符串）
+ * @returns {string} 格式化后的日期字符串；无效日期返回空字符串
  */
 export const formatDate = (date: Date | number | string): string => {
   if (!date) return ''
@@ -17,10 +17,10 @@ export const formatDate = (date: Date | number | string): string => {
 }
 
 /**
- * Formats a date object or timestamp into a YYYY-MM-DD HH:mm:ss string.
+ * 将日期对象或时间戳格式化为 YYYY-MM-DD HH:mm:ss 字符串。
  * 
- * @param {Date | number | string} date - The date to format (Date object, timestamp, or date string).
- * @returns {string} The formatted date-time string, or an empty string if the date is invalid.
+ * @param {Date | number | string} date - 待格式化的日期（Date/时间戳/日期字符串）
+ * @returns {string} 格式化后的日期时间字符串；无效日期返回空字符串
  */
 export const formatDateTime = (date: Date | number | string): string => {
   if (!date) return ''
@@ -38,10 +38,10 @@ export const formatDateTime = (date: Date | number | string): string => {
 }
 
 /**
- * Calculates the relative time string (e.g., "Just now", "1 minute ago") from a given date.
+ * 根据给定日期计算相对时间文案（如“刚刚”“1 分钟前”）。
  * 
- * @param {Date | number | string} date - The date to calculate relative time from.
- * @returns {string} The relative time description.
+ * @param {Date | number | string} date - 用于计算相对时间的日期
+ * @returns {string} 相对时间描述
  */
 export const timeAgo = (date: Date | number | string): string => {
   if (!date) return ''

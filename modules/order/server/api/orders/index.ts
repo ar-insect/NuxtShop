@@ -2,18 +2,18 @@ import redis from '~/server/utils/redis'
 import { getSessionId } from '~/server/utils/session'
 
 /**
- * Handles order management (GET, POST, DELETE).
- * Stores order history in Redis associated with a mock user ID.
+ * 订单管理接口（GET/POST/DELETE）。
+ * 将订单历史按用户维度存储在 Redis 中。
  * 
- * @param {H3Event} event - The H3 event object.
- * @returns {Promise<any>} The result of the operation (list of orders, success status, or new order).
- * @throws {H3Error} 400 Bad Request if order ID is missing for DELETE.
+ * @param {H3Event} event - H3 事件对象
+ * @returns {Promise<any>} 接口返回结果（订单列表 / 成功状态 / 新订单等）
+ * @throws {H3Error} 删除订单时若缺少订单 ID 则抛出 400
  */
 export default defineEventHandler(async (event) => {
   const method = event.method
 
   if (method === 'GET') {
-    // Get user ID from session
+    // 从会话中获取用户标识
     const userId = getSessionId(event)
     const orders = await redis.get(`orders:${userId}`)
     return orders ? JSON.parse(orders) : []
@@ -23,14 +23,14 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const userId = getSessionId(event)
     
-    // Get existing orders
+    // 获取已有订单
     const existingOrdersStr = await redis.get(`orders:${userId}`)
     const existingOrders = existingOrdersStr ? JSON.parse(existingOrdersStr) : []
     
-    // Add new order
+    // 将新订单插入到列表头部
     const newOrders = [body, ...existingOrders]
     
-    // Save back to Redis
+    // 写回 Redis
     await redis.set(`orders:${userId}`, JSON.stringify(newOrders))
     
     return { success: true, order: body }

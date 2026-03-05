@@ -1,10 +1,10 @@
 /**
- * Formats a number as a currency string.
+ * 将数字格式化为货币字符串。
  * 
- * @param {number | string} amount - The amount to format.
- * @param {string} [currency='¥'] - The currency symbol (default: '¥').
- * @param {number} [decimals=2] - The number of decimal places (default: 2).
- * @returns {string} The formatted currency string (e.g., "¥1,234.56").
+ * @param {number | string} amount - 待格式化的金额
+ * @param {string} [currency='¥'] - 货币符号（默认：¥）
+ * @param {number} [decimals=2] - 小数位数（默认：2）
+ * @returns {string} 格式化后的货币字符串（如 "¥1,234.56"）
  */
 export const formatCurrency = (amount: number | string, currency: string = '¥', decimals: number = 2): string => {
   const num = Number(amount)
@@ -13,10 +13,10 @@ export const formatCurrency = (amount: number | string, currency: string = '¥',
 }
 
 /**
- * Formats a number with thousands separators.
+ * 将数字格式化为带千分位分隔符的字符串。
  * 
- * @param {number | string} num - The number to format.
- * @returns {string} The formatted number string (e.g., "1,234,567").
+ * @param {number | string} num - 待格式化的数字
+ * @returns {string} 格式化后的字符串（如 "1,234,567"）
  */
 export const formatNumber = (num: number | string): string => {
   if (num === null || num === undefined) return ''
@@ -24,10 +24,10 @@ export const formatNumber = (num: number | string): string => {
 }
 
 /**
- * Masks the middle four digits of a phone number.
+ * 隐藏手机号中间四位数字。
  * 
- * @param {string} phone - The phone number to mask.
- * @returns {string} The masked phone number (e.g., "138****1234").
+ * @param {string} phone - 待处理的手机号
+ * @returns {string} 处理后的手机号（如 "138****1234"）
  */
 export const maskPhone = (phone: string): string => {
   if (!phone || phone.length < 11) return phone

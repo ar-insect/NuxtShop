@@ -61,7 +61,7 @@
 import BaseCard from '~/components/ui/BaseCard.vue'
 import BaseButton from '~/components/ui/BaseButton.vue'
 const { $logError } = useNuxtApp()
-// Use useState to ensure consistent time between server and client hydration
+// 使用 useState 保证服务端与客户端水合时的时间一致
 const now = useState<number>('utils-demo-now', () => Date.now())
 const fiveMinutesAgo = computed(() => new Date(now.value - 5 * 60 * 1000))
 

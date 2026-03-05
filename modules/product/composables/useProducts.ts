@@ -1,16 +1,16 @@
 
 /**
- * Interface representing a product in the shop.
+ * 表示商品的数据结构。
  * @interface Product
- * @property {number} id - Unique product identifier
- * @property {string} title - Product name
- * @property {number} price - Product price
- * @property {string} description - Detailed product description
- * @property {string} category - Product category (e.g., "men's clothing")
- * @property {string} image - URL to product image
- * @property {Object} rating - Product rating information
- * @property {number} rating.rate - Average rating score
- * @property {number} rating.count - Number of ratings
+ * @property {number} id - 商品唯一标识
+ * @property {string} title - 商品名称
+ * @property {number} price - 商品价格
+ * @property {string} description - 商品描述
+ * @property {string} category - 商品分类（如 "men's clothing"）
+ * @property {string} image - 商品图片 URL
+ * @property {Object} rating - 评分信息
+ * @property {number} rating.rate - 平均评分
+ * @property {number} rating.count - 评分人数
  */
 export interface Product {
   id: number
@@ -26,12 +26,12 @@ export interface Product {
 }
 
 /**
- * Composable for accessing product data.
- * Provides a list of mock products and helper methods.
+ * 商品数据访问组合式函数。
+ * 提供一组模拟商品数据及辅助方法。
  * 
- * @returns {Object} Product state and methods
- * @property {Ref<Product[]>} products - Reactive array of available products
- * @property {Function} getProductById - Retrieves a product by its ID
+ * @returns {Object} 商品状态与方法
+ * @property {Ref<Product[]>} products - 商品列表（响应式）
+ * @property {Function} getProductById - 根据商品 ID 获取商品
  */
 export const useProducts = () => {
   const products = ref<Product[]>([
@@ -218,23 +218,23 @@ export const useProducts = () => {
   ])
 
   /**
-   * Retrieves a product by its ID.
+   * 根据商品 ID 获取单个商品。
    * 
-   * @param {number} id - The ID of the product to find
-   * @returns {Product | undefined} The found product or undefined
+   * @param {number} id - 商品 ID
+   * @returns {Product | undefined} 找到则返回商品，否则返回 undefined
    */
   const getProductById = (id: number) => {
     return products.value.find(p => p.id === id)
   }
 
   /**
-   * Retrieves a paginated product list with optional filters.
+   * 获取分页商品列表（可选分类与搜索过滤）。
    * 
-   * @param {number} page - Current page number (1-based).
-   * @param {number} limit - Page size.
-   * @param {string} [category] - Optional category filter.
-   * @param {string} [query] - Optional search query (matches title/description).
-   * @returns {Promise<{ items: Product[]; total: number }>} Paginated items and total count.
+   * @param {number} page - 当前页码（从 1 开始）
+   * @param {number} limit - 每页数量
+   * @param {string} [category] - 分类过滤（可选）
+   * @param {string} [query] - 搜索词（可选，匹配标题/描述）
+   * @returns {Promise<{ items: Product[]; total: number }>} 分页数据与总数
    */
   const getProducts = (page: number = 1, limit: number = 16, category?: string, query?: string) => {
     return new Promise<{ items: Product[]; total: number }>((resolve) => {

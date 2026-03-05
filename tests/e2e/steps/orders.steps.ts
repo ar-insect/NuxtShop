@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 const { Given, When, Then } = createBdd()
 
 Given('我已清空数据', async ({ page }) => {
-  // Ensure cart is empty first (local and remote)
+  // 先确保购物车为空（本地与远端）
   await page.evaluate(() => {
     localStorage.removeItem('nuxt-shop-cart')
     localStorage.removeItem('nuxt-shop-orders')
@@ -18,40 +18,38 @@ Given('我已清空数据', async ({ page }) => {
 })
 
 Given('我已经创建了一个订单', async ({ page }) => {
-  // Ensure cart is empty first
+  // 先确保购物车为空
   await page.evaluate(() => {
     localStorage.removeItem('nuxt-shop-cart')
   })
   
-  // Add a product to cart (Assuming cart is empty or we just add one)
+  // 添加一个商品到购物车（假设购物车为空）
   await page.goto('/products')
-  // Wait for products to load
+  // 等待商品列表加载
   await page.waitForSelector('.grid', { state: 'visible', timeout: 30000 })
-  // Click on the first product link
+  // 点击第一个商品链接
   await page.locator('.grid a').first().click()
   
-  // Product detail page
-  // Wait for button to be visible and enabled
+  // 商品详情页：等待按钮可见且可用
   const addToCartBtn = page.locator('button:has-text("加入购物车")')
   await addToCartBtn.waitFor({ state: 'visible', timeout: 30000 })
-  // Force click or wait a bit
+  // 适当等待后点击
   await page.waitForTimeout(1000)
   await addToCartBtn.click()
-  // Wait for a moment to ensure item is added
+  // 等待片刻确保已加入
   await page.waitForTimeout(1000)
   
-  // Go to checkout
+  // 前往购物车/结算
   await page.goto('/cart')
-  // Wait for cart to be loaded (either items or empty state)
+  // 等待购物车页面加载（有商品或空状态）
   try {
-    // Try to wait for the checkout button, but don't fail immediately if it's not there yet
+    // 尝试等待“去结算”按钮出现，若暂时未出现则不立即失败
     await page.waitForSelector('button:has-text("去结算")', { state: 'visible', timeout: 5000 })
   } catch {
-    // If checkout button is not visible, it might be because the cart state wasn't persisted/loaded correctly
-    // or the page is still loading. Let's verify if we have items.
+    // 若“去结算”按钮不可见，可能是购物车状态未正确持久化/加载，或页面仍在加载中；先检查是否为空
     const emptyCart = await page.isVisible('text=您的购物车是空的')
     if (emptyCart) {
-      // Retry adding to cart if failed
+      // 若添加失败则重试加入购物车
       console.log('Cart empty, retrying adding product...')
       await page.goto('/products')
       await page.waitForSelector('.grid', { state: 'visible', timeout: 30000 })
@@ -66,27 +64,27 @@ Given('我已经创建了一个订单', async ({ page }) => {
     }
   }
   
-  // Ensure the button is clickable
+  // 确保按钮可点击
   await page.waitForTimeout(500)
   await page.click('button:has-text("去结算")')
   
-  // Fill address if needed (assuming new address mode or default)
-  // We might need to wait for navigation to checkout
+  // 如需要则填写地址（可能是新地址模式或默认地址）
+  // 等待跳转到结算页
   await page.waitForURL('**/checkout', { timeout: 30000 })
   
-  // Wait for address form or saved addresses
-  // We check for either saved addresses OR the new address form
+  // 等待地址表单或已保存地址渲染
+  // 兼容已保存地址或“填写新地址”两种情况
   try {
-    // Race condition: wait for either "收货地址" header OR "填写新地址" text
+    // 竞态：等待“收货地址”标题或“填写新地址”文本出现
     await Promise.race([
       page.waitForSelector('h3:has-text("收货地址")', { state: 'visible', timeout: 30000 }),
       page.waitForSelector('text=填写新地址', { state: 'visible', timeout: 30000 }),
-      // Also wait for the payment section to ensure page is loaded
+      // 同时等待“支付方式”区域，确保页面主要内容已加载
       page.waitForSelector('h3:has-text("支付方式")', { state: 'visible', timeout: 30000 })
     ])
   } catch {
     console.log('Timeout waiting for checkout page elements, reloading...')
-    // maybe we need to reload
+    // 可能需要刷新
     await page.reload()
     await page.waitForSelector('h3:has-text("收货地址")', { state: 'visible', timeout: 30000 })
   }
@@ -101,15 +99,15 @@ Given('我已经创建了一个订单', async ({ page }) => {
     await page.fill('input[placeholder="用于接收配送通知"]', '13800000000')
   }
 
-  // Confirm payment
-  // Wait for button to prevent timeout
+  // 确认支付
+  // 等待按钮出现以避免超时
   const payBtn = page.locator('button:has-text("确认支付")')
   await payBtn.waitFor({ state: 'visible', timeout: 30000 })
-  // Ensure button is enabled
+  // 确保按钮可用
   await expect(payBtn).toBeEnabled({ timeout: 10000 })
   await payBtn.click()
   
-  // Wait for navigation to orders page
+  // 等待跳转到订单页
   await page.waitForURL('**/orders', { timeout: 30000 })
 })
 
@@ -124,7 +122,7 @@ When('我访问"我的订单"页面', async ({ page }) => {
 })
 
 Then('我应该看到订单列表中包含刚刚创建的订单', async ({ page }) => {
-  // Wait for orders to load/render
+  // 等待订单列表加载/渲染
   await page.waitForSelector('h2:has-text("我的订单")', { state: 'visible', timeout: 30000 })
   await page.waitForSelector('dl', { state: 'visible', timeout: 30000 })
   const orders = page.locator('dl').first()
@@ -139,15 +137,15 @@ Then('我应该看到"暂无订单"的提示信息', async ({ page }) => {
 })
 
 When('我点击"删除订单"按钮', async ({ page }) => {
-  // Click the delete button on the order card
+  // 点击订单卡片上的删除按钮
   await page.locator('button:has-text("删除订单")').first().click()
   
-  // Wait for the custom confirm modal
+  // 等待自定义确认弹窗出现
   await expect(page.locator('text=确定要删除这个订单吗')).toBeVisible()
   
-  // Click the confirm button in the modal (text is "删除")
-  // Use a specific locator to avoid ambiguity if multiple "删除" exist (though unlikely)
-  // The modal footer usually has the action buttons.
+  // 点击弹窗确认按钮（文案为“删除”）
+  // 使用更精确的定位，避免与其他“删除”按钮产生歧义
+  // 弹窗 footer 中通常是操作按钮
   await page.locator('.modal-footer button:has-text("删除")').click()
 })
 

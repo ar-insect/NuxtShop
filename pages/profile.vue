@@ -589,7 +589,7 @@ const deleteAddress = async (id: string) => {
   }
 }
 
-// Persist addresses to localStorage
+// 将收货地址持久化到 localStorage
 if (import.meta.client) {
   const savedAddresses = localStorage.getItem('nuxt-shop-addresses')
   if (savedAddresses) {
@@ -606,7 +606,7 @@ if (import.meta.client) {
 }
 
 
-// Security Settings State
+// 安全设置状态
 const passwordForm = reactive({
   current: '',
   new: '',
@@ -629,7 +629,7 @@ const isPasswordValid = computed(() => {
 
 const updatePassword = async () => {
   updatingPassword.value = true
-  // Mock API call
+  // 模拟 API 请求
   await new Promise(resolve => setTimeout(resolve, 1000))
   updatingPassword.value = false
   passwordForm.current = ''
@@ -643,7 +643,7 @@ const toggle2FA = () => {
   toast.success(twoFactorEnabled.value ? '两步验证已开启' : '两步验证已关闭')
 }
 
-// Preference Settings State
+// 偏好设置状态
 const userId = computed(() => user.value?.id?.toString())
 const themes = [
   { value: 'light', label: '浅色', icon: SunIcon },
@@ -722,7 +722,7 @@ const notificationSettings = reactive([
 
 const saveNotifications = async () => {
   savingNotifications.value = true
-  // Mock API call
+  // 模拟 API 请求
   await new Promise(resolve => setTimeout(resolve, 800))
   savingNotifications.value = false
   toast.success('通知设置已保存')
@@ -730,7 +730,7 @@ const saveNotifications = async () => {
 
 const router = useRouter()
 
-// Update current state based on selection
+// 根据当前选中项更新导航状态
 watch(currentTab, (val) => {
   navigation.forEach(item => {
     item.current = item.id === val
@@ -753,7 +753,7 @@ const form = reactive({
   avatar: user.value?.avatar || ''
 })
 
-// Update form when user data is loaded/refreshed
+// 用户数据加载/刷新后同步表单内容
 watch(user, (newUser) => {
   if (newUser) {
     form.name = newUser.name
@@ -761,7 +761,7 @@ watch(user, (newUser) => {
   }
 }, { immediate: true })
 
-// Focus input when editing starts
+// 开始编辑时自动聚焦输入框
 watch(isEditingName, (val) => {
     if (val) {
         nextTick(() => {
@@ -775,7 +775,7 @@ const handleFileUpload = (event: Event) => {
   if (!input.files?.length) return
 
   const file = input.files[0]
-  // Verify file type
+  // 校验文件类型
   if (!file.type.startsWith('image/')) {
     alert('请选择图片文件')
     return
@@ -790,7 +790,7 @@ const handleFileUpload = (event: Event) => {
   }
   reader.readAsDataURL(file)
   
-  // Clear input value to allow re-selecting the same file
+  // 清空 input 值，允许再次选择同一个文件
   input.value = ''
 }
 
@@ -805,7 +805,7 @@ const handleCrop = async (blob: Blob) => {
       body: formData
     })
     form.avatar = response.data.url
-    // Save avatar immediately after crop/upload
+    // 裁剪/上传后立即保存头像
     await saveProfile()
   } catch (error) {
     alert('头像上传失败')
@@ -835,10 +835,10 @@ const saveProfile = async () => {
         avatar: form.avatar
       }
     })
-    // Update local user state if needed
-    // In a real app, useAuth's user might be reactive to backend changes or we update it manually
-    // user.value.name = form.name ... (depends on useAuth implementation)
-    // Assuming simplistic update for now:
+    // 需要时同步更新本地 user 状态
+    // 真实项目中可由后端下发最新用户信息，或 useAuth 内部做统一刷新
+    // user.value.name = form.name ...（取决于 useAuth 的实现）
+    // 这里先采用最简单的本地更新：
     if (user.value) {
         user.value.name = form.name
         user.value.avatar = form.avatar

@@ -18,7 +18,4 @@ export default defineNuxtRouteMiddleware((to, from) => {
   }
 
   // 示例：重定向（如果需要）
-  // if (to.path === '/old-path') {
-  //   return navigateTo('/new-path')
-  // }
 })

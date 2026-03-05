@@ -2,11 +2,11 @@ import type { H3Event } from 'h3'
 import { randomUUID } from 'crypto'
 
 /**
- * Retrieves the session ID from the request cookies.
- * If no session ID exists, generates a new one and sets it as a cookie.
+ * 从请求 Cookie 中获取会话 ID。
+ * 若不存在会话 ID，则生成一个新的并写入 Cookie。
  * 
- * @param {H3Event} event - The H3 event object.
- * @returns {string} The session ID.
+ * @param {H3Event} event - H3 事件对象
+ * @returns {string} 会话 ID
  */
 export const getSessionId = (event: H3Event): string => {
   const authToken = getCookie(event, 'auth-token')
@@ -24,7 +24,7 @@ export const getSessionId = (event: H3Event): string => {
   if (!sessionId) {
     sessionId = randomUUID()
     setCookie(event, 'session_id', sessionId, {
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30, // 30 天
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'

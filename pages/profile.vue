@@ -669,32 +669,12 @@ const fontSizes = [
 ] as const
 
 const colors = [
-    // Yellow / Amber family
-  '#facc15', // yellow-400
-  '#f59e0b', // amber-500
-  // Orange / Warm orange
-  '#f97316', // orange-500
-  '#fb923c', // orange-400
-  // Red / Coral
-  '#ef4444', // red-500
-  '#f87171', // red-400
-  // Pink
-  '#ec4899', // pink-500
-  '#f472b6', // pink-400
-  // Purple / Violet / Indigo
-  '#8b5cf6', // violet-500
-  '#a78bfa', // violet-400
-  '#4f46e5', // indigo-600
-  '#818cf8', // indigo-400
-  // Blue
-  '#2563eb', // blue-600
-  '#60a5fa', // blue-400
-  // Teal / Cyan
-  '#06b6d4', // cyan-500
-  '#67e8f9', // cyan-300
-  // Green / Lime
-  '#22c55e', // green-500
-  '#84cc16'  // lime-500
+  '#3b82f6',
+  '#ef4444',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899'
 ]
 
 const radii = [

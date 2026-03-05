@@ -27,6 +27,7 @@
             :src="category.image" 
             :alt="category.label"
             class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image'"
           >
         </div>
 

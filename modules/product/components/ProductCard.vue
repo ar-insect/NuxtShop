@@ -3,9 +3,10 @@
     <!-- Image Container -->
     <div class="relative aspect-[1/1] overflow-hidden bg-gray-100 rounded-xl">
       <img 
-        :src="product.image" 
+        :src="imageSrc" 
         :alt="product.title"
         class="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-105 p-4"
+        @error="handleImageError"
       >
       
       <!-- Top Right Action (Wishlist) -->
@@ -58,6 +59,18 @@ const props = defineProps<{
 const { toggleWishlist, isInWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
+
+// Image fallback handling
+const imageSrc = ref(props.product.image)
+
+watch(() => props.product.image, (newVal) => {
+  imageSrc.value = newVal
+})
+
+const handleImageError = () => {
+  // Fallback to a placeholder image
+  imageSrc.value = 'https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image'
+}
 
 const formatPrice = (price: number) => {
   return price.toFixed(2)

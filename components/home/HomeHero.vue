@@ -91,6 +91,7 @@
                           :src="currentSlide.image" 
                           :alt="currentSlide.title"
                           class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                          @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/1000x800/f3f4f6/9ca3af?text=No+Image'"
                         >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                             <span class="text-white font-medium">点击查看详情</span>

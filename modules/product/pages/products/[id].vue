@@ -14,7 +14,7 @@
 
     <div v-else-if="product" class="lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-x-8 lg:items-start">
       <!-- Image gallery -->
-      <div class="flex flex-col-reverse">
+      <div class="flex flex-col gap-4">
         <div class="w-full grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div
             ref="imageContainerRef"
@@ -25,10 +25,11 @@
             @mousemove="handleZoomMove"
           >
             <img
-              :src="product.image"
+              :src="selectedImage || product.image"
               :alt="product.title"
-              class="w-full h-full object-center object-contain p-4 sm:p-6 select-none"
+              class="w-full h-full object-center object-contain p-4 sm:p-6 select-none transition-opacity duration-300"
               draggable="false"
+              @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/800x800/f3f4f6/9ca3af?text=No+Image'"
             >
 
             <div
@@ -43,6 +44,25 @@
             :class="isZoomActive ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             :style="{ ...zoomPreviewStyle, backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }"
           />
+        </div>
+
+        <!-- Thumbnails -->
+        <div v-if="currentImages.length > 1" class="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-4 max-w-2xl">
+          <button
+            v-for="(img, idx) in currentImages"
+            :key="idx"
+            class="relative aspect-square rounded-md overflow-hidden border-2 transition-all hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-offset-2"
+            :class="selectedImage === img ? 'border-[var(--primary-color)] opacity-100 ring-1 ring-[var(--primary-color)]' : 'border-transparent opacity-60 hover:border-[var(--border-color)]'"
+            :style="{ backgroundColor: 'var(--card-bg)' }"
+            @click="selectedImage = img"
+          >
+            <img 
+              :src="img" 
+              :alt="`${product.title} - view ${idx + 1}`"
+              class="w-full h-full object-center object-contain p-1"
+              @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x200/f3f4f6/9ca3af?text=Thumbnail'"
+            >
+          </button>
         </div>
       </div>
 
@@ -70,7 +90,10 @@
 
         <div class="mt-6">
           <h3 class="sr-only">描述</h3>
-          <div class="text-base text-[var(--text-secondary)] space-y-6" v-html="product.description" />
+          <div 
+            class="text-base text-[var(--text-secondary)] space-y-6 rich-content" 
+            v-html="product.detailHtml || product.description" 
+          />
         </div>
         
         <div class="mt-6 flex items-center">
@@ -138,7 +161,12 @@
       <div class="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 lg:gap-x-8">
         <div v-for="item in historyItems" :key="item.id" class="group relative">
           <div class="w-full min-h-80 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none border" :style="{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }">
-            <img :src="item.image" :alt="item.title" class="w-full h-full object-center object-contain lg:w-full lg:h-full p-4" >
+            <img 
+              :src="item.image" 
+              :alt="item.title" 
+              class="w-full h-full object-center object-contain lg:w-full lg:h-full p-4" 
+              @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/800x800/f3f4f6/9ca3af?text=No+Image'"
+            >
           </div>
           <div class="mt-4 flex justify-between">
             <div>
@@ -183,16 +211,28 @@ const { data: product, pending } = await useAsyncData<Product | undefined>(
 )
 
 const error = computed(() => !pending.value && !product.value)
+const selectedImage = ref(product.value?.image || '')
+
+// Compute available images (fallback to main image if array missing)
+const currentImages = computed(() => {
+  if (!product.value) return []
+  if (product.value.images && product.value.images.length > 0) {
+    return product.value.images
+  }
+  return [product.value.image]
+})
 
 onMounted(async () => {
   await fetchHistory()
   if (product.value) {
+    if (!selectedImage.value) selectedImage.value = product.value.image
     addToHistory(product.value)
   }
 })
 
 watch(product, (newProduct) => {
   if (newProduct) {
+    selectedImage.value = newProduct.image
     addToHistory(newProduct)
   }
 })
@@ -283,7 +323,7 @@ const lensStyle = computed(() => ({
 }))
 
 const zoomPreviewStyle = computed(() => {
-  const src = product.value?.image
+  const src = selectedImage.value
   return {
     width: '100%',
     height: '100%',

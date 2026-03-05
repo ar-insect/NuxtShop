@@ -31,15 +31,11 @@
           />
         </div>
 
-        <div v-if="!captchaDisabled" class="py-2">
-          <BaseSliderCaptcha ref="captchaRef" @success="captchaVerified = true" @fail="captchaVerified = false" />
-        </div>
-
         <div>
           <BaseButton
             type="submit"
             :loading="loading"
-            :disabled="loading || (!captchaDisabled && !captchaVerified)"
+            :disabled="loading"
             block
             class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all"
           >
@@ -78,27 +74,16 @@
 </template>
 
 <script setup lang="ts">
-import BaseSliderCaptcha from '~/components/ui/BaseSliderCaptcha.vue'
-
 const { isOpen } = useLoginModal()
 const { login } = useAuth()
 const toast = useToast()
-const runtime = useRuntimeConfig()
 
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
-const isAutomation = import.meta.client && typeof navigator !== 'undefined' && (navigator as any).webdriver === true
-const captchaDisabled = computed(() => Boolean((runtime.public as any)?.disableCaptcha) || isAutomation)
-const captchaVerified = ref(captchaDisabled.value)
-const captchaRef = ref<InstanceType<typeof BaseSliderCaptcha> | null>(null)
 
 const handleLogin = async () => {
   if (!username.value || !password.value) return
-  if (!captchaDisabled.value && !captchaVerified.value) {
-    toast.error('请先完成滑块验证')
-    return
-  }
   
   loading.value = true
   try {
@@ -108,11 +93,6 @@ const handleLogin = async () => {
       // Reset form
       username.value = ''
       password.value = ''
-    }
-    // Reset captcha
-    if (!captchaDisabled.value) {
-      captchaVerified.value = false
-      captchaRef.value?.reset()
     }
   } finally {
     loading.value = false

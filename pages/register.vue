@@ -42,9 +42,8 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
       </div>
 
       <div class="border border-gray-300 rounded-md p-1">
-        <BaseSliderCaptcha 
+        <PuzzleCaptcha 
           ref="captchaRef" 
-          text="点击按钮进行验证" 
           @success="captchaVerified = true" 
           @fail="captchaVerified = false" 
         />
@@ -144,7 +143,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
 </template>
 
 <script setup lang="ts">
-import BaseSliderCaptcha from '~/components/ui/BaseSliderCaptcha.vue'
+import PuzzleCaptcha from '~/components/ui/PuzzleCaptcha.vue'
 
 const { register } = useAuth()
 const { openLoginModal } = useLoginModal()
@@ -158,7 +157,7 @@ const loading = ref(false)
 const phone = ref('')
 const agreed = ref(false)
 const captchaVerified = ref(false)
-const captchaRef = ref<InstanceType<typeof BaseSliderCaptcha> | null>(null)
+const captchaRef = ref<InstanceType<typeof PuzzleCaptcha> | null>(null)
 
 // Step 2 Data
 const username = ref('')

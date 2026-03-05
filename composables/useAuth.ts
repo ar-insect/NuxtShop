@@ -1,5 +1,6 @@
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
+import { useOrders } from '~/modules/order/composables/useOrders'
 /**
  * User interface representing a logged-in user.
  * @interface User
@@ -38,6 +39,7 @@ export const useAuth = () => {
   const router = useRouter()
   const { resetCartLocal, refreshCart } = useCart()
   const { resetWishlistLocal, refreshWishlist } = useWishlist()
+  const { resetOrdersLocal, refreshOrders } = useOrders()
 
   /**
    * Authenticates a user with username and password.
@@ -58,9 +60,11 @@ export const useAuth = () => {
       toast.success('Login successful')
       resetCartLocal()
       resetWishlistLocal()
+      resetOrdersLocal()
       await nextTick()
       await refreshCart()
       await refreshWishlist()
+      await refreshOrders()
       await router.push('/')
       return true
     } catch (e: any) {
@@ -103,6 +107,7 @@ export const useAuth = () => {
     toast.info('Logged out')
     resetCartLocal()
     resetWishlistLocal()
+    resetOrdersLocal()
     router.push('/login')
   }
 

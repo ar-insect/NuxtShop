@@ -11,7 +11,7 @@ Given('我已清空数据', async ({ page }) => {
   })
   try {
     await page.request.delete('/api/cart')
-    await page.request.delete('/api/orders')
+    await page.request.delete('/api/orders?clear=true')
   } catch (e) {
     console.log('Failed to clear remote cart/orders', e)
   }
@@ -139,13 +139,16 @@ Then('我应该看到"暂无订单"的提示信息', async ({ page }) => {
 })
 
 When('我点击"删除订单"按钮', async ({ page }) => {
-  // Listen for dialog (confirm alert)
-  page.on('dialog', async dialog => {
-    await dialog.accept()
-  })
+  // Click the delete button on the order card
+  await page.locator('button:has-text("删除订单")').first().click()
   
-  await page.waitForSelector('button:has-text("删除订单")', { state: 'visible' })
-  await page.click('button:has-text("删除订单")')
+  // Wait for the custom confirm modal
+  await expect(page.locator('text=确定要删除这个订单吗')).toBeVisible()
+  
+  // Click the confirm button in the modal (text is "删除")
+  // Use a specific locator to avoid ambiguity if multiple "删除" exist (though unlikely)
+  // The modal footer usually has the action buttons.
+  await page.locator('.modal-footer button:has-text("删除")').click()
 })
 
 Then('我应该看到订单被成功删除', async ({ page }) => {

@@ -1,4 +1,5 @@
 import redis from '~/server/utils/redis'
+import { getSessionId } from '~/server/utils/session'
 
 /**
  * Handles order management (GET, POST, DELETE).
@@ -12,15 +13,15 @@ export default defineEventHandler(async (event) => {
   const method = event.method
 
   if (method === 'GET') {
-    // Get user ID from query or session (mocked for now)
-    const userId = 'user-1' 
+    // Get user ID from session
+    const userId = getSessionId(event)
     const orders = await redis.get(`orders:${userId}`)
     return orders ? JSON.parse(orders) : []
   }
 
   if (method === 'POST') {
     const body = await readBody(event)
-    const userId = 'user-1'
+    const userId = getSessionId(event)
     
     // Get existing orders
     const existingOrdersStr = await redis.get(`orders:${userId}`)
@@ -38,7 +39,13 @@ export default defineEventHandler(async (event) => {
   if (method === 'DELETE') {
     const query = getQuery(event)
     const orderId = query.id
-    const userId = 'user-1'
+    const clearAll = query.clear === 'true'
+    const userId = getSessionId(event)
+
+    if (clearAll) {
+      await redis.del(`orders:${userId}`)
+      return { success: true, message: 'All orders cleared' }
+    }
 
     if (!orderId) {
       throw createError({

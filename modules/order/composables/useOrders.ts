@@ -41,34 +41,29 @@ export interface Order {
 export const useOrders = () => {
   const orders = useState<Order[]>('orders', () => [])
 
-  // Sync with localStorage on client-side
-  if (import.meta.client) {
-    onMounted(() => {
-      const savedOrders = localStorage.getItem('nuxt-shop-orders')
-      if (savedOrders) {
-        try {
-          orders.value = JSON.parse(savedOrders)
-        } catch (e) {
-          console.error('Failed to parse orders from localStorage', e)
-        }
-      }
+  // Sync with server
+  const { data, refresh } = useFetch<Order[]>('/api/orders', {
+    key: 'orders-data',
+    lazy: true
+  })
 
-      watch(orders, (newOrders) => {
-        localStorage.setItem('nuxt-shop-orders', JSON.stringify(newOrders))
-      }, { deep: true })
-    })
-  }
+  watch(data, (newOrders) => {
+    if (newOrders) {
+      orders.value = newOrders
+    }
+  }, { immediate: true })
 
   /**
    * Creates a new order and adds it to the order list.
    * Generates a unique ID and timestamp.
    * 
+   * @async
    * @param {CartItem[]} items - Items to include in the order
    * @param {number} total - Total cost of the order
    * @param {Order['shippingAddress']} address - Shipping address details
-   * @returns {Order} The newly created order object
+   * @returns {Promise<Order>} The newly created order object
    */
-  const createOrder = (items: CartItem[], total: number, address: Order['shippingAddress']) => {
+  const createOrder = async (items: CartItem[], total: number, address: Order['shippingAddress']) => {
     const newOrder: Order = {
       id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       items: [...items],
@@ -78,8 +73,17 @@ export const useOrders = () => {
       shippingAddress: address
     }
     
-    orders.value.unshift(newOrder)
-    return newOrder
+    try {
+      await $fetch('/api/orders', {
+        method: 'POST',
+        body: newOrder
+      })
+      orders.value.unshift(newOrder)
+      return newOrder
+    } catch (e) {
+      console.error('Failed to create order', e)
+      throw e
+    }
   }
 
   /**
@@ -105,18 +109,23 @@ export const useOrders = () => {
       await $fetch(`/api/orders?id=${id}`, {
         method: 'DELETE'
       })
+      // Delete locally
+      orders.value = orders.value.filter(o => o.id !== id)
     } catch (e) {
       console.error('Failed to delete order from server', e)
     }
+  }
 
-    // Delete locally
-    orders.value = orders.value.filter(o => o.id !== id)
+  const resetOrdersLocal = () => {
+    orders.value = []
   }
 
   return {
     orders,
     createOrder,
     getOrderById,
-    deleteOrder
+    deleteOrder,
+    refreshOrders: refresh,
+    resetOrdersLocal
   }
 }

@@ -16,14 +16,14 @@ export const useWishlist = () => {
   const wishlistItems = useState<Product[]>('wishlist', () => [])
 
   // Sync with server
-  const { data } = useFetch<Product[]>('/api/wishlist', {
+  const { data, refresh } = useFetch<Product[]>('/api/wishlist', {
     key: 'wishlist-data',
     lazy: true
   })
 
   // Watch for data changes from server
   watch(data, (newWishlist) => {
-    if (newWishlist && wishlistItems.value.length === 0) {
+    if (newWishlist) {
       wishlistItems.value = newWishlist
     }
   }, { immediate: true })
@@ -99,15 +99,6 @@ export const useWishlist = () => {
     wishlistItems.value = []
   }
 
-  const refreshWishlist = async () => {
-    try {
-      const latest = await $fetch<Product[]>('/api/wishlist')
-      wishlistItems.value = Array.isArray(latest) ? latest : []
-    } catch {
-      wishlistItems.value = []
-    }
-  }
-
   return {
     wishlistItems,
     addToWishlist,
@@ -115,6 +106,6 @@ export const useWishlist = () => {
     toggleWishlist,
     isInWishlist,
     resetWishlistLocal,
-    refreshWishlist
+    refreshWishlist: refresh
   }
 }

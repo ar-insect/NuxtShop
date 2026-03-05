@@ -1,8 +1,9 @@
 import redis from '~/server/utils/redis'
+import { getSessionId } from '~/server/utils/session'
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id
-  const userId = 'user-1' // Mock user ID, should be from session
+  const userId = getSessionId(event)
 
   if (!id) {
     throw createError({

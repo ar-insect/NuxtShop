@@ -44,7 +44,7 @@ Then('我应该在收藏夹页面看到该商品', async ({ page }) => {
   await expect(page).toHaveURL('/wishlist');
   await expect(page.locator('h1', { hasText: '我的收藏' })).toBeVisible();
   const main = page.getByRole('main');
-  await expect(main.locator('a[href^="/products/"]').first()).toBeVisible();
+  await expect(main.locator('h3').first()).toBeVisible();
 });
 
 Given('我在收藏夹页面', async ({ page }) => {
@@ -61,7 +61,7 @@ Given('收藏夹中已有商品', async ({ page }) => {
   await expect
     .poll(async () => {
       if (await emptyState.isVisible()) return 'empty';
-      if ((await main.locator('a[href^="/products/"]').count()) > 0) return 'has-items';
+      if ((await main.locator('h3').count()) > 0) return 'has-items';
       return 'none';
     })
     .not.toBe('none');

@@ -1,0 +1,302 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - link "N NuxtShop" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e10]: "N"
+            - generic [ref=e11]: NuxtShop
+          - navigation [ref=e12]:
+            - list [ref=e13]:
+              - listitem [ref=e14]:
+                - link "首页" [ref=e15] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e16]:
+                - link "商品" [ref=e17] [cursor=pointer]:
+                  - /url: /products
+              - listitem [ref=e18]:
+                - link "文档" [ref=e19] [cursor=pointer]:
+                  - /url: /docs
+              - listitem [ref=e20]:
+                - button "演示" [ref=e21]:
+                  - text: 演示
+                  - img [ref=e22]
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - link "收藏夹" [ref=e26] [cursor=pointer]:
+              - /url: /wishlist
+              - img [ref=e27]
+            - link "购物车" [ref=e29] [cursor=pointer]:
+              - /url: /cart
+              - img [ref=e30]
+          - generic [ref=e32]:
+            - link "用户 Admin User" [ref=e33] [cursor=pointer]:
+              - /url: /profile
+              - img "用户" [ref=e34]
+              - generic [ref=e35]: Admin User
+            - button "退出登录" [ref=e36]
+    - main [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e45]:
+                - img [ref=e46]
+                - text: 新品首发 / 科技潮流
+              - heading "探索前沿数码科技" [level=1] [ref=e48]
+              - paragraph [ref=e49]: 最新发布的智能设备、电子配件，带你体验科技的魅力。
+            - generic [ref=e50]:
+              - textbox "搜索商品，例如：背包 / 戒指 / 夹克" [ref=e54]
+              - generic [ref=e55]:
+                - button "去逛逛" [ref=e56] [cursor=pointer]:
+                  - generic [ref=e57]: 去逛逛
+                - button "搜索" [ref=e58]
+            - generic [ref=e59]:
+              - button "电子产品" [ref=e60]:
+                - img [ref=e61]
+                - text: 电子产品
+              - button "女装" [ref=e64]:
+                - img [ref=e65]
+                - text: 女装
+              - button "男装" [ref=e67]:
+                - img [ref=e68]
+                - text: 男装
+              - button "珠宝配饰" [ref=e70]:
+                - img [ref=e71]
+                - text: 珠宝配饰
+            - generic [ref=e73]:
+              - button "切换到第 1 张幻灯片" [ref=e74]
+              - button "切换到第 2 张幻灯片" [ref=e75]
+              - button "切换到第 3 张幻灯片" [ref=e76]
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - img "探索前沿数码科技" [ref=e80]
+              - generic [ref=e82]: 点击查看详情
+            - generic [ref=e84]:
+              - img [ref=e86]
+              - generic [ref=e88]:
+                - paragraph [ref=e89]: 极速配送
+                - paragraph [ref=e90]: 最快次日达
+            - generic [ref=e92]:
+              - img [ref=e94]
+              - generic [ref=e97]:
+                - paragraph [ref=e98]: 限时优惠
+                - paragraph [ref=e99]: 满200减30
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - heading "商品分类" [level=2] [ref=e103]
+              - paragraph [ref=e104]: 从分类开始，快速找到你想要的商品
+            - button "查看全部" [ref=e105]:
+              - text: 查看全部
+              - img [ref=e106]
+          - generic [ref=e108]:
+            - generic [ref=e109] [cursor=pointer]:
+              - img "电子产品" [ref=e111]
+              - generic [ref=e113]:
+                - generic [ref=e114]:
+                  - generic [ref=e115]:
+                    - img [ref=e117]
+                    - heading "电子产品" [level=3] [ref=e120]
+                  - paragraph: 数码产品、手机与配件
+                  - generic [ref=e121]:
+                    - generic [ref=e122]: 浏览商品
+                    - img [ref=e123]
+                - generic [ref=e125]: 6 件商品
+            - generic [ref=e126] [cursor=pointer]:
+              - img "女装" [ref=e128]
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]:
+                    - img [ref=e134]
+                    - heading "女装" [level=3] [ref=e136]
+                  - paragraph: 时尚潮流、裙装与上衣
+                  - generic [ref=e137]:
+                    - generic [ref=e138]: 浏览商品
+                    - img [ref=e139]
+                - generic [ref=e141]: 6 件商品
+            - generic [ref=e142] [cursor=pointer]:
+              - img "男装" [ref=e144]
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - generic [ref=e148]:
+                    - img [ref=e150]
+                    - heading "男装" [level=3] [ref=e152]
+                  - paragraph: 日常穿搭、外套与基础款
+                  - generic [ref=e153]:
+                    - generic [ref=e154]: 浏览商品
+                    - img [ref=e155]
+                - generic [ref=e157]: 4 件商品
+            - generic [ref=e158] [cursor=pointer]:
+              - img "珠宝配饰" [ref=e160]
+              - generic [ref=e162]:
+                - generic [ref=e163]:
+                  - generic [ref=e164]:
+                    - img [ref=e166]
+                    - heading "珠宝配饰" [level=3] [ref=e168]
+                  - paragraph: 戒指、耳饰、手链等
+                  - generic [ref=e169]:
+                    - generic [ref=e170]: 浏览商品
+                    - img [ref=e171]
+                - generic [ref=e173]: 4 件商品
+        - generic [ref=e174]:
+          - generic [ref=e175]:
+            - generic [ref=e176]:
+              - heading "推荐商品" [level=2] [ref=e177]
+              - paragraph [ref=e178]: 按评分与热度精选，支持加入购物车与收藏
+            - link "去逛更多 →" [ref=e179] [cursor=pointer]:
+              - /url: /products
+          - generic [ref=e180]:
+            - generic [ref=e182]:
+              - generic [ref=e184]:
+                - generic [ref=e185] [cursor=pointer]:
+                  - generic [ref=e186]:
+                    - img "男士棉质夹克" [ref=e187]
+                    - button "加入收藏" [ref=e188]:
+                      - img [ref=e189]
+                  - generic [ref=e191]:
+                    - heading "男士棉质夹克" [level=3] [ref=e192]
+                    - generic [ref=e193]:
+                      - generic [ref=e194]:
+                        - generic [ref=e195]: ¥55.99
+                        - generic [ref=e196]: 销量500+
+                      - button "加入购物车" [ref=e197]:
+                        - img [ref=e198]
+                - generic [ref=e200] [cursor=pointer]:
+                  - generic [ref=e201]:
+                    - img "WD 4TB 游戏专用硬盘 - PlayStation 4 便携外置硬盘" [ref=e202]
+                    - button "加入收藏" [ref=e203]:
+                      - img [ref=e204]
+                  - generic [ref=e206]:
+                    - heading "WD 4TB 游戏专用硬盘 - PlayStation 4 便携外置硬盘" [level=3] [ref=e207]
+                    - generic [ref=e208]:
+                      - generic [ref=e209]:
+                        - generic [ref=e210]: ¥114.00
+                        - generic [ref=e211]: 销量400+
+                      - button "加入购物车" [ref=e212]:
+                        - img [ref=e213]
+                - generic [ref=e215] [cursor=pointer]:
+                  - generic [ref=e216]:
+                    - img "Silicon Power 256GB SSD 3D NAND A55 SLC 缓存性能增强" [ref=e217]
+                    - button "加入收藏" [ref=e218]:
+                      - img [ref=e219]
+                  - generic [ref=e221]:
+                    - heading "Silicon Power 256GB SSD 3D NAND A55 SLC 缓存性能增强" [level=3] [ref=e222]
+                    - generic [ref=e223]:
+                      - generic [ref=e224]:
+                        - generic [ref=e225]: ¥109.00
+                        - generic [ref=e226]: 销量319+
+                      - button "加入购物车" [ref=e227]:
+                        - img [ref=e228]
+                - generic [ref=e230] [cursor=pointer]:
+                  - generic [ref=e231]:
+                    - img "John Hardy 女士传奇 Naga 金银龙形手链" [ref=e232]
+                    - button "加入收藏" [ref=e233]:
+                      - img [ref=e234]
+                  - generic [ref=e236]:
+                    - heading "John Hardy 女士传奇 Naga 金银龙形手链" [level=3] [ref=e237]
+                    - generic [ref=e238]:
+                      - generic [ref=e239]:
+                        - generic [ref=e240]: ¥695.00
+                        - generic [ref=e241]: 销量400+
+                      - button "加入购物车" [ref=e242]:
+                        - img [ref=e243]
+              - generic [ref=e246]:
+                - generic [ref=e247] [cursor=pointer]:
+                  - generic [ref=e248]:
+                    - img "女士防风雨条纹登山雨衣夹克" [ref=e249]
+                    - button "加入收藏" [ref=e250]:
+                      - img [ref=e251]
+                  - generic [ref=e253]:
+                    - heading "女士防风雨条纹登山雨衣夹克" [level=3] [ref=e254]
+                    - generic [ref=e255]:
+                      - generic [ref=e256]:
+                        - generic [ref=e257]: ¥39.99
+                        - generic [ref=e258]: 销量679+
+                      - button "加入购物车" [ref=e259]:
+                        - img [ref=e260]
+                - generic [ref=e262] [cursor=pointer]:
+                  - generic [ref=e263]:
+                    - img "MBJ 女士纯色短袖船领 V 领 T 恤" [ref=e264]
+                    - button "加入收藏" [ref=e265]:
+                      - img [ref=e266]
+                  - generic [ref=e268]:
+                    - heading "MBJ 女士纯色短袖船领 V 领 T 恤" [level=3] [ref=e269]
+                    - generic [ref=e270]:
+                      - generic [ref=e271]:
+                        - generic [ref=e272]: ¥9.85
+                        - generic [ref=e273]: 销量130+
+                      - button "加入购物车" [ref=e274]:
+                        - img [ref=e275]
+                - generic [ref=e277] [cursor=pointer]:
+                  - generic [ref=e278]:
+                    - img "男士休闲高级修身 T 恤" [ref=e279]
+                    - button "加入收藏" [ref=e280]:
+                      - img [ref=e281]
+                  - generic [ref=e283]:
+                    - heading "男士休闲高级修身 T 恤" [level=3] [ref=e284]
+                    - generic [ref=e285]:
+                      - generic [ref=e286]:
+                        - generic [ref=e287]: ¥22.30
+                        - generic [ref=e288]: 销量259+
+                      - button "加入购物车" [ref=e289]:
+                        - img [ref=e290]
+                - generic [ref=e292] [cursor=pointer]:
+                  - generic [ref=e293]:
+                    - img "Opna 女士短袖吸湿排汗运动衫" [ref=e294]
+                    - button "加入收藏" [ref=e295]:
+                      - img [ref=e296]
+                  - generic [ref=e298]:
+                    - heading "Opna 女士短袖吸湿排汗运动衫" [level=3] [ref=e299]
+                    - generic [ref=e300]:
+                      - generic [ref=e301]:
+                        - generic [ref=e302]: ¥7.95
+                        - generic [ref=e303]: 销量146+
+                      - button "加入购物车" [ref=e304]:
+                        - img [ref=e305]
+            - button "上一页" [ref=e307]:
+              - img [ref=e308]
+            - button "下一页" [ref=e310]:
+              - img [ref=e311]
+            - generic [ref=e313]:
+              - button "跳转到第 1 页" [ref=e314]
+              - button "跳转到第 2 页" [ref=e315]
+        - generic [ref=e317]:
+          - generic [ref=e318]:
+            - img [ref=e320]
+            - generic [ref=e322]:
+              - generic [ref=e323]: 丰富品类
+              - generic [ref=e324]: 基础电商结构：分类、列表、详情、购物车、收藏
+          - generic [ref=e325]:
+            - img [ref=e327]
+            - generic [ref=e329]:
+              - generic [ref=e330]: 安全示例
+              - generic [ref=e331]: 示例级数据与交互，不涉及真实支付与敏感信息
+          - generic [ref=e332]:
+            - img [ref=e334]
+            - generic [ref=e336]:
+              - generic [ref=e337]: 可配置皮肤
+              - generic [ref=e338]: 主题色与圆角由 CSS 变量驱动，支持实时切换
+        - generic [ref=e342]:
+          - heading "订阅新品通知" [level=2] [ref=e343]
+          - paragraph [ref=e344]: 第一时间获取最新商品上架信息与限时优惠活动，不错过任何好物。
+          - generic [ref=e345]:
+            - textbox "请输入您的邮箱地址" [ref=e346]
+            - button "立即订阅" [ref=e347]
+    - contentinfo [ref=e348]:
+      - paragraph [ref=e350]: © 2026 NuxtShop。基于 Nuxt 3 & Tailwind CSS 构建。
+  - generic:
+    - img
+  - generic [ref=e351]:
+    - button "Toggle Nuxt DevTools" [ref=e352] [cursor=pointer]:
+      - img [ref=e353]
+    - generic "Page load time" [ref=e356]:
+      - generic [ref=e357]: "24"
+      - generic [ref=e358]: ms
+    - button "Toggle Component Inspector" [ref=e360] [cursor=pointer]:
+      - img [ref=e361]
+```

@@ -28,7 +28,7 @@ Given('我已经创建了一个订单', async ({ page }) => {
   // 等待商品列表加载
   await page.waitForSelector('.grid', { state: 'visible', timeout: 30000 })
   // 点击第一个商品链接
-  await page.locator('.grid a').first().click()
+  await page.locator('.grid h3').first().click()
   
   // 商品详情页：等待按钮可见且可用
   const addToCartBtn = page.locator('button:has-text("加入购物车")')

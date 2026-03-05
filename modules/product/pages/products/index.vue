@@ -18,30 +18,40 @@
           @search="handleSearch"
         />
       </div>
-      <div class="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-        <BaseButton
-          :variant="!activeCategory ? 'primary' : 'outline'"
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+        <button
+          type="button"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap border"
+          :class="!activeCategory 
+            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300'"
           @click="setCategory()"
         >
           全部
-        </BaseButton>
-        <BaseButton
+        </button>
+        <button
           v-for="cat in categories"
           :key="cat"
-          :variant="activeCategory === cat ? 'primary' : 'outline'"
-          class="whitespace-nowrap capitalize"
+          type="button"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap capitalize border"
+          :class="activeCategory === cat 
+            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300'"
           @click="setCategory(cat)"
         >
           {{ categoryLabels[cat] || cat }}
-        </BaseButton>
-        <BaseButton
+        </button>
+        
+        <button
           v-if="activeCategory || activeQuery"
-          variant="ghost"
-          class="text-red-600 hover:text-red-700 hover:bg-red-50"
+          type="button"
+          class="p-2 ml-1 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+          title="清除筛选"
           @click="clearFilters"
         >
-          清除
-        </BaseButton>
+          <!-- <span class="font-bold text-sm mr-1">清除</span> -->
+          <XMarkIcon class="w-5 h-5 inline-block" stroke-width="2.5" />
+        </button>
       </div>
     </div>
 
@@ -90,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import { XMarkIcon } from '@heroicons/vue/24/outline'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'

@@ -12,6 +12,7 @@
       <!-- Top Right Action (Wishlist) -->
       <button 
         class="absolute top-3 right-3 p-1.5 rounded-full bg-black/5 hover:bg-black/10 text-gray-500 transition-colors backdrop-blur-sm"
+        :aria-label="isInWishlist(product.id) ? '移除收藏' : '加入收藏'"
         @click.stop="toggleWishlist(product)"
       >
         <HeartIcon class="w-5 h-5" :class="{ 'fill-red-500 text-red-500': isInWishlist(product.id) }" />
@@ -39,6 +40,7 @@
         <!-- Add to Cart Button -->
         <button 
           class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition-colors active:scale-95"
+          aria-label="加入购物车"
           @click.stop="addToCartAndToast"
         >
           <PlusIcon class="w-5 h-5" stroke-width="2.5" />

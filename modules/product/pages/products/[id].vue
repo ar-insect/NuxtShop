@@ -147,6 +147,11 @@
         </div>
       </div>
     </div>
+
+    <div v-if="product" class="mt-16 border-t pt-10" :style="{ borderColor: 'var(--border-color)' }">
+      <ProductReviews :product-id="product.id" />
+    </div>
+
     <div v-if="historyItems.length > 0" class="mt-16 border-t pt-10" :style="{ borderColor: 'var(--border-color)' }">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-lg font-medium text-[var(--text-color)]">最近浏览</h3>
@@ -190,6 +195,7 @@
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { useHistory } from '~/composables/useHistory'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
+import ProductReviews from '~/modules/product/components/ProductReviews.vue'
 
 const route = useRoute()
 const { getProductById } = useProducts()

@@ -13,8 +13,8 @@ When('我点击第一个推荐商品进入详情页', async ({ page }) => {
   await expect(recommendedSection.locator('.grid').first()).toBeVisible();
   
   // 点击第一个商品
-  const firstProductLink = recommendedSection.locator('a[href^="/products/"]').first();
-  await firstProductLink.click();
+  const firstProductTitle = recommendedSection.locator('h3').first();
+  await firstProductTitle.click();
 });
 
 When('我点击"加入购物车"按钮', async ({ page }) => {

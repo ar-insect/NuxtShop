@@ -66,14 +66,14 @@ export default defineEventHandler(async (event) => {
 
     return {
       code: 200,
-      message: 'Profile updated successfully',
+      message: '个人资料更新成功',
       data: newProfile
     }
   } catch (error) {
     console.error('Error updating user profile:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to update profile'
+      statusMessage: '更新个人资料失败'
     })
   }
 })

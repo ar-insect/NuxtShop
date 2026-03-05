@@ -106,7 +106,7 @@ const handleLogin = async () => {
   try {
     const success = await login(username.value, password.value)
     if (!success) {
-      // Reset captcha on failure
+      password.value = ''
       if (!captchaDisabled.value) {
         captchaVerified.value = false
         captchaRef.value?.reset()

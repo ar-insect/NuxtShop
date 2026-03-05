@@ -7,21 +7,21 @@ export default defineEventHandler(async (event) => {
   if (!username || !password || !confirmPassword) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Username and password are required'
+      statusMessage: '请输入用户名和密码'
     })
   }
 
   if (username === 'admin') {
     throw createError({
       statusCode: 409,
-      statusMessage: 'Username already exists'
+      statusMessage: '用户名已存在'
     })
   }
 
   if (password !== confirmPassword) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Passwords do not match'
+      statusMessage: '两次输入的密码不一致'
     })
   }
 
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   if (password.length < 6) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Password must be at least 6 characters long'
+      statusMessage: '密码长度至少需要6位'
     })
   }
 
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   if (existingUser) {
     throw createError({
       statusCode: 409,
-      statusMessage: 'Username already exists'
+      statusMessage: '用户名已存在'
     })
   }
 
@@ -67,6 +67,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    message: 'Registration successful'
+    message: '注册成功'
   }
 })

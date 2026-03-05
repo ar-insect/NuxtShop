@@ -57,7 +57,7 @@ export const useAuth = () => {
       })
       token.value = res.token
       user.value = res.user as User
-      toast.success('Login successful')
+      toast.success('登录成功')
       resetCartLocal()
       resetWishlistLocal()
       resetOrdersLocal()
@@ -68,7 +68,7 @@ export const useAuth = () => {
       await router.push('/')
       return true
     } catch (e: any) {
-      toast.error(e.message || 'An error occurred')
+      toast.error(e.message || '发生错误')
       return false
     }
   }
@@ -88,11 +88,11 @@ export const useAuth = () => {
         method: 'POST',
         body: { username, password, confirmPassword, phone }
       })
-      toast.success('Registration successful! Please login.')
+      toast.success('注册成功！请登录。')
       await login(username, password)
       return true
     } catch (e: any) {
-      toast.error(e?.data?.statusMessage || e.message || 'An error occurred during registration')
+      toast.error(e?.data?.statusMessage || e.message || '注册过程中发生错误')
       return false
     }
   }
@@ -104,7 +104,7 @@ export const useAuth = () => {
   const logout = () => {
     token.value = null
     user.value = null
-    toast.info('Logged out')
+    toast.info('已退出登录')
     resetCartLocal()
     resetWishlistLocal()
     resetOrdersLocal()

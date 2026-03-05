@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     if (password !== '123456') {
       throw createError({
         statusCode: 401,
-        statusMessage: 'Invalid credentials. Try admin/123456'
+        statusMessage: '凭据无效，请重试（试试 admin / 123456）'
       })
     }
 
@@ -98,6 +98,6 @@ export default defineEventHandler(async (event) => {
 
   throw createError({
     statusCode: 401,
-    statusMessage: 'Invalid credentials. Try admin/123456'
+    statusMessage: '凭据无效，请重试（试试 admin / 123456）'
   })
 })

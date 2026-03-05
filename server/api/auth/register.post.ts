@@ -11,6 +11,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (username === 'admin') {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'Username already exists'
+    })
+  }
+
   if (password !== confirmPassword) {
     throw createError({
       statusCode: 400,

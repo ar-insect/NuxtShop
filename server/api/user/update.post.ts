@@ -4,15 +4,47 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { name, avatar } = body
 
-  // 真实项目中应从 session/token 获取 userId
-  // 这里为演示方便，写死 userId = 1（管理员用户）
-  const userId = 1
-
   const redis = useRedis()
   if (!redis) {
     throw createError({
       statusCode: 503,
       statusMessage: 'Redis service unavailable'
+    })
+  }
+
+  const token = getCookie(event, 'auth-token')
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized'
+    })
+  }
+
+  let userId: number | null = null
+  if (token.startsWith('mock-jwt-token-')) {
+    userId = 1
+  } else if (token.startsWith('user-jwt-token-')) {
+    const username = token.slice('user-jwt-token-'.length)
+    const authData = await redis.get(`user:auth:${username}`)
+    if (!authData) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Invalid token'
+      })
+    }
+    const record = JSON.parse(authData)
+    userId = typeof record?.id === 'number' ? record.id : null
+  } else {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token'
+    })
+  }
+
+  if (!userId) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token'
     })
   }
 

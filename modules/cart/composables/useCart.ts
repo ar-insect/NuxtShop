@@ -28,16 +28,15 @@ export const useCart = () => {
   const cartItems = useState<CartItem[]>('cart', () => [])
 
   // 与服务端同步
-  const { data } = useFetch<CartItem[]>('/api/cart', {
+  const { data, refresh } = useFetch<CartItem[]>('/api/cart', {
     key: 'cart-data',
-    server: false, // 仅客户端请求，避免与 useState 造成重复拉取
-    // useFetch 默认会根据 URL 推导 key；显式指定便于复用与调试
-    lazy: true
+    // 移除 server: false 以支持 SSR，避免水合不一致
+    // 移除 lazy: true 以确保服务端渲染时数据已就绪
   })
 
   // 监听服务端数据变化
   watch(data, (newCart) => {
-    if (newCart && cartItems.value.length === 0) {
+    if (newCart) {
       cartItems.value = newCart
     }
   }, { immediate: true })
@@ -133,15 +132,6 @@ export const useCart = () => {
     cartItems.value = []
   }
 
-  const refreshCart = async () => {
-    try {
-      const latest = await $fetch<CartItem[]>('/api/cart')
-      cartItems.value = Array.isArray(latest) ? latest : []
-    } catch {
-      cartItems.value = []
-    }
-  }
-
   return {
     cartItems,
     addToCart,
@@ -151,6 +141,6 @@ export const useCart = () => {
     cartTotal,
     cartCount,
     resetCartLocal,
-    refreshCart
+    refreshCart: refresh
   }
 }

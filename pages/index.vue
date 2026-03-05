@@ -42,51 +42,13 @@
               :key="idx"
               class="w-full shrink-0"
             >
-              <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <div
+              <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4">
+                <ProductCard
                   v-for="p in slide"
                   :key="p.id"
-                  class="group relative flex flex-col border border-[var(--border-color)] bg-[var(--card-bg)] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                  :style="{ borderRadius: 'var(--border-radius)' }"
-                >
-                  <NuxtLink :to="`/products/${p.id}`" class="block flex-1">
-                    <div class="relative flex aspect-square items-center justify-center overflow-hidden bg-[var(--bg-color)] p-6 transition-colors group-hover:bg-[var(--border-color)]" :style="{ borderRadius: 'var(--border-radius)' }">
-                      <img :src="p.image" :alt="p.title" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110" >
-                      <div class="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5"/>
-                    </div>
-                    <div class="mt-4 space-y-2">
-                      <div class="line-clamp-2 text-sm font-semibold text-[var(--text-color)] transition-colors group-hover:text-[var(--primary-color)]">{{ p.title }}</div>
-                      <div class="flex items-center justify-between gap-3">
-                        <div class="text-lg font-bold text-[var(--text-color)]">¥{{ p.price }}</div>
-                        <div class="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
-                          <StarIcon class="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                          <span class="font-medium text-[var(--text-color)]">{{ p.rating.rate }}</span>
-                          <span>({{ p.rating.count }})</span>
-                        </div>
-                      </div>
-                      <div class="text-xs text-[var(--text-secondary)] capitalize">{{ getCategoryLabel(p.category) }}</div>
-                    </div>
-                  </NuxtLink>
-
-                  <div class="mt-4 flex items-center gap-3 pt-4 border-t border-[var(--border-color)]">
-                    <template v-if="isAuthenticated">
-                      <StyledButton :primary="true" class="!m-0 flex-1 !py-2 !text-sm font-medium shadow-sm hover:!shadow-md active:scale-95" @click="addToCartAndToast(p)">
-                        加入购物车
-                      </StyledButton>
-                      <ClientOnly>
-                        <button
-                          class="flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--border-color)] bg-[var(--card-bg)] text-[var(--text-secondary)] transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-500 hover:scale-110 active:scale-90"
-                          :style="{ borderRadius: 'var(--border-radius)' }"
-                          :aria-label="isInWishlist(p.id) ? '取消收藏' : '加入收藏'"
-                          type="button"
-                          @click="toggleWishlist(p)"
-                        >
-                          <HeartIcon class="h-5 w-5" :class="{ 'fill-current text-red-500': isInWishlist(p.id) }" />
-                        </button>
-                      </ClientOnly>
-                    </template>
-                  </div>
-                </div>
+                  :product="p"
+                  @click="navigateTo(`/products/${p.id}`)"
+                />
               </div>
             </div>
           </div>
@@ -171,6 +133,7 @@
 import {
   HeartIcon,
   ShoppingBagIcon,
+  ShoppingCartIcon,
   SparklesIcon,
   StarIcon,
   TagIcon,
@@ -181,6 +144,7 @@ import StyledButton from '~/components/ui/StyledButton'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
+import ProductCard from '~/modules/product/components/ProductCard.vue'
 
 useSeoMeta({
   title: '首页',

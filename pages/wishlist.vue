@@ -39,7 +39,9 @@
           </h3>
           <div class="mt-4 flex items-center justify-between">
             <p class="text-lg font-bold text-[var(--text-color)]">¥{{ product.price }}</p>
-            <BaseButton size="sm" variant="secondary" @click="handleAddToCart(product)">加入购物车</BaseButton>
+            <BaseButton size="sm" variant="secondary" class="flex items-center justify-center p-2" @click="handleAddToCart(product)">
+              <ShoppingCartIcon class="h-5 w-5" />
+            </BaseButton>
           </div>
         </div>
       </BaseCard>
@@ -48,7 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Product } from '~/modules/product/composables/useProducts'
+import { useWishlist } from '~/composables/useWishlist'
+import { useCart } from '~/modules/cart/composables/useCart'
+import { useToast } from '~/composables/useToast'
+import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 
 const { wishlistItems, removeFromWishlist } = useWishlist()
 const { addToCart } = useCart()

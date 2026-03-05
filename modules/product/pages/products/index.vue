@@ -51,37 +51,13 @@
       </div>
 
       <!-- Product Grid -->
-      <div v-else-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <BaseCard
+      <div v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <ProductCard
           v-for="product in products"
           :key="product.id"
-          class="h-full flex flex-col hover:shadow-lg transition-shadow duration-300"
-          :style="{ borderRadius: 'var(--border-radius)' }"
-        >
-          <NuxtLink
-            :to="`/products/${product.id}`"
-            class="block aspect-w-1 aspect-h-1 w-full overflow-hidden bg-[var(--bg-color)] rounded-t-lg relative group focus:outline-none"
-          >
-            <img
-              :src="product.image"
-              :alt="product.title"
-              class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
-            >
-            <div class="absolute top-2 right-2 bg-[var(--card-bg)] px-2 py-1 rounded-full text-xs font-bold text-[var(--text-color)] shadow-sm">
-              ¥{{ product.price }}
-            </div>
-          </NuxtLink>
-          <div class="p-4 flex-1 flex flex-col">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-medium text-[var(--text-color)] line-clamp-1" :title="product.title">
-                <span v-html="highlightText(product.title, activeQuery)"/>
-              </h3>
-            </div>
-            <p class="text-sm text-[var(--text-secondary)] mb-4 line-clamp-2 flex-1" :title="product.description">
-              <span v-html="highlightText(product.description, activeQuery)"/>
-            </p>
-          </div>
-        </BaseCard>
+          :product="product"
+          @click="navigateTo(`/products/${product.id}`)"
+        />
       </div>
 
       <!-- Empty State -->
@@ -115,6 +91,7 @@
 
 <script setup lang="ts">
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
+import ProductCard from '~/modules/product/components/ProductCard.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 

@@ -87,8 +87,10 @@
             size="lg" 
             block 
             :loading="addingToCart"
+            class="flex items-center justify-center gap-2"
             @click="handleAddToCart"
           >
+            <ShoppingCartIcon class="h-6 w-6" />
             加入购物车
           </BaseButton>
           
@@ -159,6 +161,7 @@
 <script setup lang="ts">
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { useHistory } from '~/composables/useHistory'
+import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const { getProductById } = useProducts()

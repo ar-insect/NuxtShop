@@ -18,6 +18,11 @@ export interface User {
   avatar: string
 }
 
+type LoginOptions = {
+  redirect?: boolean
+  redirectTo?: string
+}
+
 /**
  * 认证状态与行为的组合式函数。
  * 提供登录、退出、注册及读取当前用户信息的方法。
@@ -47,9 +52,10 @@ export const useAuth = () => {
    * @async
    * @param {string} username - 用户名
    * @param {string} password - 密码
+   * @param {LoginOptions} options - 登录选项
    * @returns {Promise<boolean>} 登录成功返回 true，否则返回 false
    */
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string, options: LoginOptions = {}) => {
     try {
       const res = await $fetch<{ token: string; user: User }>('/api/auth/login' as any, {
         method: 'POST',
@@ -65,7 +71,9 @@ export const useAuth = () => {
       await refreshCart()
       await refreshWishlist()
       await refreshOrders()
-      await router.push('/')
+      if (options.redirect !== false) {
+        await router.push(options.redirectTo || '/')
+      }
       return true
     } catch (e: any) {
       toast.error(e.message || '发生错误')

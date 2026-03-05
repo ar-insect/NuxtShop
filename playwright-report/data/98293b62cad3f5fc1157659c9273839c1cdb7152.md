@@ -167,7 +167,7 @@
     - button "Toggle Nuxt DevTools" [ref=e194] [cursor=pointer]:
       - img [ref=e195]
     - generic "Page load time" [ref=e198]:
-      - generic [ref=e199]: "76"
+      - generic [ref=e199]: "46"
       - generic [ref=e200]: ms
     - button "Toggle Component Inspector" [ref=e202] [cursor=pointer]:
       - img [ref=e203]

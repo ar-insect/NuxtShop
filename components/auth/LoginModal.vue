@@ -87,7 +87,7 @@ const handleLogin = async () => {
   
   loading.value = true
   try {
-    const success = await login(username.value, password.value)
+    const success = await login(username.value, password.value, { redirect: false })
     if (success) {
       isOpen.value = false
       // Reset form

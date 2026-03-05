@@ -17,6 +17,7 @@
                   <div>
                     <div class="flex items-center gap-2">
                       <span class="font-medium text-[var(--text-color)]">{{ address.name }}</span>
+                      <span v-if="address.isDefault" class="text-xs px-2 py-0.5 rounded-full bg-[var(--primary-color)]/10 text-[var(--primary-color)]">默认</span>
                       <span class="text-sm text-[var(--text-secondary)]">{{ address.phone }}</span>
                     </div>
                     <p class="mt-2 text-sm text-[var(--text-secondary)]">{{ address.detail }}</p>
@@ -166,33 +167,53 @@ const toast = useToast()
 const isProcessing = ref(false)
 const selectedPayment = ref('alipay')
 const isNewAddressMode = ref(false)
-const selectedAddressId = ref('')
+const selectedAddressId = ref<string>('')
 const savedAddresses = ref<any[]>([])
 
+const ADDRESS_KEY = 'nuxt-shop-addresses'
+const ADDRESS_DEFAULT_KEY = 'nuxt-shop-address-default'
+
+const persistAddresses = () => {
+  if (!import.meta.client) return
+  localStorage.setItem(ADDRESS_KEY, JSON.stringify(savedAddresses.value))
+  if (selectedAddressId.value) {
+    localStorage.setItem(ADDRESS_DEFAULT_KEY, String(selectedAddressId.value))
+  }
+}
+
 if (import.meta.client) {
-  const saved = localStorage.getItem('nuxt-shop-addresses')
-  if (saved) {
-    try {
-      savedAddresses.value = JSON.parse(saved)
-      const defaultAddr = savedAddresses.value.find(a => a.isDefault)
-      if (defaultAddr) {
-        selectedAddressId.value = defaultAddr.id
-      } else if (savedAddresses.value.length > 0) {
-        selectedAddressId.value = savedAddresses.value[0].id
-      } else {
-        isNewAddressMode.value = true
-      }
-    } catch (e) {
-      console.error('Failed to parse addresses', e)
-    }
-  } else {
+  const saved = localStorage.getItem(ADDRESS_KEY)
+  const savedDefaultId = localStorage.getItem(ADDRESS_DEFAULT_KEY)
+  try {
+    savedAddresses.value = saved ? JSON.parse(saved) : []
+  } catch (e) {
+    console.error('Failed to parse addresses', e)
+    savedAddresses.value = []
+  }
+  if (savedAddresses.value.length === 0) {
     isNewAddressMode.value = true
+  } else {
+    // 选择默认地址，若没有，则设第一个为默认并持久化
+    let defaultAddr = savedAddresses.value.find(a => a.isDefault)
+    if (!defaultAddr && savedDefaultId) {
+      defaultAddr = savedAddresses.value.find(a => String(a.id) === String(savedDefaultId))
+    }
+    if (defaultAddr) {
+      selectedAddressId.value = String(defaultAddr.id)
+    } else {
+      savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
+      selectedAddressId.value = String(savedAddresses.value[0].id)
+      persistAddresses()
+    }
   }
 }
 
 const selectAddress = (address: any) => {
-  selectedAddressId.value = address.id
+  selectedAddressId.value = String(address.id)
   isNewAddressMode.value = false
+  // 将当前选择设为默认并持久化
+  savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: String(a.id) === String(address.id) }))
+  persistAddresses()
 }
 
 const paymentMethods = [
@@ -230,6 +251,20 @@ const handleCheckout = async () => {
       phone: form.phone,
       address: `${form.city} ${form.address}`
     }
+    // 保存新地址并设为默认
+    const newAddr = {
+      id: String(Date.now()),
+      name: addressData.name,
+      phone: addressData.phone,
+      detail: addressData.address,
+      isDefault: true
+    }
+    // 取消其他默认
+    savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: false }))
+    savedAddresses.value.unshift(newAddr)
+    selectedAddressId.value = String(newAddr.id)
+    isNewAddressMode.value = false
+    persistAddresses()
   } else {
     const selected = savedAddresses.value.find(a => a.id === selectedAddressId.value)
     if (selected) {

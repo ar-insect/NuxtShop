@@ -18,14 +18,34 @@ const fontSizes = [
   { label: '特大', value: 'xl' }
 ] as const
 
-// 预设颜色
+// 预设颜色（按提供的色系：黄/橙/红、粉/紫/靛、蓝/青、绿）
 const colors = [
-  '#3b82f6', // blue
-  '#ef4444', // red
-  '#10b981', // green
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ec4899'  // pink
+  // Yellow / Amber family
+  '#facc15', // yellow-400
+  '#f59e0b', // amber-500
+  // Orange / Warm orange
+  '#f97316', // orange-500
+  '#fb923c', // orange-400
+  // Red / Coral
+  '#ef4444', // red-500
+  '#f87171', // red-400
+  // Pink
+  '#ec4899', // pink-500
+  '#f472b6', // pink-400
+  // Purple / Violet / Indigo
+  '#8b5cf6', // violet-500
+  '#a78bfa', // violet-400
+  '#4f46e5', // indigo-600
+  '#818cf8', // indigo-400
+  // Blue
+  '#2563eb', // blue-600
+  '#60a5fa', // blue-400
+  // Teal / Cyan
+  '#06b6d4', // cyan-500
+  '#67e8f9', // cyan-300
+  // Green / Lime
+  '#22c55e', // green-500
+  '#84cc16'  // lime-500
 ]
 
 const radii = [

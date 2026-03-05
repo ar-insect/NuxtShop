@@ -19,39 +19,57 @@
         />
       </div>
       <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
-        <button
-          type="button"
-          class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap border"
+        <div
+          class="inline-flex items-center rounded-lg border transition-all duration-200 whitespace-nowrap"
           :class="!activeCategory 
-            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
-            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300'"
-          @click="setCategory()"
+            ? 'bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-sm' 
+            : 'bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)] hover:bg-[var(--bg-color)]'"
         >
-          全部
-        </button>
-        <button
+          <button
+            type="button"
+            class="px-4 py-1.5 text-sm font-medium flex items-center gap-1.5"
+            @click="setCategory()"
+          >
+            <Squares2X2Icon class="w-4 h-4" />
+            全部
+          </button>
+          <button
+            v-if="!activeCategory && activeQuery"
+            type="button"
+            class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
+            aria-label="清除筛选"
+            @click="clearFilters"
+          >
+            <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
+          </button>
+        </div>
+
+        <div
           v-for="cat in categories"
           :key="cat"
-          type="button"
-          class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap capitalize border"
+          class="inline-flex items-center rounded-lg border transition-all duration-200 whitespace-nowrap capitalize"
           :class="activeCategory === cat 
-            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
-            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300'"
-          @click="setCategory(cat)"
+            ? 'bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-sm' 
+            : 'bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)] hover:bg-[var(--bg-color)]'"
         >
-          {{ categoryLabels[cat] || cat }}
-        </button>
-        
-        <button
-          v-if="activeCategory || activeQuery"
-          type="button"
-          class="p-2 ml-1 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-          title="清除筛选"
-          @click="clearFilters"
-        >
-          <!-- <span class="font-bold text-sm mr-1">清除</span> -->
-          <XMarkIcon class="w-5 h-5 inline-block" stroke-width="2.5" />
-        </button>
+          <button
+            type="button"
+            class="px-4 py-1.5 text-sm font-medium flex items-center gap-1.5"
+            @click="setCategory(cat)"
+          >
+            <component :is="categoryIcons[cat]" class="w-4 h-4" />
+            {{ categoryLabels[cat] || cat }}
+          </button>
+          <button
+            v-if="activeCategory === cat"
+            type="button"
+            class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
+            aria-label="清除筛选"
+            @click="clearFilters"
+          >
+            <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -100,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { XMarkIcon } from '@heroicons/vue/24/outline'
+import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
@@ -167,6 +185,13 @@ const categories = [
   "men's clothing",
   "women's clothing"
 ]
+
+const categoryIcons: Record<string, any> = {
+  electronics: ComputerDesktopIcon,
+  jewelery: SparklesIcon,
+  "men's clothing": UserIcon,
+  "women's clothing": UserCircleIcon
+}
 
 const paginationTo = (p: number) => {
   return { path: '/products', query: { ...route.query, page: p } }

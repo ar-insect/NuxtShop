@@ -48,7 +48,7 @@ const FONT_SIZES: Record<FontSize, string> = {
 const DEFAULT_THEME: ThemeConfig = {
   mode: 'system',
   fontSize: 'md',
-  primaryColor: '#3b82f6', // blue-500
+  primaryColor: '#f59e0b', // amber-500 as default "主色"
   backgroundColor: LIGHT_COLORS.backgroundColor,
   textColor: LIGHT_COLORS.textColor,
   borderRadius: '0.5rem',

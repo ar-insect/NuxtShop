@@ -38,11 +38,28 @@
 
         <section v-if="testReport" class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden mt-8">
           <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">测试报告</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">BDD</span>
-      </div>
+            <h2 class="text-lg font-medium text-[var(--text-color)]">测试报告</h2>
+            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">BDD</span>
+          </div>
           <div class="p-6">
-            <pre class="bg-gray-800 text-[var(--text-color)] p-4 rounded-lg overflow-auto text-sm">{{ stripAnsiCodes(testReport) }}</pre>
+            <div v-if="testReport.summary" class="mb-4 text-[var(--text-color)]">
+              <p>总测试: {{ testReport.summary.total }}</p>
+              <p>通过: {{ testReport.summary.passed }}</p>
+              <p>失败: {{ testReport.summary.failed }}</p>
+              <p>跳过: {{ testReport.summary.skipped }}</p>
+            </div>
+            <div v-for="(test, index) in testReport.tests" :key="index" class="mb-6 p-4 border rounded-lg" :class="{ 'border-green-500 bg-green-50': test.status === 'passed', 'border-red-500 bg-red-50': test.status === 'failed' || test.status === 'timedOut' }">
+              <h4 class="font-medium text-lg mb-2" :class="{ 'text-green-700': test.status === 'passed', 'text-red-700': test.status === 'failed' || test.status === 'timedOut' }">
+                {{ test.title }} - <span class="capitalize">{{ test.status }}</span>
+              </h4>
+              <div v-if="test.errors" class="text-red-600 text-sm whitespace-pre-wrap mb-2">
+                {{ stripAnsiCodes(test.errors) }}
+              </div>
+              <div v-for="(screenshot, sIdx) in test.screenshots" :key="sIdx" class="mt-4">
+                <p class="text-sm text-[var(--text-secondary)] mb-2">失败截图:</p>
+                <img :src="screenshot" alt="Failure Screenshot" class="max-w-full h-auto border border-[var(--border-color)] rounded-lg">
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -77,7 +94,7 @@ const featureFiles = ref<string[]>([])
 const fetchingFeatures = ref(false)
 const runningTest = ref<string | null>(null)
 const runningAllTests = ref(false)
-const testReport = ref<string | null>(null)
+const testReport = ref<any | null>(null)
 
 const fetchFeatures = async () => {
   fetchingFeatures.value = true
@@ -100,12 +117,12 @@ const runTest = async (feature: string) => {
   runningTest.value = feature
   testReport.value = null
   try {
-    const response = await $fetch<{ success: boolean, report: string }>('/api/tests/run', {
+    const response = await $fetch<{ success: boolean, report: any }>('/api/tests/run', {
       method: 'POST',
       body: { feature }
     })
+    testReport.value = response.report
     if (response.success) {
-      testReport.value = response.report
       toast.success(`${feature}.feature 测试运行完成`)
     } else {
       toast.error(`${feature}.feature 测试运行失败`)
@@ -122,12 +139,12 @@ const runAllTests = async () => {
   runningAllTests.value = true
   testReport.value = null
   try {
-    const response = await $fetch<{ success: boolean, report: string }>('/api/tests/run', {
+    const response = await $fetch<{ success: boolean, report: any }>('/api/tests/run', {
       method: 'POST',
       body: { feature: 'all' }
     })
+    testReport.value = response.report
     if (response.success) {
-      testReport.value = response.report
       toast.success('所有测试运行完成')
     } else {
       toast.error('所有测试运行失败')

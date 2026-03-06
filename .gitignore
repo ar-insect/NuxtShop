@@ -22,4 +22,10 @@ logs
 release
 release.tar.gz
 
-playwright-report
+# Playwright (E2E)
+playwright-report/
+test-results/
+blob-report/
+
+# playwright-bdd generated specs
+.features-gen/

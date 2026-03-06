@@ -22,8 +22,17 @@
                     </div>
                     <p class="mt-2 text-sm text-[var(--text-secondary)]">{{ address.detail }}</p>
                   </div>
-                  <div v-if="selectedAddressId === address.id" class="text-[var(--primary-color)]">
-                    <CheckCircleIcon class="h-5 w-5" />
+                  <div class="flex items-center gap-2">
+                    <button 
+                      class="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                      title="删除地址"
+                      @click="(e) => deleteAddress(e, address.id)"
+                    >
+                      <TrashIcon class="h-4 w-4" />
+                    </button>
+                    <div v-if="selectedAddressId === address.id" class="text-[var(--primary-color)]">
+                      <CheckCircleIcon class="h-5 w-5" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -50,10 +59,11 @@
                   <BaseInput v-model="form.lastName" label="名字" placeholder="例如：三" />
                 </div>
                 <div class="sm:col-span-2">
-                  <BaseInput v-model="form.address" label="详细地址" placeholder="街道、门牌号等" />
+                  <label class="block text-sm font-medium text-[var(--text-color)] mb-1">省市区</label>
+                  <RegionSelect v-model="form.region" />
                 </div>
-                <div>
-                  <BaseInput v-model="form.city" label="城市" placeholder="例如：上海" />
+                <div class="sm:col-span-2">
+                  <BaseInput v-model="form.address" label="详细地址" placeholder="街道、门牌号等" />
                 </div>
                 <div>
                   <BaseInput v-model="form.postalCode" label="邮政编码" placeholder="例如：200000" />
@@ -153,7 +163,8 @@
 </template>
 
 <script setup lang="ts">
-import { CreditCardIcon, QrCodeIcon, PlusIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
+import { CreditCardIcon, QrCodeIcon, PlusIcon, CheckCircleIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import RegionSelect from '~/components/ui/RegionSelect.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -193,20 +204,31 @@ if (import.meta.client) {
   if (savedAddresses.value.length === 0) {
     isNewAddressMode.value = true
   } else {
-    // 选择默认地址，若没有，则设第一个为默认并持久化
+    // 优先选择默认地址
     let defaultAddr = savedAddresses.value.find(a => a.isDefault)
+    // 如果没有标记为默认的地址，尝试使用上次保存的默认ID
     if (!defaultAddr && savedDefaultId) {
       defaultAddr = savedAddresses.value.find(a => String(a.id) === String(savedDefaultId))
     }
+    
     if (defaultAddr) {
       selectedAddressId.value = String(defaultAddr.id)
     } else {
+      // 如果既没有默认标记，也没有保存的默认ID，则强制选择第一个并设为默认
+      const firstAddr = savedAddresses.value[0]
       savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
-      selectedAddressId.value = String(savedAddresses.value[0].id)
+      selectedAddressId.value = String(firstAddr.id)
       persistAddresses()
     }
   }
 }
+
+onMounted(() => {
+  if (savedAddresses.value.length > 0 && !selectedAddressId.value) {
+     const defaultAddr = savedAddresses.value.find(a => a.isDefault) || savedAddresses.value[0]
+     selectedAddressId.value = String(defaultAddr.id)
+  }
+})
 
 const selectAddress = (address: any) => {
   selectedAddressId.value = String(address.id)
@@ -215,6 +237,43 @@ const selectAddress = (address: any) => {
   savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: String(a.id) === String(address.id) }))
   persistAddresses()
 }
+
+const { confirm } = useConfirm()
+
+const deleteAddress = async (e: Event, id: string) => {
+  e.stopPropagation()
+  
+  const isConfirmed = await confirm({
+    title: '删除地址',
+    message: '确定要删除这个地址吗？',
+    type: 'warning',
+    confirmText: '删除',
+    cancelText: '取消'
+  })
+
+  if (isConfirmed) {
+    savedAddresses.value = savedAddresses.value.filter(a => String(a.id) !== String(id))
+    
+    // 如果删除了当前选中的地址，重新选择一个
+    if (String(selectedAddressId.value) === String(id)) {
+      if (savedAddresses.value.length > 0) {
+        // 优先选默认的，否则选第一个
+        const defaultAddr = savedAddresses.value.find(a => a.isDefault) || savedAddresses.value[0]
+        selectedAddressId.value = String(defaultAddr.id)
+        // 确保新选中的也是默认状态（如果逻辑需要始终有一个默认）
+        if (!defaultAddr.isDefault) {
+           savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 && String(a.id) === String(defaultAddr.id) }))
+        }
+      } else {
+        selectedAddressId.value = ''
+        isNewAddressMode.value = true
+      }
+    }
+    persistAddresses()
+    toast.success('地址已删除')
+  }
+}
+
 
 const paymentMethods = [
   { id: 'alipay', name: '支付宝', icon: QrCodeIcon },
@@ -226,14 +285,14 @@ const form = reactive({
   firstName: '',
   lastName: '',
   address: '',
-  city: '',
+  region: '',
   postalCode: '',
   phone: ''
 })
 
 const isFormValid = computed(() => {
   if (!isNewAddressMode.value && selectedAddressId.value) return true
-  return form.firstName && form.lastName && form.address && form.city && form.phone
+  return form.firstName && form.lastName && form.address && form.region && form.phone
 })
 
 const handleCheckout = async () => {
@@ -249,7 +308,7 @@ const handleCheckout = async () => {
     addressData = {
       name: `${form.firstName}${form.lastName}`,
       phone: form.phone,
-      address: `${form.city} ${form.address}`
+      address: `${form.region} ${form.address}`
     }
     // 保存新地址并设为默认
     const newAddr = {

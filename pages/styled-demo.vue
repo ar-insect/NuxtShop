@@ -144,14 +144,14 @@ export default defineComponent({
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium">About Styled Components</h3>
+          <h3 class="text-sm font-medium">关于 Styled Components</h3>
           <div class="mt-2 text-sm" :style="{ color: 'var(--text-secondary)' }">
             <p>
-              Styled-components allows you to write actual CSS code to style your components. 
-              It removes the mapping between components and styles – using components as a low-level styling construct.
+              Styled-components 允许您编写实际的 CSS 代码来为组件设置样式。
+              它消除了组件和样式之间的映射——使用组件作为低级样式构造。
             </p>
             <p class="mt-2">
-              <strong>Note on SSR:</strong> We've configured a global <code>ThemeProvider</code> in <code>app.vue</code> to ensure styles are correctly injected and to avoid hydration warnings.
+              <strong>SSR 说明：</strong> 我们在 <code>app.vue</code> 中配置了全局 <code>ThemeProvider</code>，以确保样式正确注入并避免 hydration 警告。
             </p>
           </div>
         </div>

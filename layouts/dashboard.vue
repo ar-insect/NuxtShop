@@ -72,5 +72,6 @@
     
     <BaseToast />
     <BaseModal />
+    <BaseConfirm />
   </div>
 </template>

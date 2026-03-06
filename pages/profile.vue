@@ -370,14 +370,13 @@
              <div class="pt-8 border-t border-[var(--border-color)]">
                 <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">语言设置</h4>
                 <div class="max-w-xs">
-                    <select 
+                    <BaseSelect 
                       v-model="currentLanguage"
-                      class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:border-teal-500 sm:text-sm rounded-md"
-                      :style="{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)', borderColor: 'var(--border-color)' }"
-                    >
-                        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
-                        <option value="en-US">English (US)</option>
-                    </select>
+                      :options="[
+                        { label: '简体中文 (Chinese Simplified)', value: 'zh-CN' },
+                        { label: 'English (US)', value: 'en-US' }
+                      ]"
+                    />
                 </div>
              </div>
 
@@ -385,15 +384,14 @@
              <div class="pt-8 border-t border-[var(--border-color)]">
                 <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">时区</h4>
                 <div class="max-w-xs">
-                    <select 
+                    <BaseSelect 
                       v-model="currentTimezone"
-                      class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:border-teal-500 sm:text-sm rounded-md"
-                      :style="{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)', borderColor: 'var(--border-color)' }"
-                    >
-                        <option value="Asia/Shanghai">Asia/Shanghai (GMT+08:00)</option>
-                        <option value="UTC">UTC (GMT+00:00)</option>
-                        <option value="America/New_York">America/New_York (GMT-05:00)</option>
-                    </select>
+                      :options="[
+                        { label: 'Asia/Shanghai (GMT+08:00)', value: 'Asia/Shanghai' },
+                        { label: 'UTC (GMT+00:00)', value: 'UTC' },
+                        { label: 'America/New_York (GMT-05:00)', value: 'America/New_York' }
+                      ]"
+                    />
                 </div>
              </div>
 
@@ -497,6 +495,7 @@ import {
   PlusIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -777,7 +776,7 @@ const handleFileUpload = (event: Event) => {
   const file = input.files[0]
   // 校验文件类型
   if (!file.type.startsWith('image/')) {
-    alert('请选择图片文件')
+    toast.error('请选择图片文件')
     return
   }
 

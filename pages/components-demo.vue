@@ -263,6 +263,86 @@
       </div>
     </section>
 
+    <!-- Select Demo -->
+    <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
+      <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
+        <h2 class="text-lg font-medium text-[var(--text-color)]">下拉选择 (BaseSelect)</h2>
+        <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">表单</span>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <BaseSelect 
+            v-model="selectValues.single" 
+            label="单选" 
+            :options="selectOptions"
+            placeholder="请选择一个选项"
+            clearable
+          />
+          
+          <BaseSelect 
+            v-model="selectValues.multiple" 
+            label="多选" 
+            :options="selectOptions"
+            placeholder="请选择多个选项"
+            multiple
+            clearable
+          />
+
+          <BaseSelect 
+            v-model="selectValues.disabled" 
+            label="禁用状态" 
+            :options="selectOptions"
+            disabled
+            placeholder="无法选择"
+          />
+        </div>
+        <div class="mt-4 text-sm text-[var(--text-secondary)]">
+          <p>单选值: {{ selectValues.single }}</p>
+          <p>多选值: {{ selectValues.multiple }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dropdown & Carousel Demo -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Dropdown -->
+      <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
+        <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-[var(--text-color)]">下拉菜单 (BaseDropdown)</h2>
+          <span class="px-2 py-1 text-xs font-medium bg-pink-100 text-pink-700 rounded-full">交互</span>
+        </div>
+        <div class="p-6 flex justify-center items-start h-48">
+          <BaseDropdown label="操作菜单">
+            <template #default="{ close }">
+              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">查看详情</a>
+              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">编辑内容</a>
+              <div class="border-t border-[var(--border-color)] my-1"></div>
+              <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50" @click.prevent="close">删除项目</a>
+            </template>
+          </BaseDropdown>
+        </div>
+      </div>
+
+      <!-- Carousel -->
+      <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
+        <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-[var(--text-color)]">轮播图 (BaseCarousel)</h2>
+          <span class="px-2 py-1 text-xs font-medium bg-cyan-100 text-cyan-700 rounded-full">展示</span>
+        </div>
+        <div class="p-6">
+          <div class="h-48 rounded-lg overflow-hidden">
+            <BaseCarousel :items="carouselItems" indicators controls autoplay>
+              <template #default="{ item }">
+                <div class="w-full h-full flex items-center justify-center text-white text-xl font-bold" :class="item.bg">
+                  {{ item.title }}
+                </div>
+              </template>
+            </BaseCarousel>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- BaseCard Demo -->
     <section class="space-y-6">
       <div class="flex items-center justify-between">
@@ -378,11 +458,13 @@
 
 <script setup lang="ts">
 import { useToast } from '~/composables/useToast'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseDropdown from '~/components/ui/BaseDropdown.vue'
+import BaseCarousel from '~/components/ui/BaseCarousel.vue'
 
 // Modal
 const showModal = ref(false)
 const toast = useToast()
-const { confirm } = useConfirm()
 
 const handleModalConfirm = () => {
   showModal.value = false
@@ -395,6 +477,8 @@ const handleModalCancel = () => {
 }
 
 // Confirm Demo
+const { confirm } = useConfirm()
+
 const handleConfirmDelete = async () => {
   const isConfirmed = await confirm({
     title: '确认删除',
@@ -420,6 +504,8 @@ const handleConfirmWarning = async () => {
   
   if (isConfirmed) {
     toast.success('已确认继续')
+  } else {
+    toast.info('已取消操作')
   }
 }
 
@@ -432,6 +518,8 @@ const handleConfirmInfo = async () => {
   
   if (isConfirmed) {
     toast.success('已确认信息')
+  } else {
+    toast.info('已取消信息确认')
   }
 }
 
@@ -469,4 +557,24 @@ const routeDemoPage = computed(() => {
 const routeDemoTo = (page: number) => {
   return { path: '/components-demo', query: { ...route.query, demoPage: page } }
 }
+
+const selectValues = reactive({
+  single: '',
+  multiple: [],
+  disabled: ''
+})
+
+const selectOptions = [
+  { label: 'Vue.js', value: 'vue' },
+  { label: 'React', value: 'react' },
+  { label: 'Angular', value: 'angular' },
+  { label: 'Svelte', value: 'svelte' },
+  { label: 'Solid', value: 'svelte' }
+]
+
+const carouselItems = [
+  { title: 'Slide 1', bg: 'bg-red-500' },
+  { title: 'Slide 2', bg: 'bg-green-500' },
+  { title: 'Slide 3', bg: 'bg-blue-500' }
+]
 </script>

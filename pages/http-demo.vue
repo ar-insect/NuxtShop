@@ -40,6 +40,7 @@
 import BaseCard from '~/components/ui/BaseCard.vue'
 import BaseButton from '~/components/ui/BaseButton.vue'
 
+const toast = useToast()
 const result = ref<any>(null)
 const selectedFile = ref<File | null>(null)
 
@@ -80,10 +81,10 @@ const handleUpload = async () => {
   try {
     const res = await http.upload('/upload', selectedFile.value)
     result.value = res
-    alert('上传成功！')
+    toast.success('上传成功！')
   } catch (error) {
     console.error(error)
-    alert('上传失败')
+    toast.error('上传失败')
   }
 }
 

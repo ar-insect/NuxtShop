@@ -148,7 +148,7 @@
             <span>{{ user.name }}</span>
           </NuxtLink>
           <BaseButton 
-            variant="danger" 
+            variant="link" 
             size="sm"
             class="px-4 py-2 text-sm font-medium"
             @click="logout"
@@ -158,19 +158,19 @@
         </div>
         <div v-else class="flex items-center gap-2">
           <BaseButton 
-            variant="secondary"
+            variant="link"
             size="sm"
-            class="px-4 py-2 text-sm font-medium hover:bg-[var(--primary-color)]/10 transition-colors"
-            :style="{ color: 'var(--primary-color)', borderColor: 'var(--primary-color)' }"
+            class="px-2 text-sm font-medium transition-colors"
             @click="openLoginModal"
           >
             登录
           </BaseButton>
+          <span class="text-gray-300">/</span>
           <NuxtLink to="/register">
             <BaseButton
-              variant="primary"
+              variant="link"
               size="sm"
-              class="px-4 py-2 text-sm font-medium shadow-lg shadow-[var(--primary-color)]/30 transition-all hover:-translate-y-0.5"
+              class="px-2 text-sm font-medium transition-colors text-red-500 hover:text-red-600"
             >
               注册
             </BaseButton>

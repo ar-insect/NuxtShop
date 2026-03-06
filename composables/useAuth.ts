@@ -63,7 +63,7 @@ export const useAuth = () => {
       })
       token.value = res.token
       user.value = res.user as User
-      toast.success('登录成功')
+      // toast.success('登录成功')
       resetCartLocal()
       resetWishlistLocal()
       resetOrdersLocal()
@@ -112,7 +112,7 @@ export const useAuth = () => {
   const logout = () => {
     token.value = null
     user.value = null
-    toast.info('已退出登录')
+    // toast.info('已退出登录')
     resetCartLocal()
     resetWishlistLocal()
     resetOrdersLocal()

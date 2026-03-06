@@ -23,13 +23,13 @@
 
         <ul role="list" class="border-t border-b border-[var(--border-color)] divide-y divide-[var(--border-color)]">
           <li v-for="item in cartItems" :key="item.id" class="flex py-6 sm:py-10">
-            <div class="flex-shrink-0">
+            <NuxtLink :to="`/products/${item.id}`" class="flex-shrink-0">
               <img 
                 :src="item.image" 
                 :alt="item.title" 
                 class="w-24 h-24 rounded-md object-center object-contain sm:w-48 sm:h-48 bg-[var(--bg-color)]"
               >
-            </div>
+            </NuxtLink>
 
             <div class="ml-4 flex-1 flex flex-col justify-between sm:ml-6">
               <div class="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">

@@ -332,7 +332,7 @@
         </div>
         <div class="p-6">
           <div class="h-48 rounded-lg overflow-hidden">
-            <BaseCarousel :items="carouselItems" indicators controls autoplay>
+            <BaseCarousel class="h-48" :items="carouselItems" indicators controls autoplay>
               <template #default="{ item }">
                 <div class="w-full h-full flex items-center justify-center text-white text-xl font-bold" :class="item.bg">
                   {{ item.title }}

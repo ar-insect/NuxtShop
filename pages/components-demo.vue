@@ -19,12 +19,12 @@
           支持点击背景关闭和 ESC 键导航。
         </p>
         <div class="flex items-center gap-4">
-          <button 
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:outline-none"
+          <BaseButton 
+            variant="primary"
             @click="showModal = true"
           >
             打开模态框
-          </button>
+          </BaseButton>
         </div>
         
         <BaseModal

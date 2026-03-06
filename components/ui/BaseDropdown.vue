@@ -32,7 +32,7 @@
     >
       <div
         v-if="isOpen"
-        class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[var(--card-bg)] ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-[var(--border-color)]"
+        class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-2xl bg-[var(--card-bg)]/95 backdrop-blur-sm ring-1 ring-black/5 focus:outline-none z-50"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="menu-button"

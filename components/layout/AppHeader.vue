@@ -1,9 +1,10 @@
 <template>
   <header
-    class="sticky top-0 z-50 w-full backdrop-blur-lg border-b"
+    class="sticky top-0 z-50 w-full backdrop-blur-xl border-b"
     :style="{
-      backgroundColor: 'var(--card-bg)',
-      borderColor: 'var(--border-color)'
+      backgroundColor: 'color-mix(in srgb, var(--primary-color) 8%, var(--card-bg) 92%)',
+      opacity: '0.92',
+      borderColor: 'color-mix(in srgb, var(--primary-color) 14%, var(--border-color))'
     }"
   >
     <div class="w-full px-6 h-16 flex items-center justify-between">

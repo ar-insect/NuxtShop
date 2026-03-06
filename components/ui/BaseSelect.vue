@@ -7,7 +7,7 @@
     <div 
       class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors min-h-[38px] cursor-pointer flex items-center flex-wrap gap-1 px-3 py-1.5"
       :class="[
-        disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : 'hover:border-gray-400',
+        disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : '',
         isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]'
       ]"
       @click="toggleDropdown"
@@ -67,7 +67,7 @@
     <!-- Dropdown -->
     <div 
       v-if="isOpen" 
-      class="absolute z-10 mt-1 w-full bg-[var(--card-bg)] shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-[var(--border-color)]"
+      class="absolute z-10 mt-1 w-full bg-[var(--card-bg)] shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black/5 overflow-auto focus:outline-none sm:text-sm border border-gray-200 dark:border-gray-700"
     >
       <div 
         v-for="option in options" 

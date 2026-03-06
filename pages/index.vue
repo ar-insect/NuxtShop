@@ -8,6 +8,11 @@
       @navigate="goToProducts"
     />
 
+    <!-- Ad Carousel -->
+    <section class="px-4 sm:px-6 lg:px-8">
+      <BaseAdCarousel :ads="ads" />
+    </section>
+
     <CategoryShowcase 
       :categories="categoryCards" 
       @navigate="goToProducts" 
@@ -145,6 +150,7 @@ import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue' // 引入 BaseAdCarousel
 
 useSeoMeta({
   title: '首页',
@@ -153,6 +159,12 @@ useSeoMeta({
   ogDescription: '发现你喜欢的好物。Nuxt 3 电商风格首页示例：商品推荐、分类入口、加入购物车与收藏。',
   ogImage: '/og-image.png'
 })
+
+const ads = [
+  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: '电子产品广告' },
+  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: '珠宝广告' },
+  { id: 3, image: 'https://images.unsplash.com/photo-1523381294911-8d3cead290f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=men%27s%20clothing', alt: "男装广告" }
+]
 
 const router = useRouter()
 const toast = useToast()

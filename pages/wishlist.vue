@@ -49,6 +49,11 @@
       </BaseCard>
     </NuxtLink>
     </div>
+
+    <!-- Ad Carousel -->
+    <section class="mt-8">
+      <BaseAdCarousel :ads="ads" />
+    </section>
   </div>
 </template>
 
@@ -57,10 +62,16 @@ import { useWishlist } from '~/composables/useWishlist'
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useToast } from '~/composables/useToast'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
+import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
 
 const { wishlistItems, removeFromWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
+
+const ads = [
+  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: '收藏夹电子产品广告' },
+  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: '收藏夹珠宝广告' }
+]
 
 useSeoMeta({
   title: '我的收藏',

@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e5]:
+    - link "返回首页" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img [ref=e8]
+      - text: 返回首页
+    - generic [ref=e10]:
+      - heading "NuxtShop" [level=2] [ref=e11]
+      - paragraph [ref=e12]: 用户认证
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "登录您的账户" [level=2] [ref=e17]
+        - paragraph [ref=e18]: 或者使用 admin / 123456
+        - paragraph [ref=e19]:
+          - text: 还没有账号？
+          - link "立即注册" [ref=e20] [cursor=pointer]:
+            - /url: /register
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]: 用户名
+            - textbox "用户名" [ref=e25]
+          - generic [ref=e26]:
+            - generic [ref=e27]: 密码
+            - textbox "密码" [ref=e28]
+        - button "登录" [ref=e30]:
+          - img [ref=e32]
+          - text: 登录
+  - generic:
+    - img
+  - generic [ref=e34]:
+    - button "Toggle Nuxt DevTools" [ref=e35] [cursor=pointer]:
+      - img [ref=e36]
+    - generic "Page load time" [ref=e39]:
+      - generic [ref=e40]: "33"
+      - generic [ref=e41]: ms
+    - button "Toggle Component Inspector" [ref=e43] [cursor=pointer]:
+      - img [ref=e44]
+```

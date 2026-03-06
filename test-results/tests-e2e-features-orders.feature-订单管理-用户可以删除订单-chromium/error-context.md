@@ -1,0 +1,146 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - link "N NuxtShop" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e10]: "N"
+            - generic [ref=e11]: NuxtShop
+          - navigation [ref=e12]:
+            - list [ref=e13]:
+              - listitem [ref=e14]:
+                - link "首页" [ref=e15] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e16]:
+                - link "商品" [ref=e17] [cursor=pointer]:
+                  - /url: /products
+              - listitem [ref=e18]:
+                - link "文档" [ref=e19] [cursor=pointer]:
+                  - /url: /docs
+              - listitem [ref=e20]:
+                - button "演示" [ref=e23]:
+                  - text: 演示
+                  - img [ref=e24]
+              - listitem [ref=e26]:
+                - button "技术支持" [ref=e29]:
+                  - text: 技术支持
+                  - img [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - link "收藏夹" [ref=e34] [cursor=pointer]:
+              - /url: /wishlist
+              - img [ref=e35]
+            - link "1" [ref=e37] [cursor=pointer]:
+              - /url: /cart
+              - img [ref=e38]
+              - generic [ref=e40]: "1"
+          - generic [ref=e41]:
+            - link "用户 管理员" [ref=e42] [cursor=pointer]:
+              - /url: /profile
+              - img "用户" [ref=e43]
+              - generic [ref=e44]: 管理员
+            - button "退出登录" [ref=e45]
+    - main [ref=e46]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "收货地址" [level=3] [ref=e52]
+            - generic [ref=e55]:
+              - heading "填写新地址" [level=4] [ref=e56]
+              - generic [ref=e57]:
+                - generic [ref=e59]:
+                  - generic [ref=e60]: 姓氏
+                  - textbox "姓氏" [ref=e62]:
+                    - /placeholder: 例如：张
+                    - text: Test
+                - generic [ref=e64]:
+                  - generic [ref=e65]: 名字
+                  - textbox "名字" [ref=e67]:
+                    - /placeholder: 例如：三
+                    - text: User
+                - generic [ref=e68]:
+                  - generic [ref=e69]: 省市区
+                  - generic [ref=e70]:
+                    - generic [ref=e72] [cursor=pointer]:
+                      - generic [ref=e73]: 省份
+                      - generic [ref=e74]:
+                        - img
+                    - generic [ref=e76] [cursor=pointer]:
+                      - generic [ref=e77]: 城市
+                      - generic [ref=e78]:
+                        - img
+                    - generic [ref=e80] [cursor=pointer]:
+                      - generic [ref=e81]: 区县
+                      - generic [ref=e82]:
+                        - img
+                - generic [ref=e84]:
+                  - generic [ref=e85]: 详细地址
+                  - textbox "详细地址" [active] [ref=e87]:
+                    - /placeholder: 街道、门牌号等
+                    - text: Test Address
+                - generic [ref=e89]:
+                  - generic [ref=e90]: 邮政编码
+                  - textbox "邮政编码" [ref=e92]:
+                    - /placeholder: 例如：200000
+                - generic [ref=e94]:
+                  - generic [ref=e95]: 联系电话
+                  - textbox "联系电话" [ref=e97]:
+                    - /placeholder: 用于接收配送通知
+          - generic [ref=e98]:
+            - heading "支付方式" [level=3] [ref=e100]
+            - generic [ref=e103]:
+              - generic [ref=e104] [cursor=pointer]:
+                - radio "支付宝" [checked] [ref=e105]
+                - generic [ref=e106]: 支付宝
+                - img [ref=e107]
+              - generic [ref=e110] [cursor=pointer]:
+                - radio "微信支付" [ref=e111]
+                - generic [ref=e112]: 微信支付
+                - img [ref=e113]
+              - generic [ref=e116] [cursor=pointer]:
+                - radio "信用卡" [ref=e117]
+                - generic [ref=e118]: 信用卡
+                - img [ref=e119]
+        - generic [ref=e122]:
+          - heading "订单摘要" [level=3] [ref=e124]
+          - generic [ref=e126]:
+            - list [ref=e127]:
+              - listitem [ref=e128]:
+                - img "北极狐 - Foldsack No. 1 背包，适配 15 英寸笔记本" [ref=e130]
+                - generic [ref=e131]:
+                  - generic [ref=e132]:
+                    - generic [ref=e133]:
+                      - heading "北极狐 - Foldsack No. 1 背包，适配 15 英寸笔记本" [level=3] [ref=e134]
+                      - paragraph [ref=e135]: ¥109.95
+                    - paragraph [ref=e136]: men's clothing
+                  - paragraph [ref=e138]: 数量 1
+            - generic [ref=e139]:
+              - generic [ref=e140]:
+                - paragraph [ref=e141]: 商品小计
+                - paragraph [ref=e142]: ¥109.95
+              - generic [ref=e143]:
+                - paragraph [ref=e144]: 运费
+                - paragraph [ref=e145]: ¥0.00
+              - generic [ref=e146]:
+                - paragraph [ref=e147]: 订单总计
+                - paragraph [ref=e148]: ¥109.95
+            - button "确认支付" [disabled] [ref=e150]
+    - contentinfo [ref=e151]:
+      - generic [ref=e152]:
+        - paragraph [ref=e153]: © 2026 NuxtShop
+        - paragraph [ref=e154]: 基于 MIT 许可发布
+  - generic:
+    - img
+  - generic [ref=e155]:
+    - button "Toggle Nuxt DevTools" [ref=e156] [cursor=pointer]:
+      - img [ref=e157]
+    - generic "Page load time" [ref=e160]:
+      - generic [ref=e161]: "88"
+      - generic [ref=e162]: ms
+    - button "Toggle Component Inspector" [ref=e164] [cursor=pointer]:
+      - img [ref=e165]
+```

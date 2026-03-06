@@ -37,8 +37,8 @@
                 class="flex-1"
                 @keyup.enter="saveName"
               />
-              <BaseButton size="sm" @click="saveName">保存</BaseButton>
-              <BaseButton size="sm" variant="ghost" @click="cancelEditName">取消</BaseButton>
+              <BaseButton size="sm" class="whitespace-nowrap" @click="saveName">保存</BaseButton>
+              <BaseButton size="sm" variant="ghost" class="whitespace-nowrap" @click="cancelEditName">取消</BaseButton>
             </div>
           </div>
           

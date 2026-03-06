@@ -8,6 +8,7 @@
         <slot name="prefix"/>
       </div>
       <input
+        ref="inputRef"
         :id="inputId"
         :type="type"
         :value="modelValue"
@@ -94,4 +95,11 @@ const clearInput = () => {
   emit('update:modelValue', '')
   emit('clear')
 }
+
+// Expose internal input element for parent components to focus
+const inputRef = ref<HTMLInputElement | null>(null)
+defineExpose({
+  focus: () => inputRef.value?.focus(),
+  input: inputRef
+})
 </script>

@@ -60,3 +60,8 @@ pre code {
   font-weight: 500;
   border: 1px solid var(--border-color);
 }
+
+/* v-region 下拉层在模态框之上显示 */
+.dd-content {
+  z-index: 10000!important;
+}

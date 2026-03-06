@@ -3,6 +3,23 @@ import { createBdd } from 'playwright-bdd';
 
 const { Given, When, Then } = createBdd();
 
+const ensureLoggedIn = async (page: any) => {
+  const res = await page.request.post('/api/auth/login', {
+    data: { username: 'admin', password: '123456' }
+  })
+  const data = await res.json()
+  const token = data?.token || ''
+  if (token) {
+    const origin = new URL(page.url()).origin
+    await page.context().addCookies([{
+      name: 'auth-token',
+      value: token,
+      url: origin
+    }])
+  }
+  await page.reload()
+}
+
 Given('我在首页', async ({ page }) => {
   await page.goto('/');
 });
@@ -12,13 +29,18 @@ When('我点击第一个推荐商品进入详情页', async ({ page }) => {
   const recommendedSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
   await expect(recommendedSection.locator('.grid').first()).toBeVisible();
   
-  // 点击第一个商品
-  const firstProductTitle = recommendedSection.locator('h3').first();
-  await firstProductTitle.click();
+  // 点击第一个商品卡片（ProductCard 不是 NuxtLink，而是绑定了 @click 导航）
+  const firstProductCard = recommendedSection.locator('.grid').first().locator('div.group').first();
+  await firstProductCard.click();
+  await page.waitForURL(/\/products\/\d+/, { timeout: 15000 });
 });
 
 When('我点击"加入购物车"按钮', async ({ page }) => {
-  const addToCartBtn = page.locator('button:has-text("加入购物车")').first();
+  let addToCartBtn = page.getByRole('button', { name: '加入购物车' }).first();
+  const isLoggedIn = await page.getByRole('button', { name: '退出登录' }).isVisible().catch(() => false)
+  if (!isLoggedIn) {
+    await ensureLoggedIn(page)
+  }
   try {
     await expect(addToCartBtn).toBeVisible({ timeout: 2000 });
   } catch {
@@ -26,16 +48,10 @@ When('我点击"加入购物车"按钮', async ({ page }) => {
     const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
     const hasLoginHint = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);
     if (hasLoginHint) {
-      await loginHintBtn.click();
-      const modal = page.locator('.modal-mask');
-      await expect(modal).toBeVisible({ timeout: 10000 });
-      await modal.locator('input[name="username"]').fill('admin');
-      await modal.locator('input[name="password"]').fill('123456');
-      await modal.locator('button[type="submit"]').click();
-      // 等待登录完成
-      await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+      await ensureLoggedIn(page)
     }
     // 登录后再找按钮
+    addToCartBtn = page.getByRole('button', { name: '加入购物车' }).first();
     await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
   }
   await addToCartBtn.click();

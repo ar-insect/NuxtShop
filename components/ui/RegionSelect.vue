@@ -1,12 +1,14 @@
 <template>
   <div class="grid grid-cols-3 gap-2">
     <BaseSelect
+      data-testid="region-province"
       v-model="selectedProvince"
       :options="provinceOptions"
       placeholder="省份"
       @change="handleProvinceChange"
     />
     <BaseSelect
+      data-testid="region-city"
       v-model="selectedCity"
       :options="cityOptions"
       placeholder="城市"
@@ -14,6 +16,7 @@
       @change="handleCityChange"
     />
     <BaseSelect
+      data-testid="region-district"
       v-model="selectedDistrict"
       :options="districtOptions"
       placeholder="区县"

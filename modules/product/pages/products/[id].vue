@@ -122,6 +122,8 @@
               type="button" 
               class="ml-4 py-3 px-3 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-color)] hover:text-[var(--text-color)] transition-colors"
               :class="{ 'text-red-500 hover:text-red-600': product && isInWishlist(product.id) }"
+              :aria-label="product && isInWishlist(product.id) ? '取消收藏' : '加入收藏'"
+              data-testid="product-wishlist-toggle"
               @click="handleToggleWishlist"
             >
               <svg class="h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" :fill="product && isInWishlist(product.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

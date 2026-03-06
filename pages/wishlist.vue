@@ -25,6 +25,7 @@
           </div>
           <button 
             class="absolute top-2 right-2 p-1.5 rounded-full bg-[var(--card-bg)] shadow-sm text-red-500 hover:bg-[var(--bg-color)] transition-colors" 
+            aria-label="移除收藏"
             @click="removeFromWishlist(product.id)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

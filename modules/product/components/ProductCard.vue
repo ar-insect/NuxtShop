@@ -12,8 +12,10 @@
       <!-- Top Right Action (Wishlist) -->
       <button 
         class="absolute top-3 right-3 p-1.5 rounded-full bg-black/5 hover:bg-black/10 text-gray-500 transition-colors backdrop-blur-sm"
+        :class="{ 'opacity-50 cursor-not-allowed': !user }"
         :aria-label="isInWishlist(product.id) ? '移除收藏' : '加入收藏'"
-        @click.stop="toggleWishlist(product)"
+        :disabled="!user"
+        @click.stop="handleToggleWishlist"
       >
         <HeartIcon class="w-5 h-5" :class="{ 'fill-red-500 text-red-500': isInWishlist(product.id) }" />
       </button>
@@ -40,8 +42,10 @@
         <!-- Add to Cart Button -->
         <button 
           class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition-colors active:scale-95"
+          :class="{ 'opacity-50 cursor-not-allowed': !user }"
           aria-label="加入购物车"
-          @click.stop="addToCartAndToast"
+          :disabled="!user"
+          @click.stop="handleAddToCart"
         >
           <PlusIcon class="w-5 h-5" stroke-width="2.5" />
         </button>
@@ -58,9 +62,11 @@ const props = defineProps<{
   product: Product
 }>()
 
+const { user } = useAuth()
 const { toggleWishlist, isInWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
+const { openLoginModal } = useLoginModal()
 
 // Image fallback handling
 const imageSrc = ref(props.product.image)
@@ -78,8 +84,20 @@ const formatPrice = (price: number) => {
   return price.toFixed(2)
 }
 
-const addToCartAndToast = () => {
+const handleAddToCart = () => {
+  if (!user.value) {
+    openLoginModal()
+    return
+  }
   addToCart(props.product)
   toast.success('已加入购物车')
+}
+
+const handleToggleWishlist = () => {
+  if (!user.value) {
+    openLoginModal()
+    return
+  }
+  toggleWishlist(props.product)
 }
 </script>

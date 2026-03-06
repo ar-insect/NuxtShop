@@ -45,7 +45,7 @@ import type { RouteLocationRaw } from 'vue-router'
 
 type ButtonType = 'button' | 'submit' | 'reset'
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'ghost'
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'ghost' | 'link'
 
 interface Props {
   type?: ButtonType
@@ -85,6 +85,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   outline: 'border-[var(--primary-color)] text-[var(--primary-color)] bg-white hover:bg-gray-50 shadow-sm',
   danger: 'border-transparent text-white bg-red-600 hover:bg-red-700 shadow-sm',
   success: 'border-transparent text-white bg-green-600 hover:bg-green-700 shadow-sm',
-  ghost: 'border-transparent text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+  ghost: 'border-transparent text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+  link: 'border-transparent text-[var(--primary-color)] hover:underline shadow-none px-0'
 }
 </script>

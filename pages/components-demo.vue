@@ -178,6 +178,7 @@
             <BaseButton variant="danger">危险</BaseButton>
             <BaseButton variant="success">成功</BaseButton>
             <BaseButton variant="ghost">幽灵</BaseButton>
+            <BaseButton variant="link">链接</BaseButton>
           </div>
         </div>
 

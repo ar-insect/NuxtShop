@@ -69,6 +69,48 @@
                 </template>
               </BaseDropdown>
             </li>
+
+            <!-- Support Dropdown -->
+            <li class="relative group">
+              <BaseDropdown label="技术支持" :close-on-click="true">
+                <template #trigger="{ isOpen }">
+                  <button
+                    class="flex items-center gap-1 px-3 py-2 text-sm font-medium hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 transition-all duration-200"
+                    :style="{ borderRadius: 'var(--border-radius)', color: 'var(--text-secondary)' }"
+                  >
+                    技术支持
+                    <svg 
+                      class="h-4 w-4 transition-transform duration-200" 
+                      :class="{ 'rotate-180': isOpen }"
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </template>
+                
+                <template #default="{ close }">
+                  <a 
+                    href="https://github.com/ar-insect/NuxtShop"
+                    target="_blank"
+                    class="block px-4 py-2 text-sm hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)]"
+                    :style="{ color: 'var(--text-color)' }"
+                    @click="close"
+                  >
+                    GitHub 仓库
+                  </a>
+                  <a 
+                    href="https://github.com/ar-insect/NuxtShop/issues"
+                    target="_blank"
+                    class="block px-4 py-2 text-sm hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)]"
+                    :style="{ color: 'var(--text-color)' }"
+                    @click="close"
+                  >
+                    提交 Issues
+                  </a>
+                </template>
+              </BaseDropdown>
+            </li>
           </ul>
         </nav>
       </div>

@@ -2,9 +2,9 @@
   <div class="min-h-screen font-sans" :style="{ backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }">
     <div class="flex h-screen overflow-hidden">
       <!-- Main content -->
-      <div class="flex flex-1 flex-col overflow-hidden">
+      <div class="flex flex-1 flex-col overflow-hidden relative">
         <header
-          class="flex h-16 items-center justify-between border-b px-4 sm:px-6 backdrop-blur-xl"
+          class="absolute top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b px-4 sm:px-6 backdrop-blur-xl transition-all duration-300"
           :style="{
             backgroundColor: 'color-mix(in srgb, var(--primary-color) 8%, color-mix(in srgb, var(--card-bg) 88%, transparent))',
             borderColor: 'color-mix(in srgb, var(--primary-color) 18%, var(--border-color))'
@@ -63,7 +63,7 @@
 
           <div />
         </header>
-        <main class="flex-1 overflow-y-auto p-6" :style="{ backgroundColor: 'var(--bg-color)' }">
+        <main class="flex-1 overflow-y-auto pt-16 p-6" :style="{ backgroundColor: 'var(--bg-color)' }">
           <slot />
         </main>
       </div>

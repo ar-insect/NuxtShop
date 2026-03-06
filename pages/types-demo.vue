@@ -45,7 +45,7 @@ const responseData: ApiResponse<IUser> = {
   code: 200,
   message: '成功',
   data: userData,
-  timestamp: Date.now()
+  timestamp: 1689920000000 // 使用固定时间戳避免 hydration mismatch
 }
 </script>
 

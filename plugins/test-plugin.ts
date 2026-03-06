@@ -9,7 +9,10 @@ export default defineNuxtPlugin(() => {
   return {
     provide: {
       myHelper: (msg: string) => {
-        return `[插件助手] ${msg} - 处理于 ${new Date().toLocaleTimeString()}`
+        // 在服务端渲染时使用固定时间字符串，避免水合不匹配
+        // 在客户端重新执行时会显示当前时间，但首次水合需一致
+        const time = import.meta.client ? new Date().toLocaleTimeString() : 'Server Time'
+        return `[插件助手] ${msg} - 处理于 ${time}`
       }
     }
   }

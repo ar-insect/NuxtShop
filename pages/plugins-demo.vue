@@ -4,16 +4,30 @@
     
     <BaseCard title="1. 模板中使用插件">
       <p>直接在模板中使用 <code>$myHelper</code>:</p>
-      <div class="result">
-        {{ $myHelper('来自模板的问候') }}
-      </div>
+      <ClientOnly>
+        <div class="result">
+          {{ $myHelper('来自模板的问候') }}
+        </div>
+        <template #fallback>
+          <div class="result">
+            加载中...
+          </div>
+        </template>
+      </ClientOnly>
     </BaseCard>
 
     <BaseCard title="2. Script 中使用插件">
       <p>通过 <code>useNuxtApp()</code> 获取:</p>
-      <div class="result">
-        {{ scriptResult }}
-      </div>
+      <ClientOnly>
+        <div class="result">
+          {{ scriptResult }}
+        </div>
+        <template #fallback>
+          <div class="result">
+            加载中...
+          </div>
+        </template>
+      </ClientOnly>
       <BaseButton @click="triggerPlugin">重新调用插件</BaseButton>
     </BaseCard>
 

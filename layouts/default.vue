@@ -10,7 +10,8 @@
     
     <footer class="border-t py-6 mt-12" :style="{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }">
       <div class="container mx-auto px-4 text-center text-sm" :style="{ color: 'var(--text-secondary)' }">
-        <p>&copy; {{ new Date().getFullYear() }} NuxtShop。基于 Nuxt 3 & Tailwind CSS 构建。</p>
+        <p class="mb-2">&copy; {{ new Date().getFullYear() }} NuxtShop</p>
+        <p>基于 MIT 许可发布</p>
       </div>
     </footer>
 

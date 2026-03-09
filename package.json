@@ -12,6 +12,7 @@
     "preview": "nuxt preview",
     "test:e2e": "playwright test",
     "test:bdd": "bddgen && playwright test",
+    "test:unit": "vitest",
     "postinstall": "nuxt prepare",
     "deploy": "bash scripts/deploy.sh",
     "cache:clear": "bash scripts/clear-cache.sh",
@@ -39,14 +40,18 @@
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^22.14.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.27",
     "eslint": "^9.39.3",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.4.0",
     "jiti": "^2.6.1",
+    "jsdom": "^26.1.0",
     "playwright-bdd": "^8.4.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.2.1",
-    "typescript-eslint": "^8.56.1"
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^2.1.9"
   }
 }

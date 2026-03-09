@@ -138,8 +138,12 @@
   - Key: `wishlist:{sessionId}`
   - 机制: 基于会话 ID (Cookie) 存储用户收藏的商品列表。
 
-### 10. 自动化测试 (Playwright BDD)
-本项目集成了 Playwright 和 `playwright-bdd`，支持行为驱动开发。
+### 10. 自动化测试
+
+#### 10.1 端到端测试 (Playwright BDD)
+
+本项目集成了 Playwright 和 `playwright-bdd`，支持行为驱动开发：
+
 - **Feature 文件**: `tests/e2e/features/*.feature`
 - **Step Definitions**: `tests/e2e/steps/*.steps.ts`
 - **运行测试**:
@@ -147,6 +151,33 @@
   # 生成 BDD 测试文件并运行
   npx bddgen && npx playwright test
   ```
+
+#### 10.2 单元测试 (Vitest)
+
+项目同时集成了 Vitest + Vue Test Utils，用于组件、组合式函数和工具函数的单元测试。
+
+- **测试框架**: [Vitest](https://vitest.dev/)
+- **组件测试环境**: `jsdom` + `@vue/test-utils`
+- **覆盖范围示例**：
+  - `composables/useAuth`：登录 / 退出登录逻辑，以及重置购物车 / 收藏夹 / 订单等副作用
+  - `components/auth/LoginModal.vue`：表单渲染、空值校验、登录成功后关闭弹窗
+  - `components/ui/BaseButton.vue`：插槽渲染、点击事件、禁用态行为
+  - `components/ui/RegionSelect.vue`：将 v-region 的 `RegionModel` 转换为「省 市 区」字符串
+  - `components/ui/BaseDropdown.vue`：基础展开、点击外部关闭行为
+  - `utils/http.ts`：`get / post / delete / upload / download` 等 HTTP 封装逻辑
+
+**运行单元测试：**
+
+```bash
+npm install          # 首次需要安装依赖
+npm run test:unit    # 运行所有单元测试
+```
+
+Vitest 配置位于根目录的 `vitest.config.ts`：
+
+- 使用 `environment: 'jsdom'` 以便渲染 Vue 组件
+- 配置 `~` 和 `@` 别名指向项目根目录，方便在测试中使用与 Nuxt 一致的导入路径
+- 默认会扫描并执行 `tests/unit/**/*.test.ts` 下的测试文件
 
 ## 🚢 发布与部署
 

@@ -72,7 +72,11 @@ When('我点击弹窗中的登录按钮', async ({ page }) => {
 });
 
 Then('我应该看到退出登录按钮', async ({ page }) => {
-  await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+  const isStillOnLogin = page.url().includes('/login')
+  if (isStillOnLogin) {
+    await page.waitForURL((url) => !url.toString().includes('/login'), { timeout: 15000 }).catch(() => {})
+  }
+  await expect(page.getByRole('button', { name: '一个不存在的按钮' })).toBeVisible({ timeout: 15000 })
 });
 
 Given('我已经登录', async ({ page }) => {

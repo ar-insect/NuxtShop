@@ -12,6 +12,7 @@
     "preview": "nuxt preview",
     "test:e2e": "playwright test",
     "test:bdd": "bddgen && playwright test",
+    "test:unit": "vitest",
     "postinstall": "nuxt prepare",
     "deploy": "bash scripts/deploy.sh",
     "cache:clear": "bash scripts/clear-cache.sh",
@@ -24,9 +25,11 @@
     "@pinia/nuxt": "^0.11.3",
     "better-sqlite3": "^12.6.2",
     "cropperjs": "^1.6.2",
+    "execa": "^9.6.1",
     "ioredis": "^5.10.0",
     "nuxt": "^3.20.2",
     "pinia": "^3.0.4",
+    "v-region": "^3.5.0",
     "vue": "^3.5.25",
     "vue-router": "^4.6.4",
     "vue3-styled-components": "^1.2.1"
@@ -37,14 +40,18 @@
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^22.14.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.27",
     "eslint": "^9.39.3",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.4.0",
     "jiti": "^2.6.1",
+    "jsdom": "^26.1.0",
     "playwright-bdd": "^8.4.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.2.1",
-    "typescript-eslint": "^8.56.1"
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^2.1.9"
   }
 }

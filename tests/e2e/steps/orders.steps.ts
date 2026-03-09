@@ -3,6 +3,36 @@ import { expect } from '@playwright/test'
 
 const { Given, When, Then } = createBdd()
 
+const ensureLoggedIn = async (page: any) => {
+  const res = await page.request.post('/api/auth/login', {
+    data: { username: 'admin', password: '123456' }
+  })
+  const data = await res.json()
+  const token = data?.token || ''
+  if (token) {
+    const origin = new URL(page.url()).origin
+    await page.context().addCookies([{
+      name: 'auth-token',
+      value: token,
+      url: origin
+    }])
+  }
+}
+
+const selectRegion = async (page: any) => {
+  const selectFirstOption = async (container: any) => {
+    const trigger = container.locator('div.cursor-pointer').first()
+    await trigger.click()
+    const dropdown = container.locator('div.absolute.z-10')
+    await dropdown.waitFor({ state: 'visible', timeout: 10000 })
+    await dropdown.locator('div.cursor-pointer').first().click()
+  }
+
+  await selectFirstOption(page.locator('[data-testid="region-province"]'))
+  await selectFirstOption(page.locator('[data-testid="region-city"]'))
+  await selectFirstOption(page.locator('[data-testid="region-district"]'))
+}
+
 Given('我已清空数据', async ({ page }) => {
   // 先确保购物车为空（本地与远端）
   await page.evaluate(() => {
@@ -18,6 +48,7 @@ Given('我已清空数据', async ({ page }) => {
 })
 
 Given('我已经创建了一个订单', async ({ page }) => {
+  await ensureLoggedIn(page)
   // 先确保购物车为空
   await page.evaluate(() => {
     localStorage.removeItem('nuxt-shop-cart')
@@ -27,11 +58,11 @@ Given('我已经创建了一个订单', async ({ page }) => {
   await page.goto('/products')
   // 等待商品列表加载
   await page.waitForSelector('.grid', { state: 'visible', timeout: 30000 })
-  // 点击第一个商品链接
-  await page.locator('.grid h3').first().click()
+  // 点击第一个商品卡片（ProductCard 不是 NuxtLink，而是绑定了 @click 导航）
+  await page.locator('.grid').first().locator('div.group').first().click()
   
   // 商品详情页：等待按钮可见且可用
-  const addToCartBtn = page.locator('button:has-text("加入购物车")')
+  const addToCartBtn = page.getByRole('button', { name: '加入购物车' }).first()
   await addToCartBtn.waitFor({ state: 'visible', timeout: 30000 })
   // 适当等待后点击
   await page.waitForTimeout(1000)
@@ -94,7 +125,7 @@ Given('我已经创建了一个订单', async ({ page }) => {
     await page.fill('input[placeholder="例如：张"]', 'Test')
     await page.fill('input[placeholder="例如：三"]', 'User')
     await page.fill('input[placeholder="街道、门牌号等"]', 'Test Address')
-    await page.fill('input[placeholder="例如：上海"]', 'Shanghai')
+    await selectRegion(page)
     await page.fill('input[placeholder="例如：200000"]', '200000')
     await page.fill('input[placeholder="用于接收配送通知"]', '13800000000')
   }

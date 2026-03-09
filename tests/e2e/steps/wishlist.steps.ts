@@ -3,35 +3,66 @@ import { createBdd } from 'playwright-bdd';
 
 const { Given, When, Then } = createBdd();
 
-When('我点击"加入收藏"按钮', async ({ page }) => {
-  const btn = page.getByRole('button', { name: '加入收藏' }).first();
-  try {
-    await expect(btn).toBeVisible({ timeout: 2000 });
-  } catch {
-    // 未登录场景，触发登录弹窗
-    const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
-    const hasLoginHint = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);
-    if (hasLoginHint) {
-      await loginHintBtn.click();
-      const modal = page.locator('.modal-mask');
-      await expect(modal).toBeVisible({ timeout: 10000 });
-      await modal.locator('input[name="username"]').fill('admin');
-      await modal.locator('input[name="password"]').fill('123456');
-      await modal.locator('button[type="submit"]').click();
-      await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+const loginViaModalIfNeeded = async (page: any) => {
+  const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first()
+  const needsLogin = await loginHintBtn.isVisible({ timeout: 1000 }).catch(() => false)
+  if (!needsLogin) return
+
+  await loginHintBtn.click()
+  const modal = page.locator('.modal-mask')
+  await expect(modal).toBeVisible({ timeout: 10000 })
+  await modal.locator('input[name="username"]').fill('admin')
+  await modal.locator('input[name="password"]').fill('123456')
+  await modal.locator('button[type="submit"]').click()
+  await expect(modal).toBeHidden({ timeout: 15000 })
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible({ timeout: 15000 })
+}
+
+const getDetailWishlistButton = (page: any) => {
+  return page.locator('[data-testid="product-wishlist-toggle"]').first()
+}
+
+const clickWithDetachRetry = async (locator: any, page: any) => {
+  for (let i = 0; i < 3; i++) {
+    try {
+      await locator.scrollIntoViewIfNeeded().catch(() => {})
+      await locator.click({ force: true, timeout: 10000 })
+      return
+    } catch {
+      await page.waitForTimeout(300)
     }
-    await expect(btn).toBeVisible({ timeout: 10000 });
   }
-  await btn.click();
+  await locator.click({ force: true })
+}
+
+const addWishlistFromDetail = async (page: any) => {
+  const btn = getDetailWishlistButton(page)
+  await expect(btn).toBeVisible({ timeout: 15000 })
+
+  for (let i = 0; i < 5; i++) {
+    try {
+      await btn.scrollIntoViewIfNeeded().catch(() => {})
+      await btn.click({ force: true, timeout: 10000 })
+    } catch {}
+    await page.waitForTimeout(250)
+    const label = await btn.getAttribute('aria-label').catch(() => '')
+    if (label === '取消收藏') return
+  }
+
+  throw new Error('Failed to add wishlist item from product detail')
+}
+
+When('我点击"加入收藏"按钮', async ({ page }) => {
+  await loginViaModalIfNeeded(page)
+  await addWishlistFromDetail(page)
 });
 
 Then('收藏夹图标上的数字应该增加', async ({ page }) => {
-  const badge = page.locator('a[href="/wishlist"] span').first();
-  await expect(badge).toBeVisible();
   await expect
     .poll(async () => {
-      const text = await badge.textContent();
-      return Number((text || '').trim() || 0);
+      const badge = page.locator('a[href="/wishlist"] span').first()
+      const text = await badge.textContent().catch(() => '')
+      return Number((text || '').trim() || 0)
     })
     .toBeGreaterThan(0);
 });
@@ -66,31 +97,15 @@ Given('收藏夹中已有商品', async ({ page }) => {
     })
     .not.toBe('none');
 
-  // 稳定分支：如为空则通过接口登录并从首页添加一件收藏，然后直接返回
+  // 稳定分支：如为空则从首页进入详情页并添加一件收藏
   if (await emptyState.isVisible().catch(() => false)) {
-    const token = await page.evaluate(async () => {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ username: 'admin', password: '123456' })
-      });
-      const data = await res.json();
-      return data?.token || '';
-    });
-    if (token) {
-      await page.context().addCookies([{
-        name: 'auth-token',
-        value: token,
-        domain: 'localhost',
-        path: '/'
-      }]);
-    }
     await page.goto('/');
     const homeSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
     await expect(homeSection.locator('.grid').first()).toBeVisible({ timeout: 15000 });
-    const heartBtn = homeSection.getByRole('button', { name: '加入收藏' }).first();
-    await heartBtn.waitFor({ state: 'visible', timeout: 15000 });
-    await heartBtn.click();
+    await homeSection.locator('.grid').first().locator('div.group').first().click()
+    await page.waitForURL(/\/products\/\d+/, { timeout: 15000 })
+    await loginViaModalIfNeeded(page)
+    await addWishlistFromDetail(page)
     await page.goto('/wishlist');
     await expect(page.locator('h1', { hasText: '我的收藏' })).toBeVisible({ timeout: 15000 });
     return;
@@ -98,32 +113,11 @@ Given('收藏夹中已有商品', async ({ page }) => {
 
   if (await emptyState.isVisible()) {
     await page.goto('/');
-    await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
-    const recommendedSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
-    await expect(recommendedSection.locator('.grid').first()).toBeVisible();
-    await recommendedSection.locator('a[href^="/products/"]').first().click();
-    // 若需要登录，则先登录
-    const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first();
-    const needsLogin = await loginHintBtn.isVisible({ timeout: 2000 }).catch(() => false);
-    if (needsLogin) {
-      const productUrl = page.url();
-      await loginHintBtn.click();
-      const modal = page.locator('.modal-mask');
-      await expect(modal).toBeVisible({ timeout: 10000 });
-      await modal.locator('input[name="username"]').fill('admin');
-      await modal.locator('input[name="password"]').fill('123456');
-      await modal.locator('button[type="submit"]').click();
-      await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
-      // 登录逻辑会重定向到首页，返回商品详情页继续操作
-      await page.goto(productUrl);
-    }
-    // 为稳定起见：回到首页从推荐列表添加收藏（已登录时才显示心形按钮）
-    await page.goto('/');
     const homeSection = page.locator('section', { has: page.locator('h2', { hasText: '推荐商品' }) });
     await expect(homeSection.locator('.grid').first()).toBeVisible({ timeout: 15000 });
-    const heartBtn = homeSection.getByRole('button', { name: '加入收藏' }).first();
-    await heartBtn.waitFor({ state: 'visible', timeout: 15000 });
-    await heartBtn.click();
+    await homeSection.locator('.grid').first().locator('div.group').first().click()
+    await loginViaModalIfNeeded(page)
+    await addWishlistFromDetail(page)
     await page.goto('/wishlist');
     await expect(page.locator('h1', { hasText: '我的收藏' })).toBeVisible();
   }
@@ -134,7 +128,7 @@ Given('收藏夹中已有商品', async ({ page }) => {
 
   // 为了让“移除商品”场景可预测：确保收藏夹里只有 1 个商品
   // 如果存在多个商品，先移除多余的，保留 1 个
-  const removeButtons = main.locator('button').filter({ hasNotText: '加入购物车' });
+  const removeButtons = main.getByRole('button', { name: '移除收藏' });
   await expect
     .poll(async () => itemLinks.count())
     .toBeGreaterThan(0);
@@ -150,12 +144,23 @@ Given('收藏夹中已有商品', async ({ page }) => {
 When('我点击商品的"移除"按钮', async ({ page }) => {
   await expect(page.locator('h1', { hasText: '我的收藏' })).toBeVisible();
   const main = page.getByRole('main');
-  const removeBtn = main.locator('button').filter({ hasNotText: '加入购物车' }).first();
-  await expect(removeBtn).toBeVisible();
-  await removeBtn.click();
+  const removeBtn = main.getByRole('button', { name: '移除收藏' }).first();
+  await expect(removeBtn).toBeVisible({ timeout: 15000 });
+  await removeBtn.click({ force: true });
+  await expect
+    .poll(async () => main.locator('a[href^="/products/"]').count(), { timeout: 15000 })
+    .toBe(0);
 });
 
 Then('该商品应该从收藏夹中消失', async ({ page }) => {
-  const emptyState = page.locator('text=您的收藏夹是空的');
-  await expect(emptyState).toBeVisible({ timeout: 15000 });
+  const emptyState = page.locator('text=您的收藏夹是空的')
+  const main = page.getByRole('main')
+  await expect
+    .poll(async () => {
+      if (await emptyState.isVisible().catch(() => false)) return 'empty'
+      const count = await main.locator('a[href^="/products/"]').count().catch(() => 0)
+      if (count === 0) return 'empty'
+      return 'not-empty'
+    })
+    .toBe('empty')
 });

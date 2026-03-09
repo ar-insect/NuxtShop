@@ -12,11 +12,11 @@ const port = 4000;
 
 export default defineConfig({
   testDir,
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: [['html', { open: 'always' }]],
+  workers: 1,
+  reporter: [['json', { outputFile: 'test-results/report.json' }]],
   use: {
     baseURL: `http://localhost:${port}`,
     trace: 'on-first-retry',

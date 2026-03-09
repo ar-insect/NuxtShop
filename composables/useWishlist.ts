@@ -62,8 +62,8 @@ export const useWishlist = () => {
    * @async
    * @param {number} productId - 要移除的商品 ID
    */
-  const removeFromWishlist = async (productId: number) => {
-    const index = wishlistItems.value.findIndex(item => item.id === productId)
+  const removeFromWishlist = async (productId: number | string) => {
+    const index = wishlistItems.value.findIndex(item => String(item.id) === String(productId))
     if (index > -1) {
       wishlistItems.value.splice(index, 1)
       await saveWishlist()
@@ -90,8 +90,8 @@ export const useWishlist = () => {
    * @param {number} productId - 商品 ID
    * @returns {boolean} 已收藏返回 true，否则返回 false
    */
-  const isInWishlist = (productId: number) => {
-    return wishlistItems.value.some(item => item.id === productId)
+  const isInWishlist = (productId: number | string) => {
+    return wishlistItems.value.some(item => String(item.id) === String(productId))
   }
 
   const resetWishlistLocal = () => {

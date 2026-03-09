@@ -18,14 +18,16 @@
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <BaseCard v-for="product in wishlistItems" :key="product.id" class="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+    <NuxtLink v-for="product in wishlistItems" :key="product.id" :to="`/products/${product.id}`" class="block">
+      <BaseCard class="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
         <div class="relative">
           <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-[var(--bg-color)] mb-4 h-48 flex items-center justify-center p-4">
             <img :src="product.image" :alt="product.title" class="h-full w-full object-contain object-center group-hover:opacity-75">
           </div>
           <button 
             class="absolute top-2 right-2 p-1.5 rounded-full bg-[var(--card-bg)] shadow-sm text-red-500 hover:bg-[var(--bg-color)] transition-colors" 
-            @click="removeFromWishlist(product.id)"
+            aria-label="移除收藏"
+            @click.prevent="removeFromWishlist(product.id)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -35,17 +37,23 @@
         
         <div class="flex-1 flex flex-col justify-between">
           <h3 class="text-sm font-medium text-[var(--text-color)] line-clamp-2 min-h-[2.5rem]">
-            <NuxtLink :to="`/products/${product.id}`">{{ product.title }}</NuxtLink>
+            {{ product.title }}
           </h3>
           <div class="mt-4 flex items-center justify-between">
             <p class="text-lg font-bold text-[var(--text-color)]">¥{{ product.price }}</p>
-            <BaseButton size="sm" variant="secondary" class="flex items-center justify-center p-2" @click="handleAddToCart(product)">
+            <BaseButton size="sm" variant="secondary" class="flex items-center justify-center p-2" @click.prevent="handleAddToCart(product)">
               <ShoppingCartIcon class="h-5 w-5" />
             </BaseButton>
           </div>
         </div>
       </BaseCard>
+    </NuxtLink>
     </div>
+
+    <!-- Ad Carousel -->
+    <section class="mt-8">
+      <BaseAdCarousel :ads="ads" />
+    </section>
   </div>
 </template>
 
@@ -54,10 +62,16 @@ import { useWishlist } from '~/composables/useWishlist'
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useToast } from '~/composables/useToast'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
+import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
 
 const { wishlistItems, removeFromWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
+
+const ads = [
+  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: '收藏夹电子产品广告' },
+  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: '收藏夹珠宝广告' }
+]
 
 useSeoMeta({
   title: '我的收藏',

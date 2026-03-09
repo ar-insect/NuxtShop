@@ -181,6 +181,8 @@ const isNewAddressMode = ref(false)
 const selectedAddressId = ref<string>('')
 const savedAddresses = ref<any[]>([])
 
+const phoneRegex = /^1[3-9]\d{9}$/
+
 const ADDRESS_KEY = 'nuxt-shop-addresses'
 const ADDRESS_DEFAULT_KEY = 'nuxt-shop-address-default'
 
@@ -290,13 +292,35 @@ const form = reactive({
   phone: ''
 })
 
+const isRegionValid = computed(() => {
+  const parts = form.region.split(' ').filter(Boolean)
+  return parts.length >= 3
+})
+
+const isPhoneValid = computed(() => {
+  return phoneRegex.test(form.phone)
+})
+
 const isFormValid = computed(() => {
   if (!isNewAddressMode.value && selectedAddressId.value) return true
-  return form.firstName && form.lastName && form.address && form.region && form.phone
+  return Boolean(
+    form.firstName &&
+    form.lastName &&
+    form.address &&
+    isRegionValid.value &&
+    isPhoneValid.value
+  )
 })
 
 const handleCheckout = async () => {
-  if (!isFormValid.value) return
+  if (!isFormValid.value) {
+    if (!isRegionValid.value) {
+      toast.error('请选择完整的省、市、区')
+    } else if (!isPhoneValid.value) {
+      toast.error('请输入有效的11位手机号码')
+    }
+    return
+  }
 
   isProcessing.value = true
   

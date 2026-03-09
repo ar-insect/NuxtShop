@@ -23,13 +23,13 @@
 
         <ul role="list" class="border-t border-b border-[var(--border-color)] divide-y divide-[var(--border-color)]">
           <li v-for="item in cartItems" :key="item.id" class="flex py-6 sm:py-10">
-            <div class="flex-shrink-0">
+            <NuxtLink :to="`/products/${item.id}`" class="flex-shrink-0">
               <img 
                 :src="item.image" 
                 :alt="item.title" 
                 class="w-24 h-24 rounded-md object-center object-contain sm:w-48 sm:h-48 bg-[var(--bg-color)]"
               >
-            </div>
+            </NuxtLink>
 
             <div class="ml-4 flex-1 flex flex-col justify-between sm:ml-6">
               <div class="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
@@ -96,18 +96,52 @@
         </div>
       </section>
     </div>
+
+    <!-- Recommended Products -->
+    <section aria-labelledby="recommended-products-heading" class="mt-16">
+      <h2 id="recommended-products-heading" class="text-2xl font-bold text-[var(--text-color)] mb-6">推荐商品</h2>
+      <div v-if="recommendedProductsPending" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"/>
+      </div>
+      <div v-else-if="recommendedProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <ProductCard
+          v-for="product in recommendedProducts"
+          :key="product.id"
+          :product="product"
+          @click="navigateTo(`/products/${product.id}`)"
+        />
+      </div>
+      <div v-else class="text-center py-12 text-[var(--text-secondary)]">
+        没有找到推荐商品。
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import ProductCard from '~/modules/product/components/ProductCard.vue'
+import { useProducts } from '~/modules/product/composables/useProducts'
+
 const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart()
 const toast = useToast()
 const { confirm } = useConfirm()
+const { getProducts } = useProducts()
 
 useSeoMeta({
   title: '购物车',
   description: '查看您的购物车商品并结算。'
 })
+
+// Fetch recommended products
+const { data: recommendedProductsData, pending: recommendedProductsPending } = await useAsyncData(
+  'recommendedProducts',
+  () => getProducts(1, 4), // Fetch first 4 products as recommendations
+  {
+    default: () => ({ items: [], total: 0 })
+  }
+)
+
+const recommendedProducts = computed(() => recommendedProductsData.value?.items || [])
 
 const handleRemoveItem = async (id: number) => {
   const isConfirmed = await confirm({

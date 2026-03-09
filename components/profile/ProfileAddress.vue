@@ -41,6 +41,10 @@
       <div class="space-y-4">
         <BaseInput v-model="addressForm.name" label="收货人" placeholder="请输入收货人姓名" />
         <BaseInput v-model="addressForm.phone" label="联系电话" placeholder="请输入联系电话" />
+        <div>
+          <label class="block text-sm font-medium text-[var(--text-color)] mb-1">省市区</label>
+          <RegionSelect v-model="addressForm.region" />
+        </div>
         <BaseInput v-model="addressForm.detail" label="详细地址" placeholder="街道、门牌号等" />
         <div class="flex items-center">
           <input
@@ -67,6 +71,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import RegionSelect from '~/components/ui/RegionSelect.vue'
 
 const toast = useToast()
 const { confirm } = useConfirm()
@@ -80,37 +85,89 @@ interface Address {
 }
 
 const addresses = ref<Address[]>([
-  { id: '1', name: '张三', phone: '13800138000', detail: '上海市浦东新区陆家嘴环路1000号', isDefault: true }
+  { id: '1', name: '张三', phone: '13800138000', detail: '上海市 上海市 浦东新区 陆家嘴环路1000号', isDefault: true }
 ])
 const isAddressModalOpen = ref(false)
 const addressForm = reactive({
   id: '',
   name: '',
   phone: '',
+  region: '',
   detail: '',
   isDefault: false
 })
 
+const phoneRegex = /^1[3-9]\d{9}$/
+
+const isRegionComplete = (region: string) => {
+  const parts = region.split(' ').filter(Boolean)
+  return parts.length >= 3
+}
+
 const openAddressModal = (address?: Address) => {
   if (address) {
-    Object.assign(addressForm, address)
+    let region = ''
+    let detail = address.detail
+    const parts = address.detail.split(' ')
+    if (parts.length >= 4) {
+      region = parts.slice(0, 3).join(' ')
+      detail = parts.slice(3).join(' ')
+    }
+    Object.assign(addressForm, {
+      id: address.id,
+      name: address.name,
+      phone: address.phone,
+      region,
+      detail,
+      isDefault: address.isDefault
+    })
   } else {
-    Object.assign(addressForm, { id: '', name: '', phone: '', detail: '', isDefault: false })
+    Object.assign(addressForm, { id: '', name: '', phone: '', region: '', detail: '', isDefault: false })
   }
   isAddressModalOpen.value = true
 }
 
 const saveAddress = () => {
+  if (!isRegionComplete(addressForm.region)) {
+    toast.error('请选择完整的省、市、区')
+    return
+  }
+
+  if (!phoneRegex.test(addressForm.phone)) {
+    toast.error('请输入有效的11位手机号码')
+    return
+  }
+
+  const fullDetail = addressForm.region
+    ? `${addressForm.region} ${addressForm.detail}`.trim()
+    : addressForm.detail
+
+  let currentId = addressForm.id
   if (addressForm.id) {
     const index = addresses.value.findIndex(a => a.id === addressForm.id)
-    if (index > -1) addresses.value[index] = { ...addressForm }
+    if (index > -1) {
+      addresses.value[index] = {
+        id: addressForm.id,
+        name: addressForm.name,
+        phone: addressForm.phone,
+        detail: fullDetail,
+        isDefault: addressForm.isDefault
+      }
+    }
   } else {
-    addresses.value.push({ ...addressForm, id: Date.now().toString() })
+    currentId = Date.now().toString()
+    addresses.value.push({
+      id: currentId,
+      name: addressForm.name,
+      phone: addressForm.phone,
+      detail: fullDetail,
+      isDefault: addressForm.isDefault
+    })
   }
   
   if (addressForm.isDefault) {
     addresses.value.forEach(a => {
-      if (a.id !== (addressForm.id || addresses.value[addresses.value.length - 1].id)) {
+      if (a.id !== currentId) {
         a.isDefault = false
       }
     })

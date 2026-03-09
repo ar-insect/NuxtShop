@@ -296,6 +296,14 @@
             disabled
             placeholder="无法选择"
           />
+          
+          <div>
+            <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">省市区选择 (RegionSelect)</h3>
+            <RegionSelect v-model="regionDemo" />
+            <p class="mt-2 text-xs text-[var(--text-secondary)]">
+              当前选择：{{ regionDemo || '未选择' }}
+            </p>
+          </div>
         </div>
         <div class="mt-4 text-sm text-[var(--text-secondary)]">
           <p>单选值: {{ selectValues.single }}</p>
@@ -332,7 +340,7 @@
         </div>
         <div class="p-6">
           <div class="h-48 rounded-lg overflow-hidden">
-            <BaseCarousel :items="carouselItems" indicators controls autoplay>
+            <BaseCarousel class="h-48" :items="carouselItems" indicators controls autoplay>
               <template #default="{ item }">
                 <div class="w-full h-full flex items-center justify-center text-white text-xl font-bold" :class="item.bg">
                   {{ item.title }}
@@ -462,6 +470,7 @@ import { useToast } from '~/composables/useToast'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseDropdown from '~/components/ui/BaseDropdown.vue'
 import BaseCarousel from '~/components/ui/BaseCarousel.vue'
+import RegionSelect from '~/components/ui/RegionSelect.vue'
 
 // Modal
 const showModal = ref(false)
@@ -564,6 +573,8 @@ const selectValues = reactive({
   multiple: [],
   disabled: ''
 })
+
+const regionDemo = ref('')
 
 const selectOptions = [
   { label: 'Vue.js', value: 'vue' },

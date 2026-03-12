@@ -52,12 +52,22 @@
               v-for="link in dashboardLinks"
               :key="link.to"
               :to="link.to"
-              class="group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5"
+              class="group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 relative"
               :style="{ color: 'var(--text-secondary)' }"
               active-class="bg-[var(--primary-color)]/10 text-[var(--primary-color)]"
             >
               <SvgIcon :name="link.icon" class="mr-2 h-5 w-5 flex-shrink-0" :style="{ color: 'var(--text-secondary)' }" />
               {{ link.label }}
+              <ClientOnly v-if="link.to === '/cart'">
+                <span v-if="cartCount > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-[var(--primary-color)] rounded-full">
+                  {{ cartCount }}
+                </span>
+              </ClientOnly>
+              <ClientOnly v-if="link.to === '/wishlist'">
+                <span v-if="wishlistItems.length > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">
+                  {{ wishlistItems.length }}
+                </span>
+              </ClientOnly>
             </NuxtLink>
           </nav>
 
@@ -76,6 +86,12 @@
 </template>
 
 <script setup lang="ts">
+import { useCart } from '~/modules/cart/composables/useCart'
+import { useWishlist } from '~/composables/useWishlist'
+
+const { cartCount } = useCart()
+const { wishlistItems } = useWishlist()
+
 const dashboardLinks = [
   { to: '/', label: '首页', icon: 'home' },
   { to: '/profile', label: '个人中心', icon: 'user' },

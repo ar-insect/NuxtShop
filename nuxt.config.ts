@@ -32,8 +32,8 @@ export default defineNuxtConfig({
     }
   },
   sourcemap: {
-    server: true,
-    client: true
+    server: process.env.NODE_ENV === 'production',
+    client: process.env.NODE_ENV === 'production'
   },
   css: ['~/assets/css/main.css'],
   components: [

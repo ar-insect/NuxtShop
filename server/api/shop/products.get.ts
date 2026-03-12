@@ -13,7 +13,7 @@ interface Product {
   createTime: Date;
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   try {
     // 使用封装好的 find 方法检查集合是否为空
     const count = await find<Product>('products', {}, { limit: 1 })

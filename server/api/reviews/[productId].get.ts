@@ -16,13 +16,15 @@ export default defineEventHandler(async (event) => {
     // 获取评价列表（获取前 50 条，避免一次性加载太多）
     const reviewsData = await redis.lrange(`reviews:product:${productId}`, 0, 49)
     
-    const reviews = reviewsData.map((item) => {
-      try {
-        return JSON.parse(item)
-      } catch (e) {
-        return null
-      }
-    }).filter(Boolean)
+    const reviews = reviewsData
+      .map((item) => {
+        try {
+          return JSON.parse(item)
+        } catch {
+          return null
+        }
+      })
+      .filter(Boolean)
 
     return {
       success: true,

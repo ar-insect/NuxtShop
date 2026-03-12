@@ -129,8 +129,8 @@ const form = reactive({
 // 用户数据加载/刷新后同步表单内容
 watch(user, (newUser) => {
   if (newUser) {
-    form.name = newUser.name
-    form.avatar = newUser.avatar
+    form.name = newUser.name || ''
+    form.avatar = newUser.avatar || ''
   }
 }, { immediate: true })
 
@@ -188,6 +188,30 @@ const handleCrop = async (blob: Blob) => {
   }
 }
 
+const saveProfile = async () => {
+  saving.value = true;
+  try {
+    const response = await $fetch('/api/user/update', {
+      method: 'POST',
+      body: {
+        name: form.name,
+        avatar: form.avatar,
+      },
+    });
+    // 更新 useAuth 中的用户状态
+    if (user.value && response.data) {
+      user.value.name = response.data.name;
+      user.value.avatar = response.data.avatar;
+    }
+    toast.success('个人资料更新成功！');
+  } catch (error: any) {
+    toast.error(error.statusMessage || '个人资料更新失败');
+    console.error('Error saving profile:', error);
+  } finally {
+    saving.value = false;
+  }
+};
+
 const saveName = async () => {
   await saveProfile()
   isEditingName.value = false
@@ -196,27 +220,5 @@ const saveName = async () => {
 const cancelEditName = () => {
   form.name = user.value?.name || ''
   isEditingName.value = false
-}
-
-const saveProfile = async () => {
-  saving.value = true
-  try {
-    await $fetch<{ data: any }>('/api/user/update', {
-      method: 'POST',
-      body: {
-        name: form.name,
-        avatar: form.avatar
-      }
-    })
-    if (user.value) {
-      user.value.name = form.name
-      user.value.avatar = form.avatar
-    }
-  } catch (error) {
-    toast.error('保存失败')
-    console.error(error)
-  } finally {
-    saving.value = false
-  }
 }
 </script>

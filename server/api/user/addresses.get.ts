@@ -1,5 +1,5 @@
-// server/api/auth/me.get.ts
-import { findUserById } from '~/server/utils/user';
+// server/api/user/addresses.get.ts
+import { findAddressesByUserId } from '~/server/utils/address';
 import { ObjectId } from 'mongodb';
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 从 token 中提取用户 ID
   let userId: string | null = null;
   if (token.startsWith('user-jwt-token-')) {
     userId = token.replace('user-jwt-token-', '');
@@ -30,25 +29,18 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 从 MongoDB 查找用户
-  const user = await findUserById(userId);
-
-  if (!user) {
+  try {
+    const addresses = await findAddressesByUserId(userId);
+    return {
+      code: 200,
+      message: '获取收货地址成功',
+      data: addresses,
+    };
+  } catch (error) {
+    console.error('Error fetching addresses:', error);
     throw createError({
-      statusCode: 401,
-      statusMessage: 'User not found',
+      statusCode: 500,
+      statusMessage: '获取收货地址失败',
     });
   }
-
-  // 返回部分用户数据，不包含密码
-  return {
-    user: {
-      _id: user._id,
-      username: user.username,
-      name: user.name,
-      role: user.role,
-      avatar: user.avatar,
-      createdAt: user.createdAt,
-    },
-  };
 });

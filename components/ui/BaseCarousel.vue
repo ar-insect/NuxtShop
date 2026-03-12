@@ -29,8 +29,8 @@
         type="button"
         class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none"
         :class="currentIndex === index ? 'bg-white' : 'bg-white/50 hover:bg-white/80'"
-        @click="goTo(index)"
         :aria-label="`Go to slide ${index + 1}`"
+        @click="goTo(index)"
       />
     </div>
 
@@ -38,8 +38,8 @@
     <template v-if="controls">
       <button 
         class="absolute top-1/2 left-4 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 focus:outline-none transition-colors"
-        @click="prev"
         aria-label="Previous slide"
+        @click="prev"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -47,8 +47,8 @@
       </button>
       <button 
         class="absolute top-1/2 right-4 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 focus:outline-none transition-colors"
-        @click="next"
         aria-label="Next slide"
+        @click="next"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

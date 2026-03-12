@@ -145,14 +145,14 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
     },
 
     // 从服务端加载配置
-    async fetchTheme(userId?: string) {
-      if (!userId) return
-
+    async fetchTheme(token?: string) { // 接受 token 参数
       this.isLoading = true
       try {
-        const data = await $fetch<ThemeConfig>('/api/theme', {
-          params: { userId }
-        })
+        const headers: HeadersInit = {}
+        if (token) {
+          headers.Authorization = `Bearer ${token}`
+        }
+        const data = await $fetch<ThemeConfig | Record<string, never>>('/api/theme', { headers }) // 传递 headers
         
         if (data) {
           this.theme = { ...DEFAULT_THEME, ...data }
@@ -167,7 +167,7 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
     },
 
     // 更新并保存配置
-    async updateTheme(newConfig: Partial<ThemeConfig>, userId?: string) {
+    async updateTheme(newConfig: Partial<ThemeConfig>, token?: string) { // 接受 token 参数
       const nextTheme: ThemeConfig = { ...this.theme, ...newConfig }
       if (newConfig.mode) {
         const colors = resolveColors(newConfig.mode)
@@ -178,35 +178,39 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       this.applyTheme()
       this.syncSystemModeListener()
 
-      if (userId) {
-        try {
-          await $fetch('/api/theme', {
-            method: 'POST',
-            body: {
-              userId,
-              config: this.theme
-            }
-          })
-        } catch (e) {
-          console.error('Failed to save theme:', e)
+      try {
+        const headers: HeadersInit = {}
+        if (token) {
+          headers.Authorization = `Bearer ${token}`
         }
+        await $fetch('/api/theme', {
+          method: 'POST',
+          body: {
+            config: this.theme
+          },
+          headers // 传递 headers
+        })
+      } catch (e) {
+        console.error('Failed to save theme:', e)
       }
     },
 
-    resetTheme(userId?: string) {
+    resetTheme(token?: string) { // 接受 token 参数
       this.theme = { ...DEFAULT_THEME }
       this.applyTheme()
       this.syncSystemModeListener()
 
-      if (userId) {
-        $fetch('/api/theme', {
-          method: 'POST',
-          body: {
-            userId,
-            config: this.theme
-          }
-        }).catch(() => {})
+      const headers: HeadersInit = {}
+      if (token) {
+        headers.Authorization = `Bearer ${token}`
       }
+      $fetch('/api/theme', {
+        method: 'POST',
+        body: {
+          config: this.theme
+        },
+        headers // 传递 headers
+      }).catch(() => {})
     },
 
     syncSystemModeListener() {

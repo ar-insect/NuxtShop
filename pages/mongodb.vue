@@ -81,10 +81,10 @@
                 <p class="text-sm text-gray-500 mt-2">创建时间: {{ new Date(product.createTime).toLocaleString() }}</p>
               </ClientOnly>
               <div class="mt-4 flex space-x-2">
-                <BaseButton @click="startEdit(product)" variant="info" size="sm">
+                <BaseButton variant="info" size="sm" @click="startEdit(product)">
                   编辑
                 </BaseButton>
-                <BaseButton @click="deleteProduct(product._id)" variant="danger" size="sm">
+                <BaseButton variant="danger" size="sm" @click="deleteProduct(product._id)">
                   删除
                 </BaseButton>
               </div>
@@ -100,7 +100,7 @@
     </div>
 
     <BaseModal v-model="isEditing" title="编辑商品" @confirm="updateProduct" @cancel="cancelEdit">
-      <form v-if="currentEditingProduct" @submit.prevent="updateProduct" class="grid grid-cols-1 gap-4">
+      <form v-if="currentEditingProduct" class="grid grid-cols-1 gap-4" @submit.prevent="updateProduct">
         <BaseInput
           id="edit-name"
           v-model="currentEditingProduct.name"

@@ -136,16 +136,12 @@
 
 <script setup lang="ts">
 import {
-  HeartIcon,
   ShoppingBagIcon,
-  ShoppingCartIcon,
   SparklesIcon,
-  StarIcon,
   TagIcon,
   ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
-import StyledButton from '~/components/ui/StyledButton'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
@@ -168,11 +164,10 @@ const ads = [
 
 const router = useRouter()
 const toast = useToast()
-const { addToCart, cartCount } = useCart()
-const { wishlistItems, toggleWishlist, isInWishlist } = useWishlist()
+const { cartCount } = useCart()
+const { wishlistItems } = useWishlist()
 const { getProducts } = useProducts()
 const { getCategoryLabel } = useCategoryMapper()
-const { isAuthenticated } = useAuth()
 
 const email = ref('')
 
@@ -311,8 +306,4 @@ const goToProducts = (query?: Record<string, string | undefined>) => {
   router.push({ path: '/products', query: normalized })
 }
 
-const addToCartAndToast = (p: Product) => {
-  addToCart(p)
-  toast.success(`已加入购物车：${p.title}`)
-}
 </script>

@@ -8,8 +8,8 @@
         <slot name="prefix"/>
       </div>
       <input
-        ref="inputRef"
         :id="inputId"
+        ref="inputRef"
         :type="type"
         :value="modelValue"
         class="focus:outline-none focus:border-[var(--primary-color)] block w-full sm:text-sm border py-2 transition-colors"

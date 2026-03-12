@@ -21,7 +21,7 @@
               <span class="w-3 text-[var(--text-secondary)]">{{ 6 - i }}</span>
               <StarIcon class="w-4 h-4 text-gray-400" />
               <div class="flex-1 h-2 bg-[var(--bg-color)] rounded-full overflow-hidden">
-                <div class="h-full bg-yellow-400" :style="{ width: `${getPercentage(6 - i)}%` }"></div>
+                <div class="h-full bg-yellow-400" :style="{ width: `${getPercentage(6 - i)}%` }"/>
               </div>
               <span class="w-8 text-right text-[var(--text-secondary)]">{{ getCount(6 - i) }}</span>
             </div>
@@ -31,7 +31,7 @@
         <!-- Add Review Form -->
         <div v-if="isAuthenticated" class="border border-[var(--border-color)] bg-[var(--card-bg)] rounded-xl p-6">
           <h3 class="text-lg font-bold mb-4 text-[var(--text-color)]">撰写评价</h3>
-          <form @submit.prevent="submitReview" class="space-y-4">
+          <form class="space-y-4" @submit.prevent="submitReview">
             <div>
               <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">评分</label>
               <div class="flex gap-1">
@@ -60,7 +60,7 @@
                 class="w-full rounded-md border-[var(--border-color)] bg-[var(--bg-color)] text-[var(--text-color)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border placeholder-[var(--text-secondary)]"
                 placeholder="分享您的使用体验..."
                 required
-              ></textarea>
+              />
             </div>
 
             <button 
@@ -84,11 +84,11 @@
         
         <div v-if="loading" class="space-y-6">
           <div v-for="i in 3" :key="i" class="animate-pulse flex gap-4">
-            <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+            <div class="w-12 h-12 bg-gray-200 rounded-full"/>
             <div class="flex-1 space-y-2">
-              <div class="h-4 bg-gray-200 rounded w-1/4"></div>
-              <div class="h-4 bg-gray-200 rounded w-full"></div>
-              <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div class="h-4 bg-gray-200 rounded w-1/4"/>
+              <div class="h-4 bg-gray-200 rounded w-full"/>
+              <div class="h-4 bg-gray-200 rounded w-2/3"/>
             </div>
           </div>
         </div>
@@ -178,7 +178,7 @@ const submitReview = async () => {
   
   submitting.value = true
   try {
-    const { data, error } = await useFetch('/api/reviews/add', {
+    const { error } = await useFetch('/api/reviews/add', {
       method: 'POST',
       body: {
         productId: props.productId,

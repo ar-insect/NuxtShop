@@ -1,17 +1,9 @@
-// server/api/theme.get.ts
-import { findUserById } from '~/server/utils/user';
+// server/api/user/addresses/[id].delete.ts
+import { deleteAddress } from '~/server/utils/address';
 import { ObjectId } from 'mongodb';
 
 export default defineEventHandler(async (event) => {
-  let token = getCookie(event, 'auth-token');
-
-  // 兼容通过 Authorization 头传递的 token（例如：Bearer xxx）
-  if (!token) {
-    const authHeader = getHeader(event, 'authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.slice(7);
-    }
-  }
+  const token = getCookie(event, 'auth-token');
 
   if (!token) {
     throw createError({
@@ -37,23 +29,33 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  try {
-    const user = await findUserById(userId);
+  const addressId = event.context.params?.id;
+  if (!addressId || !ObjectId.isValid(addressId)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid address ID',
+    });
+  }
 
-    if (!user) {
+  try {
+    const success = await deleteAddress(addressId);
+
+    if (!success) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'User not found',
+        statusMessage: '地址未找到或不属于当前用户',
       });
     }
 
-    // 返回用户的偏好设置，如果没有则返回空对象
-    return user.preferences || {};
+    return {
+      code: 200,
+      message: '地址删除成功',
+    };
   } catch (error) {
-    console.error('Error fetching user preferences:', error);
+    console.error('Error deleting address:', error);
     throw createError({
       statusCode: 500,
-      statusMessage: '获取用户偏好设置失败',
+      statusMessage: '删除地址失败',
     });
   }
 });

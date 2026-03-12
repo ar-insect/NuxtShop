@@ -260,11 +260,4 @@ const handleSearch = (query: string) => {
   // debouncedSearch 会由 watch(searchText) 触发
 }
 
-const highlightText = (text: string, query: string) => {
-  if (!query) return text
-  // 转义 query 中的特殊字符，避免正则错误
-  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = new RegExp(`(${escapedQuery})`, 'gi')
-  return text.replace(regex, '<mark class="bg-yellow-200 text-gray-900 rounded-sm px-0.5">$1</mark>')
-}
 </script>

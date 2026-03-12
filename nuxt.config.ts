@@ -126,6 +126,10 @@ export default defineNuxtConfig({
     public: {
       // 客户端公共配置
       disableCaptcha: process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1' || process.env.NODE_ENV === 'test'
+    },
+    admin: { // 添加 admin 配置
+      username: process.env.ADMIN_USERNAME || 'admin',
+      password: process.env.ADMIN_PASSWORD || '123456',
     }
   },
   typescript: {

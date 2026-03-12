@@ -8,10 +8,10 @@
         </BaseButton>
       </div>
       
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div v-if="addresses && addresses.length > 0" class="grid gap-4 sm:grid-cols-2">
         <div 
           v-for="address in addresses" 
-          :key="address.id" 
+          :key="address._id" 
           class="relative border border-[var(--border-color)] rounded-lg p-4 bg-[var(--bg-color)]/50 hover:shadow-sm transition-all"
         >
           <div class="flex justify-between items-start">
@@ -21,23 +21,27 @@
                 <span class="text-sm text-[var(--text-secondary)]">{{ address.phone }}</span>
                 <span v-if="address.isDefault" class="px-1.5 py-0.5 rounded text-xs bg-teal-100 text-teal-800">默认</span>
               </div>
-              <p class="mt-2 text-sm text-[var(--text-secondary)]">{{ address.detail }}</p>
+              <p class="mt-2 text-sm text-[var(--text-secondary)]">{{ address.region }} {{ address.detail }}</p>
             </div>
             <div class="flex gap-2">
               <button class="text-[var(--text-secondary)] hover:text-[var(--primary-color)]" @click="openAddressModal(address)">
                 <PencilIcon class="h-4 w-4" />
               </button>
-              <button class="text-[var(--text-secondary)] hover:text-red-500" @click="deleteAddress(address.id)">
+              <button class="text-[var(--text-secondary)] hover:text-red-500" @click="deleteAddress(address._id)">
                 <TrashIcon class="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
       </div>
+      <div v-else class="text-center text-[var(--text-secondary)] py-8">
+        <p>您还没有添加收货地址。</p>
+        <p>点击“新增地址”开始添加吧！</p>
+      </div>
     </div>
 
     <!-- Address Modal -->
-    <BaseModal v-model="isAddressModalOpen" :title="addressForm.id ? '编辑地址' : '新增地址'">
+    <BaseModal v-model="isAddressModalOpen" :title="addressForm._id ? '编辑地址' : '新增地址'">
       <div class="space-y-4">
         <BaseInput v-model="addressForm.name" label="收货人" placeholder="请输入收货人姓名" />
         <BaseInput v-model="addressForm.phone" label="联系电话" placeholder="请输入联系电话" />
@@ -72,24 +76,23 @@
 import { ref, reactive, watch } from 'vue'
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import RegionSelect from '~/components/ui/RegionSelect.vue'
+import type { Address as MongoAddress } from '~/types/address' // 导入 MongoDB 的 Address 类型
+
+interface Address extends Omit<MongoAddress, '_id' | 'userId' | 'createdAt' | 'updatedAt'> {
+  _id: string; // 确保 _id 存在且为 string
+  userId: string; // 确保 userId 存在且为 string
+}
 
 const toast = useToast()
 const { confirm } = useConfirm()
 
-interface Address {
-  id: string
-  name: string
-  phone: string
-  detail: string
-  isDefault: boolean
-}
+const { data: addresses, refresh: refreshAddresses } = await useAsyncData('user-addresses', () =>
+  $fetch<{ code: number; message: string; data: Address[] }>('/api/user/addresses').then(res => res.data)
+)
 
-const addresses = ref<Address[]>([
-  { id: '1', name: '张三', phone: '13800138000', detail: '上海市 上海市 浦东新区 陆家嘴环路1000号', isDefault: true }
-])
 const isAddressModalOpen = ref(false)
 const addressForm = reactive({
-  id: '',
+  _id: '', // MongoDB 的 _id
   name: '',
   phone: '',
   region: '',
@@ -106,28 +109,21 @@ const isRegionComplete = (region: string) => {
 
 const openAddressModal = (address?: Address) => {
   if (address) {
-    let region = ''
-    let detail = address.detail
-    const parts = address.detail.split(' ')
-    if (parts.length >= 4) {
-      region = parts.slice(0, 3).join(' ')
-      detail = parts.slice(3).join(' ')
-    }
     Object.assign(addressForm, {
-      id: address.id,
+      _id: address._id,
       name: address.name,
       phone: address.phone,
-      region,
-      detail,
+      region: address.region,
+      detail: address.detail,
       isDefault: address.isDefault
     })
   } else {
-    Object.assign(addressForm, { id: '', name: '', phone: '', region: '', detail: '', isDefault: false })
+    Object.assign(addressForm, { _id: '', name: '', phone: '', region: '', detail: '', isDefault: false })
   }
   isAddressModalOpen.value = true
 }
 
-const saveAddress = () => {
+const saveAddress = async () => {
   if (!isRegionComplete(addressForm.region)) {
     toast.error('请选择完整的省、市、区')
     return
@@ -138,43 +134,28 @@ const saveAddress = () => {
     return
   }
 
-  const fullDetail = addressForm.region
-    ? `${addressForm.region} ${addressForm.detail}`.trim()
-    : addressForm.detail
-
-  let currentId = addressForm.id
-  if (addressForm.id) {
-    const index = addresses.value.findIndex(a => a.id === addressForm.id)
-    if (index > -1) {
-      addresses.value[index] = {
-        id: addressForm.id,
-        name: addressForm.name,
-        phone: addressForm.phone,
-        detail: fullDetail,
-        isDefault: addressForm.isDefault
-      }
+  try {
+    if (addressForm._id) {
+      // 更新地址
+      await $fetch(`/api/user/addresses/${addressForm._id}`, {
+        method: 'PUT',
+        body: addressForm
+      })
+      toast.success('地址更新成功')
+    } else {
+      // 新增地址
+      await $fetch('/api/user/addresses', {
+        method: 'POST',
+        body: addressForm
+      })
+      toast.success('地址添加成功')
     }
-  } else {
-    currentId = Date.now().toString()
-    addresses.value.push({
-      id: currentId,
-      name: addressForm.name,
-      phone: addressForm.phone,
-      detail: fullDetail,
-      isDefault: addressForm.isDefault
-    })
+    isAddressModalOpen.value = false
+    await refreshAddresses() // 刷新地址列表
+  } catch (error: any) {
+    toast.error(error.statusMessage || '保存地址失败')
+    console.error('Error saving address:', error)
   }
-  
-  if (addressForm.isDefault) {
-    addresses.value.forEach(a => {
-      if (a.id !== currentId) {
-        a.isDefault = false
-      }
-    })
-  }
-  
-  isAddressModalOpen.value = false
-  toast.success('地址保存成功')
 }
 
 const deleteAddress = async (id: string) => {
@@ -187,24 +168,30 @@ const deleteAddress = async (id: string) => {
   })
 
   if (isConfirmed) {
-    addresses.value = addresses.value.filter(a => a.id !== id)
-    toast.success('地址已删除')
+    try {
+      await $fetch(`/api/user/addresses/${id}`, {
+        method: 'DELETE'
+      })
+      toast.success('地址已删除')
+      await refreshAddresses() // 刷新地址列表
+    } catch (error: any) {
+      toast.error(error.statusMessage || '删除地址失败')
+      console.error('Error deleting address:', error)
+    }
   }
 }
 
-// 将收货地址持久化到 localStorage
-if (import.meta.client) {
-  const savedAddresses = localStorage.getItem('nuxt-shop-addresses')
-  if (savedAddresses) {
+// 监听 isDefault 变化，如果设置为 true，则调用 API 设置默认地址
+watch(() => addressForm.isDefault, async (newVal) => {
+  if (newVal && addressForm._id) {
     try {
-      addresses.value = JSON.parse(savedAddresses)
-    } catch (e) {
-      console.error('Failed to parse addresses', e)
+      await $fetch(`/api/user/addresses/${addressForm._id}/default`, {
+        method: 'PUT'
+      })
+      await refreshAddresses() // 刷新地址列表
+    } catch (error) {
+      console.error('Error setting default address:', error)
     }
   }
-  
-  watch(addresses, (newVal) => {
-    localStorage.setItem('nuxt-shop-addresses', JSON.stringify(newVal))
-  }, { deep: true })
-}
+})
 </script>

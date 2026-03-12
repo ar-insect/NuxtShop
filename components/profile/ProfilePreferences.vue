@@ -119,10 +119,9 @@ import { ref, computed } from 'vue'
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/vue/24/outline'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 
-const { user } = useAuth()
+const { token } = useAuth()
 const themeStore = useThemeStore()
 
-const userId = computed(() => user.value?.id?.toString())
 const themes = [
   { value: 'light', label: '浅色', icon: SunIcon },
   { value: 'dark', label: '深色', icon: MoonIcon },
@@ -130,13 +129,15 @@ const themes = [
 ]
 const currentTheme = computed(() => themeStore.theme.mode)
 const currentFontSize = computed(() => themeStore.theme.fontSize)
-const currentPrimaryColor = computed(() => themeStore.theme.primaryColor)
+const currentPrimaryColor = computed(() => themeStore.theme.primaryColor?.toLowerCase() || '#3b82f6')
 const currentBorderRadius = computed(() => themeStore.theme.borderRadius)
 const currentLanguage = ref('zh-CN')
 const currentTimezone = ref('Asia/Shanghai')
 
 const setTheme = (mode: string) => {
-  themeStore.updateTheme({ mode: mode as any }, userId.value)
+  if (token.value) { // 添加检查
+    themeStore.updateTheme({ mode: mode as any }, token.value) // 传递 token.value
+  }
 }
 
 const fontSizes = [
@@ -163,18 +164,26 @@ const radii = [
 ]
 
 const setFontSize = (size: typeof fontSizes[number]['value']) => {
-  themeStore.updateTheme({ fontSize: size }, userId.value)
+  if (token.value) { // 添加检查
+    themeStore.updateTheme({ fontSize: size }, token.value) // 传递 token.value
+  }
 }
 
 const setPrimaryColor = (color: string) => {
-  themeStore.updateTheme({ primaryColor: color }, userId.value)
+  if (token.value) { // 添加检查
+    themeStore.updateTheme({ primaryColor: color }, token.value) // 传递 token.value
+  }
 }
 
 const setBorderRadius = (radius: string) => {
-  themeStore.updateTheme({ borderRadius: radius }, userId.value)
+  if (token.value) { // 添加检查
+    themeStore.updateTheme({ borderRadius: radius }, token.value) // 传递 token.value
+  }
 }
 
 const resetTheme = () => {
-  themeStore.resetTheme(userId.value)
+  if (token.value) { // 添加检查
+    themeStore.resetTheme(token.value) // 传递 token.value
+  }
 }
 </script>

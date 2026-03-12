@@ -77,7 +77,6 @@ const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const { login } = useAuth()
-const toast = useToast()
 
 useSeoMeta({
   title: '用户登录',

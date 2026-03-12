@@ -10,7 +10,7 @@
           <NuxtLink to="/" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
             返回首页
           </NuxtLink>
-          <button @click="handleClearError" class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition duration-300">
+          <button class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition duration-300" @click="handleClearError">
             刷新页面
           </button>
         </div>

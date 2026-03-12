@@ -1,79 +1,61 @@
-import { useRedis } from '~/server/utils/redis'
+// server/api/user/update.post.ts
+import { updateUser } from '~/server/utils/user';
+import { ObjectId } from 'mongodb';
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const { name, avatar } = body
+  const body = await readBody(event);
+  const { name, avatar } = body;
 
-  const redis = useRedis()
-  if (!redis) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Redis service unavailable'
-    })
-  }
-
-  const token = getCookie(event, 'auth-token')
+  const token = getCookie(event, 'auth-token');
   if (!token) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Unauthorized'
-    })
+      statusMessage: 'Unauthorized',
+    });
   }
 
-  let userId: number | null = null
-  if (token.startsWith('mock-jwt-token-')) {
-    userId = 1
-  } else if (token.startsWith('user-jwt-token-')) {
-    const username = token.slice('user-jwt-token-'.length)
-    const authData = await redis.get(`user:auth:${username}`)
-    if (!authData) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: 'Invalid token'
-      })
-    }
-    const record = JSON.parse(authData)
-    userId = typeof record?.id === 'number' ? record.id : null
+  let userId: string | null = null;
+  if (token.startsWith('user-jwt-token-')) {
+    userId = token.replace('user-jwt-token-', '');
   } else {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
+      statusMessage: 'Invalid token',
+    });
   }
 
-  if (!userId) {
+  if (!userId || !ObjectId.isValid(userId)) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
+      statusMessage: 'Invalid token',
+    });
   }
 
   try {
-    const key = `user:profile:${userId}`
-    
-    // 获取现有资料并合并更新
-    const existingData = await redis.get(key)
-    const currentProfile = existingData ? JSON.parse(existingData) : {}
+    const updatedUser = await updateUser(userId, { name, avatar });
 
-    const newProfile = {
-      ...currentProfile,
-      ...(name && { name }),
-      ...(avatar && { avatar }),
-      updatedAt: new Date().toISOString()
+    if (!updatedUser) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'User not found',
+      });
     }
-
-    await redis.set(key, JSON.stringify(newProfile))
 
     return {
       code: 200,
       message: '个人资料更新成功',
-      data: newProfile
-    }
+      data: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+      },
+    };
   } catch (error) {
-    console.error('Error updating user profile:', error)
+    console.error('Error updating user profile:', error);
     throw createError({
       statusCode: 500,
-      statusMessage: '更新个人资料失败'
-    })
+      statusMessage: '更新个人资料失败',
+    });
   }
-})
+});

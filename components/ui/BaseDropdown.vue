@@ -1,6 +1,6 @@
 <template>
-  <div class="relative inline-block text-left" ref="containerRef">
-    <div @click="toggleDropdown" class="cursor-pointer">
+  <div ref="containerRef" class="relative inline-block text-left">
+    <div class="cursor-pointer" @click="toggleDropdown">
       <slot name="trigger" :is-open="isOpen">
         <button
           type="button"

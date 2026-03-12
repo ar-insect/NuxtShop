@@ -325,7 +325,7 @@
             <template #default="{ close }">
               <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">查看详情</a>
               <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">编辑内容</a>
-              <div class="border-t border-[var(--border-color)] my-1"></div>
+              <div class="border-t border-[var(--border-color)] my-1"/>
               <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50" @click.prevent="close">删除项目</a>
             </template>
           </BaseDropdown>

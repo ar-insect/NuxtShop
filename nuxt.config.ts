@@ -119,6 +119,10 @@ export default defineNuxtConfig({
       password: process.env.REDIS_PASSWORD || '',
       db: Number(process.env.REDIS_DB) || 0
     },
+    mongodb: {
+      uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
+      dbName: process.env.MONGODB_DB_NAME || 'nuxtshop'
+    },
     public: {
       // 客户端公共配置
       disableCaptcha: process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1' || process.env.NODE_ENV === 'test'

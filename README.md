@@ -138,7 +138,25 @@
   - Key: `wishlist:{sessionId}`
   - 机制: 基于会话 ID (Cookie) 存储用户收藏的商品列表。
 
-### 10. 自动化测试
+### 10. 数据持久化 (MongoDB Integration)
+本项目集成了 MongoDB 作为 NoSQL 数据库，用于存储和管理非结构化数据，例如商品信息。
+
+- **配置**:
+  - `nuxt.config.ts` 中通过 `runtimeConfig` 配置 `MONGODB_URI` 和 `MONGODB_DB_NAME`。
+  - 环境变量: 在 `.env` 文件中设置 `MONGODB_URI` (MongoDB 连接字符串) 和 `MONGODB_DB_NAME` (数据库名称)。
+- **连接管理**:
+  - `server/utils/mongodb.ts`: 封装了 MongoDB 的连接逻辑，确保单例模式，避免重复连接。
+  - `server/plugins/mongodb.ts`: Nuxt Nitro 插件，在应用启动时连接 MongoDB，应用关闭时断开连接。
+- **CRUD 工具**:
+  - `server/utils/mongodb.ts` 中提供了 `find`, `findOne`, `insertOne`, `updateOne`, `deleteOne` 等通用 CRUD 方法，方便在服务端 API 中调用。
+- **演示页面**:
+  - `pages/mongodb.vue`: 提供了完整的商品 CRUD (创建、读取、更新、删除) 演示。
+  - `server/api/shop/products.get.ts`: 获取商品列表，如果集合为空则自动插入示例数据。
+  - `server/api/shop/products.post.ts`: 创建新商品。
+  - `server/api/shop/products/[id].put.ts`: 更新指定商品。
+  - `server/api/shop/products/[id].delete.ts`: 删除指定商品。
+
+### 11. 自动化测试
 
 #### 10.1 端到端测试 (Playwright BDD)
 

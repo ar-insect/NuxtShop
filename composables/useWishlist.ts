@@ -1,4 +1,5 @@
 import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 /**
  * 收藏夹管理组合式函数。
@@ -34,10 +35,7 @@ export const useWishlist = () => {
    */
   const saveWishlist = async () => {
     try {
-      await $fetch('/api/wishlist', {
-        method: 'POST',
-        body: wishlistItems.value
-      })
+      await http.post('/wishlist', wishlistItems.value)
     } catch (e) {
       console.error('Failed to save wishlist', e)
     }

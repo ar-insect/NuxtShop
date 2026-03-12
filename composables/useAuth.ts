@@ -3,7 +3,7 @@ import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useOrders } from '~/modules/order/composables/useOrders'
 import type { User as MongoUser } from '~/types/user'; // 导入 MongoDB 的 User 类型
-// import { ObjectId } from 'mongodb'; // 移除 ObjectId 导入
+import { http } from '~/utils/http'
 
 /**
  * 表示已登录用户的接口。
@@ -57,9 +57,9 @@ export const useAuth = () => {
    */
   const login = async (username: string, password: string, options: LoginOptions = {}) => {
     try {
-      const res = await $fetch<{ token: string; user: User }>('/api/auth/login' as any, {
-        method: 'POST',
-        body: { username, password }
+      const res = await http.post<{ token: string; user: User }>('/auth/login', {
+        username,
+        password
       })
       token.value = res.token
       user.value = res.user as User
@@ -93,9 +93,11 @@ export const useAuth = () => {
    */
   const register = async (username: string, password: string, confirmPassword: string, phone?: string) => {
     try {
-      const res = await $fetch<{ success: boolean; message: string; user: User }>('/api/auth/register' as any, {
-        method: 'POST',
-        body: { username, password, confirmPassword, phone }
+      const res = await http.post<{ success: boolean; message: string; user: User }>('/auth/register', {
+        username,
+        password,
+        confirmPassword,
+        phone
       })
       toast.success('注册成功！请登录。')
       // 注册成功后自动登录

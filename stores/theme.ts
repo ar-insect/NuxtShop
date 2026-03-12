@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { http } from '~/utils/http'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -144,15 +145,11 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       useHead({ style: [{ innerHTML: systemCss }] })
     },
 
-    // 从服务端加载配置
-    async fetchTheme(token?: string) { // 接受 token 参数
+    // 从服务端加载配置（使用同域 cookie 进行鉴权，无需显式传 token）
+    async fetchTheme() {
       this.isLoading = true
       try {
-        const headers: HeadersInit = {}
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
-        const data = await $fetch<ThemeConfig | Record<string, never>>('/api/theme', { headers }) // 传递 headers
+        const data = await http.get<ThemeConfig | Record<string, never>>('/theme')
         
         if (data) {
           this.theme = { ...DEFAULT_THEME, ...data }
@@ -166,8 +163,8 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       }
     },
 
-    // 更新并保存配置
-    async updateTheme(newConfig: Partial<ThemeConfig>, token?: string) { // 接受 token 参数
+    // 更新并保存配置（使用同域 cookie 进行鉴权，无需显式传 token）
+    async updateTheme(newConfig: Partial<ThemeConfig>) {
       const nextTheme: ThemeConfig = { ...this.theme, ...newConfig }
       if (newConfig.mode) {
         const colors = resolveColors(newConfig.mode)
@@ -179,38 +176,18 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       this.syncSystemModeListener()
 
       try {
-        const headers: HeadersInit = {}
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
-        await $fetch('/api/theme', {
-          method: 'POST',
-          body: {
-            config: this.theme
-          },
-          headers // 传递 headers
-        })
+        await http.post('/theme', { config: this.theme })
       } catch (e) {
         console.error('Failed to save theme:', e)
       }
     },
 
-    resetTheme(token?: string) { // 接受 token 参数
+    resetTheme() {
       this.theme = { ...DEFAULT_THEME }
       this.applyTheme()
       this.syncSystemModeListener()
 
-      const headers: HeadersInit = {}
-      if (token) {
-        headers.Authorization = `Bearer ${token}`
-      }
-      $fetch('/api/theme', {
-        method: 'POST',
-        body: {
-          config: this.theme
-        },
-        headers // 传递 headers
-      }).catch(() => {})
+      http.post('/theme', { config: this.theme }).catch(() => {})
     },
 
     syncSystemModeListener() {

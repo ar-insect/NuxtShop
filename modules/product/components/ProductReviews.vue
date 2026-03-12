@@ -122,6 +122,7 @@
 
 <script setup lang="ts">
 import { StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
+import { http } from '~/utils/http'
 
 const props = defineProps<{
   productId: number
@@ -178,18 +179,11 @@ const submitReview = async () => {
   
   submitting.value = true
   try {
-    const { error } = await useFetch('/api/reviews/add', {
-      method: 'POST',
-      body: {
-        productId: props.productId,
-        rating: form.rating,
-        content: form.content
-      }
+    await http.post('/reviews/add', {
+      productId: props.productId,
+      rating: form.rating,
+      content: form.content
     })
-
-    if (error.value) {
-      throw new Error(error.value.statusMessage || '提交失败')
-    }
 
     toast.success('评价提交成功')
     form.rating = 0

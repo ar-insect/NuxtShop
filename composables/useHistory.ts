@@ -1,4 +1,5 @@
 import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 /**
  * 浏览历史管理组合式函数。
@@ -23,7 +24,7 @@ export const useHistory = () => {
    */
   const fetchHistory = async () => {
     try {
-      const data = await $fetch<Product[]>('/api/history')
+      const data = await http.get<Product[]>('/history')
       historyItems.value = data || []
     } catch (e) {
       console.error('Failed to fetch history:', e)
@@ -69,9 +70,7 @@ export const useHistory = () => {
   const clearHistory = async () => {
     historyItems.value = []
     try {
-      await $fetch('/api/history/clear', {
-        method: 'POST'
-      })
+      await http.post('/history/clear')
     } catch (e) {
       console.error('Failed to clear history:', e)
     }

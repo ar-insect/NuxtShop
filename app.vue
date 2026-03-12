@@ -30,10 +30,10 @@ useHead({
   ]
 })
 
-// 初始化主题
+// 初始化主题：如果已登录则加载用户偏好，否则使用默认主题
 const initTheme = async () => {
-  if (user.value?.id) {
-    await themeStore.fetchTheme(user.value.id.toString())
+  if (user.value?._id) {
+    await themeStore.fetchTheme()
   }
   themeStore.applyTheme()
   themeStore.syncSystemModeListener()
@@ -43,9 +43,9 @@ const initTheme = async () => {
 await initTheme()
 
 // 监听用户登录状态变化，重新加载主题
-watch(() => user.value?.id, async (newId) => {
+watch(() => user.value?._id, async (newId) => {
   if (newId) {
-    await themeStore.fetchTheme(newId.toString())
+    await themeStore.fetchTheme()
   } else {
     themeStore.resetTheme()
   }

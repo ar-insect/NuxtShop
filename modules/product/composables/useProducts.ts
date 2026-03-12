@@ -12,6 +12,8 @@
  * @property {number} rating.rate - 平均评分
  * @property {number} rating.count - 评分人数
  */
+import { http } from '~/utils/http'
+
 export interface Product {
   id: number
   title: string
@@ -44,7 +46,7 @@ export const useProducts = () => {
   const ensureProducts = async () => {
     if (products.value.length === 0) {
       try {
-        const data = await $fetch<Product[]>('/api/products')
+        const data = await http.get<Product[]>('/products')
         products.value = data
       } catch (error) {
         console.error('Failed to fetch products:', error)

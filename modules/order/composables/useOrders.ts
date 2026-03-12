@@ -1,5 +1,6 @@
 
 import type { CartItem } from '~/modules/cart/composables/useCart'
+import { http } from '~/utils/http'
 
 /**
  * 表示一笔订单的数据结构。
@@ -73,10 +74,7 @@ export const useOrders = () => {
     }
     
     try {
-      await $fetch('/api/orders', {
-        method: 'POST',
-        body: newOrder
-      })
+      await http.post('/orders', newOrder)
       orders.value.unshift(newOrder)
       return newOrder
     } catch (e) {
@@ -105,9 +103,7 @@ export const useOrders = () => {
   const deleteOrder = async (id: string) => {
     // 从服务端删除
     try {
-      await $fetch(`/api/orders?id=${id}`, {
-        method: 'DELETE'
-      })
+      await http.delete('/orders', { id })
       // 从本地状态删除
       orders.value = orders.value.filter(o => o.id !== id)
     } catch (e) {

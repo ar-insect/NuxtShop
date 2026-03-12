@@ -13,11 +13,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // 未登录时直接返回空配置，让前端使用默认主题，而不是抛 401
   if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    });
+    return {};
   }
 
   let userId: string | null = null;

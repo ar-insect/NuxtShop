@@ -1,4 +1,5 @@
 import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 /**
  * 表示购物车中的一条商品项。
@@ -48,10 +49,7 @@ export const useCart = () => {
    */
   const saveCart = async () => {
     try {
-      await $fetch('/api/cart', {
-        method: 'POST',
-        body: cartItems.value
-      })
+      await http.post('/cart', cartItems.value)
     } catch (e) {
       console.error('Failed to save cart', e)
     }

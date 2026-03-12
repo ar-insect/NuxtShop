@@ -119,7 +119,6 @@ import { ref, computed } from 'vue'
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/vue/24/outline'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 
-const { token } = useAuth()
 const themeStore = useThemeStore()
 
 const themes = [
@@ -135,9 +134,7 @@ const currentLanguage = ref('zh-CN')
 const currentTimezone = ref('Asia/Shanghai')
 
 const setTheme = (mode: string) => {
-  if (token.value) { // 添加检查
-    themeStore.updateTheme({ mode: mode as any }, token.value) // 传递 token.value
-  }
+  themeStore.updateTheme({ mode: mode as any })
 }
 
 const fontSizes = [
@@ -164,26 +161,18 @@ const radii = [
 ]
 
 const setFontSize = (size: typeof fontSizes[number]['value']) => {
-  if (token.value) { // 添加检查
-    themeStore.updateTheme({ fontSize: size }, token.value) // 传递 token.value
-  }
+  themeStore.updateTheme({ fontSize: size })
 }
 
 const setPrimaryColor = (color: string) => {
-  if (token.value) { // 添加检查
-    themeStore.updateTheme({ primaryColor: color }, token.value) // 传递 token.value
-  }
+  themeStore.updateTheme({ primaryColor: color })
 }
 
 const setBorderRadius = (radius: string) => {
-  if (token.value) { // 添加检查
-    themeStore.updateTheme({ borderRadius: radius }, token.value) // 传递 token.value
-  }
+  themeStore.updateTheme({ borderRadius: radius })
 }
 
 const resetTheme = () => {
-  if (token.value) { // 添加检查
-    themeStore.resetTheme(token.value) // 传递 token.value
-  }
+  themeStore.resetTheme()
 }
 </script>

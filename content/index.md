@@ -110,6 +110,39 @@ npm run test:unit # 单元测试（Vitest）
 - **数据持久化与缓存**: 使用 MongoDB 存储商品、购物车、订单、收藏夹、浏览历史、评价和用户主题偏好等核心数据，并集成 Redis 用于日志缓存与部分页面/接口缓存（配合 ISR）。
 - **功能演示**: 包含完整的商品列表、详情、购物车、订单管理、收藏夹及用户中心功能。
 
+## 🌐 多语言 (i18n)
+
+项目内置了基础的中英双语支持，基于一个轻量级的自定义 i18n 实现：
+
+- **语言包位置**  
+  - `locales/zh-CN.ts`：中文文案  
+  - `locales/en-US.ts`：英文文案  
+  - 统一通过 `ui.*` / `pages.*` / `profile.*` / `demo.*` 等命名空间组织。
+
+- **运行时 Store 与组合式**  
+  - `stores/i18n.ts`：管理当前语言 (`locale`) 与持久化（localStorage）。  
+  - `composables/useI18n.ts`：提供 `t(key, params?)` 和 `setLocale`，支持占位符（如 `{count}`）替换。
+
+- **默认语言与持久化**  
+  - SSR 首屏使用默认语言（当前为中文），避免 Hydration mismatch。  
+  - 客户端挂载后根据 localStorage 中的 `nuxtshop-locale` 或浏览器语言自动切换。  
+  - 登录用户的语言偏好会持久化到用户文档 `language` 字段，后续可用于 SSR 侧语言选择。
+
+- **切换入口**  
+  - 个人中心 → 「偏好设置」中提供语言选择（简体中文 / English），支持：  
+    - 更新 Pinia 中的 `locale`；  
+    - 写入 localStorage；  
+    - （登录状态下）通过 `/api/user/update` 写入用户偏好。
+
+- **覆盖范围示例**  
+  - 顶部导航与 Dashboard 布局导航（Home / Profile / Cart / Wishlist 等）。  
+  - 登录 / 注册 / 首页 / 商品卡片 / 评价组件。  
+  - 个人中心（基本信息 / 收货地址 / 安全设置 / 偏好设置 / 退出登录）。  
+  - 通用 UI 组件：`BaseModal` / `BaseConfirm` / `BaseLoading` / `BasePagination` / 验证滑块 / 拼图验证码等。  
+  - `components-demo` 页面完整中英文说明。
+
+要新增多语言文案时，建议按现有命名空间在 `locales/*` 中补充 key，然后通过 `useI18n().t('xxx.yyy')` 在组件中使用。
+
 ## 📂 目录结构
 
 ```bash

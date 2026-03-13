@@ -2,7 +2,7 @@
   <nav
     v-if="!hideIfSingle || totalPages > 1"
     class="inline-flex items-center gap-2"
-    :aria-label="ariaLabel"
+    :aria-label="ariaLabelComputed"
   >
     <template v-if="showPrevNext">
       <component
@@ -13,7 +13,7 @@
         :style="controlStyle"
         @click="handlePageClick(currentPage - 1, $event)"
       >
-        上一页
+        {{ t('ui.pagination.prev') }}
       </component>
       <button
         v-else
@@ -23,7 +23,7 @@
         :disabled="disabled || currentPage <= 1"
         @click="goToPage(currentPage - 1)"
       >
-        上一页
+        {{ t('ui.pagination.prev') }}
       </button>
     </template>
 
@@ -60,7 +60,7 @@
         :style="controlStyle"
         @click="handlePageClick(currentPage + 1, $event)"
       >
-        下一页
+        {{ t('ui.pagination.next') }}
       </component>
       <button
         v-else
@@ -70,7 +70,7 @@
         :disabled="disabled || currentPage >= totalPages"
         @click="goToPage(currentPage + 1)"
       >
-        下一页
+        {{ t('ui.pagination.next') }}
       </button>
     </template>
   </nav>
@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import { computed, resolveComponent } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 import type { RouteLocationRaw } from 'vue-router'
 
 type PaginationItem =
@@ -103,9 +104,11 @@ const props = withDefaults(defineProps<Props>(), {
   showEdges: true,
   hideIfSingle: true,
   disabled: false,
-  ariaLabel: '分页',
+  ariaLabel: '',
   getTo: undefined
 })
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
@@ -113,6 +116,7 @@ const emit = defineEmits<{
 }>()
 
 const NuxtLink = resolveComponent('NuxtLink')
+const ariaLabelComputed = computed(() => props.ariaLabel || t('ui.pagination.aria'))
 
 const clamp = (value: number, min: number, max: number) => {
   if (Number.isNaN(value)) return min

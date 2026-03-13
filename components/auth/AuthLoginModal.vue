@@ -1,28 +1,28 @@
 <template>
-  <BaseModal v-model="isOpen" title="登录" @cancel="closeLoginModal">
+  <BaseModal v-model="isOpen" :title="t('pages.login.heading')" @cancel="closeLoginModal">
     <form class="space-y-4" @submit.prevent="handleLogin">
       <BaseInput
         id="login-username"
         v-model="username"
-        label="用户名"
+        :label="t('pages.login.usernameLabel')"
         type="text"
         required
       />
       <BaseInput
         id="login-password"
         v-model="password"
-        label="密码"
+        :label="t('pages.login.passwordLabel')"
         type="password"
         required
       />
       <BaseButton type="submit" :loading="loading" block>
-        登录
+        {{ t('pages.login.submit') }}
       </BaseButton>
     </form>
     <div class="mt-4 text-center text-sm">
-      还没有账户？
+      {{ t('pages.login.goRegisterPrefix') }}
       <NuxtLink to="/register" class="text-[var(--primary-color)] hover:underline" @click="closeLoginModal">
-        立即注册
+        {{ t('pages.login.goRegisterLink') }}
       </NuxtLink>
     </div>
   </BaseModal>
@@ -33,10 +33,12 @@ import { ref } from 'vue'
 import { useLoginModal } from '~/composables/useLoginModal'
 import { useAuth } from '~/composables/useAuth'
 import { validateUsername, validatePassword } from '~/utils/validation'
+import { useI18n } from '~/composables/useI18n'
 
 const { isOpen, closeLoginModal } = useLoginModal()
 const { login } = useAuth()
 const toast = useToast()
+const { t } = useI18n()
 
 const username = ref('')
 const password = ref('')
@@ -45,12 +47,12 @@ const loading = ref(false)
 const handleLogin = async () => {
   const usernameError = validateUsername(username.value)
   if (usernameError) {
-    toast.error(usernameError)
+    toast.error(t(usernameError))
     return
   }
   const passwordError = validatePassword(password.value)
   if (passwordError) {
-    toast.error(passwordError)
+    toast.error(t(passwordError))
     return
   }
 

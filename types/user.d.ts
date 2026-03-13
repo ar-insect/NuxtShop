@@ -10,6 +10,8 @@ export interface User {
   avatar?: string;
   name?: string;
   phone?: string;
+   language?: 'zh-CN' | 'en-US';
+   timezone?: string;
   createdAt: Date;
   updatedAt?: Date;
   preferences?: ThemeConfig; // 添加偏好设置字段

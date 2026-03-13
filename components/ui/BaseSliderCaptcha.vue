@@ -6,7 +6,7 @@
         class="w-full text-center text-sm text-gray-400 transition-opacity duration-300 select-none"
         :class="{ 'opacity-0': isMoving || verified }"
       >
-        {{ text }}
+        {{ displayText }}
       </div>
 
       <!-- Success Background -->
@@ -16,7 +16,7 @@
         :style="{ width: `${sliderWidth}px` }"
       >
         <div v-if="verified" class="w-full h-full flex items-center justify-center text-white text-sm font-medium">
-          验证通过
+          {{ t('ui.sliderCaptcha.success') }}
         </div>
       </div>
 
@@ -44,15 +44,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
+
 interface Props {
   text?: string
   tolerance?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  text: '向右滑动验证',
-  tolerance: 5 // Allowable pixel difference to consider as full slide
+  text: '',
+  tolerance: 5
 })
+
+const { t } = useI18n()
+const displayText = computed(() => props.text || t('ui.sliderCaptcha.text'))
 
 const emit = defineEmits<{
   (e: 'success'): void

@@ -1,6 +1,96 @@
 # NuxtShop 全栈电商实战模板
 
-本项目是一个基于 Nuxt 3 的全栈电商演示应用，采用现代化的模块化架构。它不仅集成了 MongoDB/Redis 数据持久化、Playwright 自动化测试 (E2E/BDD) 和 Docker 部署方案，还包含了服务端渲染 (SSR)、增量静态再生 (ISR) 等企业级特性，旨在提供一个功能完备、最佳实践的开发参考。
+本项目是一个基于 Nuxt 3 的全栈电商演示应用，采用现代化的模块化架构。它不仅集成了 MongoDB 数据持久化、Playwright 自动化测试 (E2E/BDD) 和 Docker 部署方案，还包含了服务端渲染 (SSR)、增量静态再生 (ISR) 等企业级特性，旨在提供一个功能完备、可阅读、可二次开发的电商最佳实践参考。
+
+> 项目定位：**学习 / 内部脚手架级别的示例电商应用**  
+> 适合想要快速了解「Nuxt3 + MongoDB + Playwright + 模块化架构」的开发者。
+
+## 🧰 技术栈概览
+
+- 前端框架：Nuxt 3 (Vue 3, `<script setup>`, Composition API)
+- UI 与样式：Tailwind CSS、少量 TSX 组件、Css 变量主题系统
+- 数据层：MongoDB（商品 / 购物车 / 订单 / 收藏 / 浏览历史 / 评价 / 地址 / 用户偏好）
+- 认证与会话：基于 Cookie 的自定义登录 / 注册流程
+- 测试框架：Playwright (E2E + BDD)、Vitest (单元测试)
+- 部署与运行：Docker / PM2 / 原生 Node 运行
+
+---
+
+## ⚡ 快速开始
+
+### 1) 克隆项目并安装依赖
+
+```bash
+git clone https://github.com/ar-insect/NuxtShop.git
+cd NuxtShop
+
+# 推荐使用 pnpm / npm / yarn 三选一
+npm install
+```
+
+### 2) 准备 MongoDB
+
+- 本地已安装 MongoDB，或使用 Docker：
+
+```bash
+docker run -d --name nuxtshop-mongo -p 27017:27017 mongo:6
+```
+
+#### 2.1 准备 Redis（推荐）
+
+项目内置了基于 Redis 的**日志缓存**和**页面/接口缓存（配合 ISR）**。  
+未启动 Redis 时，核心业务功能（商品 / 购物车 / 订单等）仍可运行，但：
+
+- 日志写入会退化为控制台输出；
+- 部分依赖 Redis 的缓存策略会自动降级为实时计算。
+
+建议在本地也启动一个 Redis，体验完整功能：
+
+```bash
+docker run -d --name nuxtshop-redis -p 6379:6379 redis:7
+```
+
+### 3) 配置环境变量
+
+复制示例配置并按需修改：
+
+```bash
+cp .env.example .env
+```
+
+`.env` 中至少需要：
+
+- `MONGODB_URI`：MongoDB 连接字符串（例如：`mongodb://localhost:27017`）
+- `MONGODB_DB_NAME`：数据库名称（例如：`nuxtshop`）
+- 可选：管理员账号（如果已在 runtimeConfig 中配置）
+
+如果启用了 Redis，还可以配置以下可选变量（不配置则使用默认值）：
+
+- `REDIS_HOST`（默认 `localhost`）
+- `REDIS_PORT`（默认 `6379`）
+- `REDIS_PASSWORD`（默认空）
+- `REDIS_DB`（默认 `0`）
+
+### 4) 启动开发服务器
+
+```bash
+npm run dev
+```
+
+默认打开：http://localhost:3000  
+首次启动会自动进行种子数据初始化，并在 MongoDB 中创建商品、用户等基础数据。
+
+### 5) 常用脚本
+
+```bash
+npm run dev       # 开发模式
+npm run build     # 生产构建
+npm run lint      # 代码检查（ESLint）
+npm run test:unit # 单元测试（Vitest）
+# Playwright E2E / BDD 可按 README 下方测试章节执行
+```
+
+---
 
 ## 🚀 特性
 
@@ -17,7 +107,7 @@
 - **调试配置**: 预配置 VS Code `launch.json`，支持客户端和服务端断点调试。
 - **SSR 支持**: 包含服务端渲染 API 和页面调试示例，支持 `useAsyncData` 数据获取。
 - **ISR 渲染**: 配置了增量静态再生 (ISR)，支持页面级缓存策略。
-- **数据持久化**: 使用 MongoDB 存储商品、购物车、订单、收藏夹、浏览历史、评价和用户主题偏好等核心数据，并可选集成 Redis 作为缓存与日志存储。
+- **数据持久化与缓存**: 使用 MongoDB 存储商品、购物车、订单、收藏夹、浏览历史、评价和用户主题偏好等核心数据，并集成 Redis 用于日志缓存与部分页面/接口缓存（配合 ISR）。
 - **功能演示**: 包含完整的商品列表、详情、购物车、订单管理、收藏夹及用户中心功能。
 
 ## 📂 目录结构
@@ -104,7 +194,7 @@
 - **Components**: `components/ui/` (基础 UI 组件), `components/home/` (首页组件)。
 - **Composables**: `useAuth` (认证), `useToast` (提示), `useConfirm` (确认框)。
 - **Utils**: `http.ts`, `format.ts` 等通用工具。
-- **Server Utils**: `server/utils/mongodb.ts` (MongoDB 工具), `server/utils/redis.ts` (Redis 客户端，可选缓存), `server/utils/session.ts` (会话管理)。
+- **Server Utils**: `server/utils/mongodb.ts` (MongoDB 工具), `server/utils/redis.ts` (Redis 客户端，用于日志与缓存), `server/utils/session.ts` (会话管理)。
 
 ### 4. 页面布局 (Layouts)
 - **`default`**: 默认布局，包含头部导航和底部版权信息。
@@ -122,15 +212,18 @@
   - `/docs`: SWR (Stale-While-Revalidate)，非阻塞后台更新。
   - `/products/**`: 缓存 1 小时 (3600秒)，适用于商品详情页。
 
-### 7. 数据持久化 (Redis Integration)
-本项目中的核心业务数据已全部迁移至 MongoDB。Redis 作为可选组件，主要用于缓存与扩展示例：
+### 7. 缓存与日志 (Redis Integration)
+本项目中的核心业务数据已全部迁移至 MongoDB。Redis 用于：
 
-- **缓存 / 临时数据**:
-  - 可用于实现页面级缓存、限流、会话扩展等（根据业务需要接入）。
-- **脚本与示例**:
-  - 保留 `server/utils/redis.ts` 作为 Redis 工具封装示例，方便在实际项目中扩展使用。
+- **日志 / 监控**:
+  - 记录关键操作日志，支持后续扩展为实时监控或仪表盘。
+- **页面 / 接口缓存**:
+  - 与 Nuxt `routeRules` / ISR 配合，对部分页面或接口结果进行短期缓存，减少重复计算。
 
-在默认演示环境下，即使未启动 Redis，核心功能（商品、购物车、订单、收藏、浏览历史、评价等）也可以正常工作。
+在默认演示环境下，如果未启动 Redis，核心业务功能（商品、购物车、订单、收藏、浏览历史、评价等）仍然可以正常工作，只是：
+
+- 日志会退化为控制台输出；
+- 与 Redis 相关的缓存策略会自动降级为实时查询。
 
 ### 8. 数据持久化 (MongoDB Integration)
 本项目集成了 MongoDB 作为核心数据存储，用于持久化所有电商相关业务数据。
@@ -213,6 +306,69 @@ Vitest 配置位于根目录的 `vitest.config.ts`：
 - 使用 `environment: 'jsdom'` 以便渲染 Vue 组件
 - 配置 `~` 和 `@` 别名指向项目根目录，方便在测试中使用与 Nuxt 一致的导入路径
 - 默认会扫描并执行 `tests/unit/**/*.test.ts` 下的测试文件
+
+---
+
+## 🤝 参与贡献
+
+欢迎通过 Issue / PR 一起完善 NuxtShop。如果你准备提 PR，建议遵循以下流程：
+
+1. **Fork 仓库并创建分支**
+   - 从 `main` 分支拉一个新的 feature 分支，例如：`feat/cart-discount`、`fix/order-status-badge`。
+2. **本地开发与验证**
+   - 安装依赖并启动开发环境：
+     ```bash
+     npm install
+     npm run dev
+     ```
+   - 修改代码后，至少运行：
+     ```bash
+     npm run lint
+     npm run test:unit
+     ```
+   - 如修改了核心流程（登录、下单、购物车、评价等），建议同时运行 E2E 测试。
+3. **代码风格与约定**
+   - 使用 TypeScript + `<script setup>`。
+   - 业务逻辑优先放在 `modules/*/composables` 和 `server/utils/*` 中，组件尽量保持展示职责。
+   - UI 相关优先复用现有的 Base 组件（`BaseButton`、`BaseInput`、`BaseDropdown` 等）。
+4. **提交与 PR**
+   - Commit 信息保持简洁清晰，推荐使用英文，例如：`feat: add rating-based product sorting`。
+   - 在 PR 描述中简单说明：
+     - 要解决的问题 / 新增的能力；
+     - 涉及的模块与主要文件；
+     - 如何验证（手动步骤或测试命令）。
+
+欢迎补充更多测试用例或文档，即使是小的文案修正和注释补充，对项目也很有价值。
+
+---
+
+## 🗺 Roadmap（方向规划）
+
+项目目前已经覆盖了从「浏览 → 加购 → 下单 → 评价 → 用户中心」的完整闭环，后续会围绕以下方向继续演进（也非常欢迎 PR 一起来做）：
+
+- **国际化与可配置文案**
+  - 抽离中文文案到 `locales`，支持英文或多语言版本。
+  - 提供更易修改的文案配置，用于二次定制。
+
+- **更多电商场景示例**
+  - 优惠券 / 满减活动 / 限时折扣等促销流程。
+  - 更丰富的订单状态流转（支付中、退款中、部分发货等）。
+  - 更完整的售后流程示例（退货 / 换货占位）。
+
+- **后台与运营面板**
+  - 简单的管理员后台：商品管理、订单概览、用户概览。
+  - 商品统计与看板（销量、浏览量、收藏量等 Mongo 聚合示例）。
+
+- **工程与质量提升**
+  - 补充核心模块（Cart / Order / Wishlist / Review）的单测覆盖。
+  - 完善 GitHub Actions CI：在 PR 上自动跑 `lint` 和测试。
+  - 引入更多 Lint 规则（如对 Vue template 的约束），保持代码风格一致。
+
+- **扩展集成示例**
+  - 国际支付 / 第三方登录等“集成型”示例（以 mock/沙箱形式展示）。
+  - 外部搜索服务 / 推荐服务的接入占位。
+
+如果你对以上某一块感兴趣，或者有新的想法，可以直接开 Issue 讨论，也可以基于对应方向发起 PR。
 
 ## 🚢 发布与部署
 

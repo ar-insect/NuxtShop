@@ -6,21 +6,21 @@
         <div
 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
           :class="step >= 1 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'">1</div>
-        <span class="text-xs mt-2" :class="step >= 1 ? 'text-green-500' : 'text-gray-500'">验证手机号</span>
+        <span class="text-xs mt-2" :class="step >= 1 ? 'text-green-500' : 'text-gray-500'">{{ t('pages.register.step1') }}</span>
       </div>
       <div class="flex-1 h-px mx-4" :class="step >= 2 ? 'bg-green-500' : 'bg-gray-200'"/>
       <div class="flex flex-col items-center">
         <div
 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
           :class="step >= 2 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'">2</div>
-        <span class="text-xs mt-2" :class="step >= 2 ? 'text-green-500' : 'text-gray-500'">填写账号信息</span>
+        <span class="text-xs mt-2" :class="step >= 2 ? 'text-green-500' : 'text-gray-500'">{{ t('pages.register.step2') }}</span>
       </div>
       <div class="flex-1 h-px mx-4" :class="step >= 3 ? 'bg-green-500' : 'bg-gray-200'"/>
       <div class="flex flex-col items-center">
         <div
 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
           :class="step >= 3 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'">3</div>
-        <span class="text-xs mt-2" :class="step >= 3 ? 'text-green-500' : 'text-gray-500'">注册成功</span>
+        <span class="text-xs mt-2" :class="step >= 3 ? 'text-green-500' : 'text-gray-500'">{{ t('pages.register.step3') }}</span>
       </div>
     </div>
 
@@ -28,7 +28,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
     <div v-if="step === 1" class="space-y-6">
       <div class="flex border border-gray-300 rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
         <div class="bg-gray-50 px-3 py-3 border-r border-gray-300 text-gray-500 text-sm flex items-center whitespace-nowrap">
-          中国 0086
+          {{ t('pages.register.regionLabel') }}
           <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
@@ -36,7 +36,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
         <input 
           v-model="phone" 
           type="tel" 
-          placeholder="建议使用常用手机号" 
+          :placeholder="t('pages.register.phonePlaceholder')" 
           class="flex-1 px-4 py-3 outline-none text-sm w-full"
         >
       </div>
@@ -56,7 +56,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
         class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium text-lg rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         @click="handleNextStep"
       >
-        同意协议并继续
+        {{ t('pages.register.agreeAndContinue') }}
       </BaseButton>
 
       <div class="flex items-start gap-2">
@@ -67,7 +67,8 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
           class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
         >
         <label for="agreement" class="text-sm text-gray-500 leading-snug">
-          我已阅读并同意 <a href="#" class="text-blue-600 hover:underline">《NuxtShop 用户服务协议和隐私政策》</a>
+          {{ t('pages.register.agreementPrefix') }}
+          <a href="#" class="text-blue-600 hover:underline">{{ t('pages.register.agreementLink') }}</a>
         </label>
       </div>
 
@@ -76,7 +77,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
           <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          企业用户注册
+          {{ t('pages.register.enterpriseRegister') }}
         </a>
       </div>
     </div>
@@ -87,20 +88,20 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
         <BaseInput
           v-model="username"
           type="text"
-          label="用户名"
-          placeholder="请输入用户名"
+          :label="t('pages.register.usernameLabel')"
+          :placeholder="t('pages.register.usernamePlaceholder')"
         />
         <BaseInput
           v-model="password"
           type="password"
-          label="设置密码"
-          placeholder="建议使用两种字符组合"
+          :label="t('pages.register.passwordLabel')"
+          :placeholder="t('pages.register.passwordPlaceholder')"
         />
         <BaseInput
           v-model="confirmPassword"
           type="password"
-          label="确认密码"
-          placeholder="请再次输入密码"
+          :label="t('pages.register.confirmPasswordLabel')"
+          :placeholder="t('pages.register.confirmPasswordPlaceholder')"
         />
       </div>
 
@@ -112,11 +113,13 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
         class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium text-lg rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         @click="handleRegister"
       >
-        {{ loading ? '注册中...' : '立即注册' }}
+        {{ loading ? t('pages.register.submitting') : t('pages.register.submit') }}
       </BaseButton>
       
       <div class="text-center">
-        <button class="text-sm text-gray-500 hover:text-gray-700" @click="step = 1">返回上一步</button>
+        <button class="text-sm text-gray-500 hover:text-gray-700" @click="step = 1">
+          {{ t('pages.register.backPrev') }}
+        </button>
       </div>
     </div>
 
@@ -127,15 +130,17 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h3 class="text-2xl font-bold text-gray-900">注册成功</h3>
-      <p class="text-gray-500">恭喜您，账号已注册成功！</p>
+      <h3 class="text-2xl font-bold text-gray-900">{{ t('pages.register.successTitle') }}</h3>
+      <p class="text-gray-500">{{ t('pages.register.successDesc') }}</p>
       
       <div class="pt-4">
         <NuxtLink to="/" class="inline-block w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium text-lg rounded-sm transition-colors">
-          立即购物
+          {{ t('pages.register.goShopping') }}
         </NuxtLink>
         <p class="mt-4 text-sm text-gray-500">
-          <span class="font-medium text-indigo-600 cursor-pointer" @click="openLoginModal">立即登录</span>
+          <span class="font-medium text-indigo-600 cursor-pointer" @click="openLoginModal">
+            {{ t('pages.register.goLoginNow') }}
+          </span>
         </p>
       </div>
     </div>
@@ -145,10 +150,12 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
 <script setup lang="ts">
 import PuzzleCaptcha from '~/components/ui/PuzzleCaptcha.vue'
 import { validatePhone, validateUsername, validatePassword, validateConfirmPassword } from '~/utils/validation'
+import { useI18n } from '~/composables/useI18n'
 
 const { register } = useAuth()
 const { openLoginModal } = useLoginModal()
 const toast = useToast()
+const { t } = useI18n()
 
 // State
 const step = ref(1)
@@ -180,9 +187,9 @@ const isStep2Valid = computed(() => {
 const handleNextStep = () => {
   if (!isStep1Valid.value) {
     const phoneError = validatePhone(phone.value)
-    if (phoneError) toast.error(phoneError)
-    else if (!captchaVerified.value) toast.error('请完成验证')
-    else if (!agreed.value) toast.error('请同意协议')
+    if (phoneError) toast.error(t(phoneError))
+    else if (!captchaVerified.value) toast.error(t('pages.register.captchaRequired'))
+    else if (!agreed.value) toast.error(t('pages.register.agreementRequired'))
     return
   }
   step.value = 2
@@ -191,17 +198,17 @@ const handleNextStep = () => {
 const handleRegister = async () => {
   const usernameError = validateUsername(username.value)
   if (usernameError) {
-    toast.error(usernameError)
+    toast.error(t(usernameError))
     return
   }
   const passwordError = validatePassword(password.value)
   if (passwordError) {
-    toast.error(passwordError)
+    toast.error(t(passwordError))
     return
   }
   const confirmError = validateConfirmPassword(password.value, confirmPassword.value)
   if (confirmError) {
-    toast.error(confirmError)
+    toast.error(t(confirmError))
     return
   }
   
@@ -217,8 +224,8 @@ const handleRegister = async () => {
 }
 
 useSeoMeta({
-  title: '用户注册',
-  description: '注册您的 NuxtShop 账户。'
+  title: t('seo.register.title'),
+  description: t('seo.register.description')
 })
 
 definePageMeta({

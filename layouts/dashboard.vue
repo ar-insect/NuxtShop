@@ -88,14 +88,16 @@
 <script setup lang="ts">
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
+import { useI18n } from '~/composables/useI18n'
 
 const { cartCount } = useCart()
 const { wishlistItems } = useWishlist()
+const { t } = useI18n()
 
-const dashboardLinks = [
-  { to: '/', label: '首页', icon: 'home' },
-  { to: '/profile', label: '个人中心', icon: 'user' },
-  { to: '/cart', label: '购物车', icon: 'shopping-cart' },
-  { to: '/wishlist', label: '收藏夹', icon: 'heart' },
-]
+const dashboardLinks = computed(() => ([
+  { to: '/', label: t('nav.home'), icon: 'home' },
+  { to: '/profile', label: t('nav.profile'), icon: 'user' },
+  { to: '/cart', label: t('nav.cart'), icon: 'shopping-cart' },
+  { to: '/wishlist', label: t('nav.wishlist'), icon: 'heart' }
+]))
 </script>

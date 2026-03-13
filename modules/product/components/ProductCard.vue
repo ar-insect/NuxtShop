@@ -68,6 +68,7 @@ const { toggleWishlist, isInWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
 const { openLoginModal } = useLoginModal()
+const { t } = useI18n()
 
 // Image fallback handling
 const imageSrc = ref(props.product.image)
@@ -91,7 +92,7 @@ const handleAddToCart = () => {
     return
   }
   addToCart(props.product)
-  toast.success('已加入购物车，点击右上角购物车查看')
+  toast.success(t('toast.cartAdded'))
 }
 
 const handleToggleWishlist = () => {

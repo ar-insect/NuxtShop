@@ -1,21 +1,28 @@
 <template>
   <div v-if="loading" class="loading-overlay">
     <div class="spinner"/>
-    <p v-if="text" class="loading-text">{{ text }}</p>
+    <p v-if="displayText" class="loading-text">{{ displayText }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps({
+import { computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
+
+const props = defineProps({
   loading: {
     type: Boolean,
     default: false
   },
   text: {
     type: String,
-    default: '加载中...'
+    default: ''
   }
 })
+
+const { t } = useI18n()
+
+const displayText = computed(() => props.text || t('ui.loading'))
 </script>
 
 <style scoped>

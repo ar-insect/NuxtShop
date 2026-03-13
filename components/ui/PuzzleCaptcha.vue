@@ -33,18 +33,20 @@
 
       <!-- Loading/Success/Fail Overlay -->
       <div v-if="status !== 'idle'" class="absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300" :class="statusClass">
-        <div v-if="status === 'loading'" class="text-white">加载中...</div>
+        <div v-if="status === 'loading'" class="text-white">
+          {{ t('ui.puzzleCaptcha.loading') }}
+        </div>
         <div v-if="status === 'success'" class="text-green-500 font-bold flex flex-col items-center">
           <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mb-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </div>
-          验证通过
+          {{ t('ui.puzzleCaptcha.success') }}
         </div>
         <div v-if="status === 'fail'" class="text-red-500 font-bold flex flex-col items-center">
           <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mb-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </div>
-          验证失败
+          {{ t('ui.puzzleCaptcha.fail') }}
         </div>
       </div>
     </div>
@@ -52,7 +54,9 @@
     <!-- Slider Track -->
     <div class="relative h-10 bg-gray-100 rounded-full shadow-inner flex items-center">
       <div class="absolute left-0 top-0 h-full bg-blue-100/50 rounded-full border border-blue-200" :style="{ width: `${sliderValue + 20}px` }"/>
-      <div class="w-full text-center text-xs text-gray-400 select-none pointer-events-none">向右拖动滑块填充拼图</div>
+      <div class="w-full text-center text-xs text-gray-400 select-none pointer-events-none">
+        {{ t('ui.puzzleCaptcha.hint') }}
+      </div>
       
       <!-- Slider Handle -->
       <div
@@ -71,13 +75,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-
+import { useI18n } from '~/composables/useI18n'
 const props = defineProps<{
   onSuccess?: () => void
   onFail?: () => void
 }>()
 
 const emit = defineEmits(['success', 'fail'])
+const { t } = useI18n()
 
 // Config
 const pieceWidth = 45

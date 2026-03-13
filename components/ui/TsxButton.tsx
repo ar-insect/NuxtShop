@@ -1,5 +1,6 @@
 
 import { defineComponent } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 
 export default defineComponent({
   name: 'TsxButton',
@@ -10,6 +11,7 @@ export default defineComponent({
     }
   },
   setup(props, { slots }) {
+    const { t } = useI18n()
     return () => (
       <button
         class={[
@@ -19,7 +21,7 @@ export default defineComponent({
             : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
         ]}
       >
-        {slots.default ? slots.default() : 'Styled Button'}
+        {slots.default ? slots.default() : t('ui.tsx.buttonLabel')}
       </button>
     )
   }

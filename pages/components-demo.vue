@@ -1,45 +1,50 @@
 <template>
   <div class="max-w-5xl mx-auto space-y-12">
     <div class="border-b pb-5" :style="{ borderColor: 'var(--border-color)' }">
-      <h1 class="text-3xl font-bold leading-tight" :style="{ color: 'var(--text-color)' }">全局组件</h1>
+      <h1 class="text-3xl font-bold leading-tight" :style="{ color: 'var(--text-color)' }">
+        {{ t('demo.components.title') }}
+      </h1>
       <p class="mt-2 text-lg" :style="{ color: 'var(--text-secondary)' }">
-        展示应用中可重用的 UI 组件。
+        {{ t('demo.components.description') }}
       </p>
     </div>
     
     <!-- Modal Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">模态框 (BaseModal)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">交互式</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.modal.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+          {{ t('demo.components.modal.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <p class="mb-6 text-[var(--text-secondary)]">
-          一个完全可访问的模态框组件，支持自定义标题、内容和操作。
-          支持点击背景关闭和 ESC 键导航。
+          {{ t('demo.components.modal.desc') }}
         </p>
         <div class="flex items-center gap-4">
           <BaseButton 
             variant="primary"
             @click="showModal = true"
           >
-            打开模态框
+            {{ t('demo.components.modal.open') }}
           </BaseButton>
         </div>
         
         <BaseModal
           v-model="showModal"
-          title="演示模态框"
+          :title="t('demo.components.modal.dialogTitle')"
           @confirm="handleModalConfirm"
           @cancel="handleModalCancel"
         >
           <div class="space-y-4">
             <p class="text-[var(--text-secondary)]">
-              这是全局模态框组件的内容。它可以包含任何 HTML 或其他组件。
+              {{ t('demo.components.modal.content') }}
             </p>
             <div class="p-4 rounded-lg border bg-[var(--muted-bg)] border-[var(--border-color)]">
               <p class="text-sm text-[var(--text-color)]">
-                <strong>提示：</strong> 如果需要，您可以传递自定义的头部和底部插槽。
+                {{ t('demo.components.modal.tip') }}
               </p>
             </div>
           </div>
@@ -50,24 +55,30 @@
     <!-- Loading Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">加载状态 (BaseLoading)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">工具</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.loading.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+          {{ t('demo.components.loading.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <p class="mb-6 text-[var(--text-secondary)]">
-          一个灵活的加载覆盖层，可以覆盖特定容器或整个屏幕。
+          {{ t('demo.components.loading.desc') }}
         </p>
         
         <div class="relative h-64 rounded-lg border border-dashed flex items-center justify-center mb-6 overflow-hidden bg-[var(--muted-bg)] border-[var(--border-color)]">
           <div class="text-center p-6">
-            <h3 class="text-lg font-medium mb-2 text-[var(--text-color)]">内容容器</h3>
+            <h3 class="text-lg font-medium mb-2 text-[var(--text-color)]">
+              {{ t('demo.components.loading.boxTitle') }}
+            </h3>
             <p class="max-w-sm mx-auto text-[var(--text-secondary)]">
-              此区域代表数据获取组件。点击下方按钮模拟加载状态。
+              {{ t('demo.components.loading.boxDesc') }}
             </p>
           </div>
           
           <!-- Loading Component -->
-          <BaseLoading :loading="loading" text="正在获取数据..." />
+          <BaseLoading :loading="loading" :text="t('demo.components.loading.loadingText')" />
         </div>
 
         <button 
@@ -75,7 +86,7 @@
           class="px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:bg-[var(--hover-bg)] bg-[var(--card-bg)] border-[var(--border-color)] text-[var(--text-color)]"
           @click="toggleLoading"
         >
-          {{ loading ? '加载中...' : '切换加载状态' }}
+          {{ loading ? t('demo.components.loading.buttonLoading') : t('demo.components.loading.buttonToggle') }}
         </button>
       </div>
     </section>
@@ -83,42 +94,45 @@
     <!-- Toast Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">Toast 通知 (BaseToast)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">反馈</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.toast.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+          {{ t('demo.components.toast.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <p class="mb-6 text-[var(--text-secondary)]">
-          用于向用户提供反馈的非阻塞通知。 
-          使用 <code>useToast</code> 组合式函数，可从任何地方轻松触发。
+          {{ t('demo.components.toast.desc') }}
         </p>
         
         <div class="flex flex-wrap gap-4">
           <BaseButton 
             variant="success"
-            @click="toast.success('操作成功完成！')"
+            @click="toast.success(t('demo.components.toast.successMsg'))"
           >
-            成功 Toast
+            {{ t('demo.components.toast.successLabel') }}
           </BaseButton>
           
           <BaseButton 
             variant="danger"
-            @click="toast.error('出错了！')"
+            @click="toast.error(t('demo.components.toast.errorMsg'))"
           >
-            错误 Toast
+            {{ t('demo.components.toast.errorLabel') }}
           </BaseButton>
           
           <BaseButton 
             variant="secondary"
-            @click="toast.info('这是一些信息。')"
+            @click="toast.info(t('demo.components.toast.infoMsg'))"
           >
-            信息 Toast
+            {{ t('demo.components.toast.infoLabel') }}
           </BaseButton>
           
           <BaseButton 
             variant="outline"
-            @click="toast.warning('警告：请谨慎操作。')"
+            @click="toast.warning(t('demo.components.toast.warningMsg'))"
           >
-            警告 Toast
+            {{ t('demo.components.toast.warningLabel') }}
           </BaseButton>
         </div>
       </div>
@@ -127,13 +141,16 @@
     <!-- Confirm Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">确认框 (BaseConfirm)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">交互式</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.confirm.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+          {{ t('demo.components.confirm.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <p class="mb-6 text-[var(--text-secondary)]">
-          用于关键操作确认的对话框，支持异步调用。
-          使用 <code>useConfirm</code> 组合式函数，返回 Promise。
+          {{ t('demo.components.confirm.desc') }}
         </p>
         
         <div class="flex flex-wrap gap-4">
@@ -141,21 +158,21 @@
             variant="danger"
             @click="handleConfirmDelete"
           >
-            删除操作
+            {{ t('demo.components.confirm.deleteButton') }}
           </BaseButton>
           
           <BaseButton 
             variant="outline"
             @click="handleConfirmWarning"
           >
-            警告提示
+            {{ t('demo.components.confirm.warningButton') }}
           </BaseButton>
           
           <BaseButton 
             variant="secondary"
             @click="handleConfirmInfo"
           >
-            信息确认
+            {{ t('demo.components.confirm.infoButton') }}
           </BaseButton>
         </div>
       </div>
@@ -164,43 +181,55 @@
     <!-- BaseButton Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">按钮 (BaseButton)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">交互式</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.button.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+          {{ t('demo.components.button.badge') }}
+        </span>
       </div>
       <div class="p-6 space-y-8">
         <!-- Variants -->
         <div>
-          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">变体</h3>
+          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">
+            {{ t('demo.components.button.variantsTitle') }}
+          </h3>
           <div class="flex flex-wrap gap-4">
-            <BaseButton>主要</BaseButton>
-            <BaseButton variant="secondary">次要</BaseButton>
-            <BaseButton variant="outline">轮廓</BaseButton>
-            <BaseButton variant="danger">危险</BaseButton>
-            <BaseButton variant="success">成功</BaseButton>
-            <BaseButton variant="ghost">幽灵</BaseButton>
-            <BaseButton variant="link">链接</BaseButton>
+            <BaseButton>{{ t('demo.components.button.primary') }}</BaseButton>
+            <BaseButton variant="secondary">{{ t('demo.components.button.secondary') }}</BaseButton>
+            <BaseButton variant="outline">{{ t('demo.components.button.outline') }}</BaseButton>
+            <BaseButton variant="danger">{{ t('demo.components.button.danger') }}</BaseButton>
+            <BaseButton variant="success">{{ t('demo.components.button.success') }}</BaseButton>
+            <BaseButton variant="ghost">{{ t('demo.components.button.ghost') }}</BaseButton>
+            <BaseButton variant="link">{{ t('demo.components.button.link') }}</BaseButton>
           </div>
         </div>
 
         <!-- Sizes -->
         <div>
-          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">尺寸</h3>
+          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">
+            {{ t('demo.components.button.sizesTitle') }}
+          </h3>
           <div class="flex flex-wrap items-center gap-4">
-            <BaseButton size="xs">XS 按钮</BaseButton>
-            <BaseButton size="sm">小</BaseButton>
-            <BaseButton size="md">中</BaseButton>
-            <BaseButton size="lg">大</BaseButton>
-            <BaseButton size="xl">特大</BaseButton>
+            <BaseButton size="xs">{{ t('demo.components.button.sizeXs') }}</BaseButton>
+            <BaseButton size="sm">{{ t('demo.components.button.sizeSm') }}</BaseButton>
+            <BaseButton size="md">{{ t('demo.components.button.sizeMd') }}</BaseButton>
+            <BaseButton size="lg">{{ t('demo.components.button.sizeLg') }}</BaseButton>
+            <BaseButton size="xl">{{ t('demo.components.button.sizeXl') }}</BaseButton>
           </div>
         </div>
 
         <!-- States -->
         <div>
-          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">状态</h3>
+          <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">
+            {{ t('demo.components.button.statesTitle') }}
+          </h3>
           <div class="flex flex-wrap gap-4">
-            <BaseButton :loading="true">加载中</BaseButton>
-            <BaseButton disabled>禁用</BaseButton>
-            <BaseButton disabled variant="secondary">禁用次要</BaseButton>
+            <BaseButton :loading="true">{{ t('demo.components.button.loading') }}</BaseButton>
+            <BaseButton disabled>{{ t('demo.components.button.disabled') }}</BaseButton>
+            <BaseButton disabled variant="secondary">
+              {{ t('demo.components.button.disabledSecondary') }}
+            </BaseButton>
           </div>
         </div>
       </div>
@@ -209,43 +238,47 @@
     <!-- BaseInput Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">表单输入 (BaseInput)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">表单</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.input.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
+          {{ t('demo.components.input.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <BaseInput 
             v-model="inputValues.username" 
-            label="用户名" 
-            placeholder="输入您的用户名"
-            hint="这将是您的公开显示名称。"
+            :label="t('demo.components.input.usernameLabel')"
+            :placeholder="t('demo.components.input.usernamePlaceholder')"
+            :hint="t('demo.components.input.usernameHint')"
           />
           
           <BaseInput 
             v-model="inputValues.email" 
-            label="邮箱" 
+            :label="t('demo.components.input.emailLabel')"
             type="email" 
             placeholder="you@example.com"
           />
 
           <BaseInput 
             v-model="inputValues.password" 
-            label="密码" 
+            :label="t('demo.components.input.passwordLabel')"
             type="password" 
-            placeholder="请输入密码"
+            :placeholder="t('demo.components.input.passwordPlaceholder')"
           />
 
           <BaseInput 
             v-model="inputValues.error" 
-            label="错误状态" 
-            placeholder="出错了..."
-            error="此字段为必填项"
+            :label="t('demo.components.input.errorLabel')"
+            :placeholder="t('demo.components.input.errorPlaceholder')"
+            :error="t('demo.components.input.errorMessage')"
           />
 
           <BaseInput 
             v-model="inputValues.search" 
-            label="带前缀" 
-            placeholder="搜索..."
+            :label="t('demo.components.input.searchLabel')"
+            :placeholder="t('demo.components.input.searchPlaceholder')"
           >
             <template #prefix>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :style="{ color: 'var(--text-secondary)' }" viewBox="0 0 20 20" fill="currentColor">
@@ -256,8 +289,8 @@
 
           <BaseInput 
             v-model="inputValues.disabled" 
-            label="禁用" 
-            placeholder="无法编辑"
+            :label="t('demo.components.input.disabledLabel')"
+            :placeholder="t('demo.components.input.disabledPlaceholder')"
             disabled
           />
         </div>
@@ -267,47 +300,53 @@
     <!-- Select Demo -->
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">下拉选择 (BaseSelect)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">表单</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.select.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
+          {{ t('demo.components.select.badge') }}
+        </span>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <BaseSelect 
             v-model="selectValues.single" 
-            label="单选" 
+            :label="t('demo.components.select.singleLabel')"
             :options="selectOptions"
-            placeholder="请选择一个选项"
+            :placeholder="t('demo.components.select.singlePlaceholder')"
             clearable
           />
           
           <BaseSelect 
             v-model="selectValues.multiple" 
-            label="多选" 
+            :label="t('demo.components.select.multipleLabel')"
             :options="selectOptions"
-            placeholder="请选择多个选项"
+            :placeholder="t('demo.components.select.multiplePlaceholder')"
             multiple
             clearable
           />
 
           <BaseSelect 
             v-model="selectValues.disabled" 
-            label="禁用状态" 
+            :label="t('demo.components.select.disabledLabel')"
             :options="selectOptions"
             disabled
-            placeholder="无法选择"
+            :placeholder="t('demo.components.select.disabledPlaceholder')"
           />
           
           <div>
-            <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">省市区选择 (RegionSelect)</h3>
+            <h3 class="text-sm font-medium mb-3 uppercase tracking-wider text-[var(--text-secondary)]">
+              {{ t('demo.components.select.regionTitle') }}
+            </h3>
             <RegionSelect v-model="regionDemo" />
             <p class="mt-2 text-xs text-[var(--text-secondary)]">
-              当前选择：{{ regionDemo || '未选择' }}
+              {{ t('demo.components.select.regionCurrent', { value: regionDemo || t('demo.components.select.regionNone') }) }}
             </p>
           </div>
         </div>
         <div class="mt-4 text-sm text-[var(--text-secondary)]">
-          <p>单选值: {{ selectValues.single }}</p>
-          <p>多选值: {{ selectValues.multiple }}</p>
+          <p>{{ t('demo.components.select.singleValue') }}: {{ selectValues.single }}</p>
+          <p>{{ t('demo.components.select.multipleValue') }}: {{ selectValues.multiple }}</p>
         </div>
       </div>
     </section>
@@ -317,16 +356,26 @@
       <!-- Dropdown -->
       <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
         <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-          <h2 class="text-lg font-medium text-[var(--text-color)]">下拉菜单 (BaseDropdown)</h2>
-          <span class="px-2 py-1 text-xs font-medium bg-pink-100 text-pink-700 rounded-full">交互</span>
+          <h2 class="text-lg font-medium text-[var(--text-color)]">
+            {{ t('demo.components.dropdown.title') }}
+          </h2>
+          <span class="px-2 py-1 text-xs font-medium bg-pink-100 text-pink-700 rounded-full">
+            {{ t('demo.components.dropdown.badge') }}
+          </span>
         </div>
         <div class="p-6 flex justify-center items-start h-48">
-          <BaseDropdown label="操作菜单">
+          <BaseDropdown :label="t('demo.components.dropdown.label')">
             <template #default="{ close }">
-              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">查看详情</a>
-              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">编辑内容</a>
+              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">
+                {{ t('demo.components.dropdown.view') }}
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-[var(--text-color)] hover:bg-[var(--hover-bg)]" @click.prevent="close">
+                {{ t('demo.components.dropdown.edit') }}
+              </a>
               <div class="border-t border-[var(--border-color)] my-1"/>
-              <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50" @click.prevent="close">删除项目</a>
+              <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50" @click.prevent="close">
+                {{ t('demo.components.dropdown.delete') }}
+              </a>
             </template>
           </BaseDropdown>
         </div>
@@ -335,8 +384,12 @@
       <!-- Carousel -->
       <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
         <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-          <h2 class="text-lg font-medium text-[var(--text-color)]">轮播图 (BaseCarousel)</h2>
-          <span class="px-2 py-1 text-xs font-medium bg-cyan-100 text-cyan-700 rounded-full">展示</span>
+          <h2 class="text-lg font-medium text-[var(--text-color)]">
+            {{ t('demo.components.carousel.title') }}
+          </h2>
+          <span class="px-2 py-1 text-xs font-medium bg-cyan-100 text-cyan-700 rounded-full">
+            {{ t('demo.components.carousel.badge') }}
+          </span>
         </div>
         <div class="p-6">
           <div class="h-48 rounded-lg overflow-hidden">
@@ -355,32 +408,40 @@
     <!-- BaseCard Demo -->
     <section class="space-y-6">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-[var(--text-color)]">卡片组件 (BaseCard)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">容器</span>
+        <h2 class="text-2xl font-bold text-[var(--text-color)]">
+          {{ t('demo.components.card.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">
+          {{ t('demo.components.card.badge') }}
+        </span>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <BaseCard title="简单卡片" subtitle="带副标题">
+        <BaseCard :title="t('demo.components.card.simpleTitle')" :subtitle="t('demo.components.card.simpleSubtitle')">
           <p class="text-[var(--text-secondary)]">
-            这是一个带有标题和副标题的简单卡片组件。它使用默认插槽作为内容。
+            {{ t('demo.components.card.simpleContent') }}
           </p>
         </BaseCard>
 
         <BaseCard>
           <template #header>
             <div class="flex items-center justify-between">
-              <h3 class="text-lg leading-6 font-medium text-[var(--text-color)]">自定义头部</h3>
+              <h3 class="text-lg leading-6 font-medium text-[var(--text-color)]">
+                {{ t('demo.components.card.customHeaderTitle') }}
+              </h3>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                活跃
+                {{ t('demo.components.card.customHeaderBadge') }}
               </span>
             </div>
           </template>
-          <p class="text-[var(--text-secondary)]">
-            此卡片具有用于更复杂布局的自定义头部插槽。
-          </p>
+            <p class="text-[var(--text-secondary)]">
+              {{ t('demo.components.card.customHeaderContent') }}
+            </p>
           <template #footer>
             <div class="flex justify-end">
-              <BaseButton size="sm" variant="outline">查看详情</BaseButton>
+              <BaseButton size="sm" variant="outline">
+                {{ t('demo.components.card.customHeaderButton') }}
+              </BaseButton>
             </div>
           </template>
         </BaseCard>
@@ -389,33 +450,49 @@
 
     <section class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
       <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-[var(--text-color)]">分页 (BasePagination)</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-sky-100 text-sky-700 rounded-full">导航</span>
+        <h2 class="text-lg font-medium text-[var(--text-color)]">
+          {{ t('demo.components.pagination.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-sky-100 text-sky-700 rounded-full">
+          {{ t('demo.components.pagination.badge') }}
+        </span>
       </div>
       <div class="p-6 space-y-8">
         <div class="space-y-3">
-          <div class="text-sm font-medium text-[var(--text-color)]">事件模式（v-model）</div>
+          <div class="text-sm font-medium text-[var(--text-color)]">
+            {{ t('demo.components.pagination.eventTitle') }}
+          </div>
           <div class="flex justify-center">
             <BasePagination v-model="demoPage" :total-pages="demoTotalPages" />
           </div>
           <div class="text-sm text-[var(--text-secondary)]">
-            当前页：{{ demoPage }} / {{ demoTotalPages }}
+            {{ t('demo.components.pagination.currentPage', { page: demoPage, total: demoTotalPages }) }}
           </div>
           <div class="flex flex-wrap gap-3">
-            <BaseButton size="sm" variant="outline" @click="demoTotalPages = 6">总页数=6</BaseButton>
-            <BaseButton size="sm" variant="outline" @click="demoTotalPages = 24">总页数=24</BaseButton>
-            <BaseButton size="sm" variant="outline" @click="demoPage = 1">跳到第 1 页</BaseButton>
-            <BaseButton size="sm" variant="outline" @click="demoPage = Math.min(demoTotalPages, 10)">跳到第 10 页</BaseButton>
+            <BaseButton size="sm" variant="outline" @click="demoTotalPages = 6">
+              {{ t('demo.components.pagination.demoTotal6') }}
+            </BaseButton>
+            <BaseButton size="sm" variant="outline" @click="demoTotalPages = 24">
+              {{ t('demo.components.pagination.demoTotal24') }}
+            </BaseButton>
+            <BaseButton size="sm" variant="outline" @click="demoPage = 1">
+              {{ t('demo.components.pagination.goto1') }}
+            </BaseButton>
+            <BaseButton size="sm" variant="outline" @click="demoPage = Math.min(demoTotalPages, 10)">
+              {{ t('demo.components.pagination.goto10') }}
+            </BaseButton>
           </div>
         </div>
 
         <div class="pt-6 border-t border-[var(--border-color)] space-y-3">
-          <div class="text-sm font-medium text-[var(--text-color)]">路由模式（通过 getTo 生成 NuxtLink）</div>
+          <div class="text-sm font-medium text-[var(--text-color)]">
+            {{ t('demo.components.pagination.routeTitle') }}
+          </div>
           <div class="flex justify-center">
             <BasePagination :model-value="routeDemoPage" :total-pages="routeDemoTotalPages" :get-to="routeDemoTo" />
           </div>
           <div class="text-sm text-[var(--text-secondary)]">
-            当前 query.demoPage：{{ routeDemoPage }}
+            {{ t('demo.components.pagination.currentQuery', { page: routeDemoPage }) }}
           </div>
         </div>
       </div>
@@ -424,29 +501,39 @@
     <!-- Advanced Components Demo -->
     <section class="space-y-6">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-[var(--text-color)]">高级组件</h2>
-        <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">实验性</span>
+        <h2 class="text-2xl font-bold text-[var(--text-color)]">
+          {{ t('demo.components.advanced.title') }}
+        </h2>
+        <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+          {{ t('demo.components.advanced.badge') }}
+        </span>
       </div>
       
       <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
-        <h3 class="text-lg font-medium text-[var(--text-color)] mb-4">TSX 组件 (TsxButton)</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)] mb-4">
+          {{ t('demo.components.advanced.tsxTitle') }}
+        </h3>
         <p class="text-[var(--text-secondary)] mb-4">
-          用 TSX (Vue 的 JSX) 编写的组件，演示了完整的 TypeScript 支持。
+          {{ t('demo.components.advanced.tsxDesc') }}
         </p>
         <div class="flex gap-4">
-          <TsxButton>默认 TSX 按钮</TsxButton>
-          <TsxButton variant="primary">主要 TSX 按钮</TsxButton>
+          <TsxButton>{{ t('demo.components.advanced.tsxDefault') }}</TsxButton>
+          <TsxButton variant="primary">{{ t('demo.components.advanced.tsxPrimary') }}</TsxButton>
         </div>
       </div>
 
       <div class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
-        <h3 class="text-lg font-medium text-[var(--text-color)] mb-4">样式组件 (StyledButton)</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)] mb-4">
+          {{ t('demo.components.advanced.styledTitle') }}
+        </h3>
         <p class="text-[var(--text-secondary)] mb-4">
-          使用 <code>vue3-styled-components</code> 构建的组件，用于 CSS-in-JS 样式。
+          {{ t('demo.components.advanced.styledDesc') }}
         </p>
         <div class="flex gap-4 items-center">
-          <StyledButton>默认样式</StyledButton>
-          <StyledButton :primary="true">主要样式</StyledButton>
+          <StyledButton>{{ t('demo.components.advanced.styledDefault') }}</StyledButton>
+          <StyledButton :primary="true">
+            {{ t('demo.components.advanced.styledPrimary') }}
+          </StyledButton>
         </div>
       </div>
     </section>
@@ -455,11 +542,11 @@
       <NuxtLink 
         to="/" 
         class="font-medium flex items-center gap-2 transition-colors hover:text-[var(--primary-color)] text-[var(--text-secondary)]"
-      >
+        >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
         </svg>
-        返回首页
+        {{ t('demo.components.backHome') }}
       </NuxtLink>
     </div>
   </div>
@@ -471,19 +558,20 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseDropdown from '~/components/ui/BaseDropdown.vue'
 import BaseCarousel from '~/components/ui/BaseCarousel.vue'
 import RegionSelect from '~/components/ui/RegionSelect.vue'
+import { useI18n } from '~/composables/useI18n'
 
-// Modal
 const showModal = ref(false)
 const toast = useToast()
+const { t } = useI18n()
 
 const handleModalConfirm = () => {
   showModal.value = false
-  toast.success('确认成功')
+  toast.success(t('demo.components.modal.confirmSuccess'))
 }
 
 const handleModalCancel = () => {
   showModal.value = false
-  toast.info('操作已取消')
+  toast.info(t('demo.components.modal.cancelInfo'))
 }
 
 // Confirm Demo
@@ -491,45 +579,45 @@ const { confirm } = useConfirm()
 
 const handleConfirmDelete = async () => {
   const isConfirmed = await confirm({
-    title: '确认删除',
-    message: '您确定要执行此删除操作吗？该操作无法撤销。',
+    title: t('demo.components.confirm.deleteTitle'),
+    message: t('demo.components.confirm.deleteMessage'),
     type: 'danger',
-    confirmText: '确认删除',
-    cancelText: '取消'
+    confirmText: t('demo.components.confirm.deleteConfirm'),
+    cancelText: t('demo.components.confirm.deleteCancel')
   })
   
   if (isConfirmed) {
-    toast.success('删除成功')
+    toast.success(t('demo.components.confirm.deleteSuccess'))
   } else {
-    toast.info('已取消删除')
+    toast.info(t('demo.components.confirm.deleteCancelInfo'))
   }
 }
 
 const handleConfirmWarning = async () => {
   const isConfirmed = await confirm({
-    title: '温馨提示',
-    message: '继续操作可能会导致数据变更，是否继续？',
+    title: t('demo.components.confirm.warnTitle'),
+    message: t('demo.components.confirm.warnMessage'),
     type: 'warning'
   })
   
   if (isConfirmed) {
-    toast.success('已确认继续')
+    toast.success(t('demo.components.confirm.warnSuccess'))
   } else {
-    toast.info('已取消操作')
+    toast.info(t('demo.components.confirm.warnCancelInfo'))
   }
 }
 
 const handleConfirmInfo = async () => {
   const isConfirmed = await confirm({
-    title: '确认信息',
-    message: '请确认您的个人信息是否正确。',
+    title: t('demo.components.confirm.infoTitle'),
+    message: t('demo.components.confirm.infoMessage'),
     type: 'info'
   })
   
   if (isConfirmed) {
-    toast.success('已确认信息')
+    toast.success(t('demo.components.confirm.infoSuccess'))
   } else {
-    toast.info('已取消信息确认')
+    toast.info(t('demo.components.confirm.infoCancelInfo'))
   }
 }
 
@@ -539,7 +627,7 @@ const toggleLoading = () => {
   loading.value = true
   setTimeout(() => {
     loading.value = false
-    toast.success('加载完成')
+    toast.success(t('demo.components.loading.doneToast'))
   }, 2000)
 }
 

@@ -5,21 +5,25 @@
         <div class="modal-container" @click.stop>
           <div class="modal-header">
             <slot name="header">
-              <h3>{{ title }}</h3>
+              <h3>{{ displayTitle }}</h3>
             </slot>
             <button class="close-btn" @click="close">×</button>
           </div>
 
           <div class="modal-body">
             <slot>
-              <p>默认内容</p>
+              <p>{{ t('ui.modal.defaultContent') }}</p>
             </slot>
           </div>
 
           <div class="modal-footer">
             <slot name="footer">
-              <button class="btn btn-secondary" @click="close">取消</button>
-              <button class="btn btn-primary" @click="confirm">确认</button>
+              <button class="btn btn-secondary" @click="close">
+                {{ t('ui.modal.cancel') }}
+              </button>
+              <button class="btn btn-primary" @click="confirm">
+                {{ t('ui.modal.confirm') }}
+              </button>
             </slot>
           </div>
         </div>
@@ -29,6 +33,9 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
+
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -36,13 +43,16 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: '提示'
+    default: ''
   },
   closeOnMask: {
     type: Boolean,
     default: true
   }
 })
+
+const { t } = useI18n()
+const displayTitle = computed(() => props.title || t('ui.modal.title'))
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 

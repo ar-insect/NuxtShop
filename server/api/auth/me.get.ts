@@ -48,6 +48,8 @@ export default defineEventHandler(async (event) => {
       name: user.name,
       role: user.role,
       avatar: user.avatar,
+      language: user.language,
+      timezone: user.timezone,
       phone: user.phone,
       createdAt: user.createdAt,
     },

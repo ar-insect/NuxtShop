@@ -41,17 +41,32 @@ export interface Order {
 export const useOrders = () => {
   const orders = useState<Order[]>('orders', () => [])
 
-  // 与服务端同步
-  const { data, refresh } = useFetch<Order[]>('/api/orders', {
-    key: 'orders-data',
-    lazy: true
-  })
+  // 首次调用时从服务端拉取一次订单数据
+  const ordersInitialized = useState<boolean>('orders-fetched', () => false)
 
-  watch(data, (newOrders) => {
-    if (newOrders) {
-      orders.value = newOrders
+  if (!ordersInitialized.value) {
+    const { data } = useFetch<Order[]>('/api/orders', {
+      key: 'orders-data',
+      lazy: true
+    })
+
+    watch(data, (newOrders) => {
+      if (newOrders) {
+        orders.value = newOrders
+      }
+    }, { immediate: true })
+
+    ordersInitialized.value = true
+  }
+
+  const refreshOrders = async () => {
+    try {
+      const fresh = await http.get<Order[]>('/orders')
+      orders.value = fresh
+    } catch {
+      // 刷新订单失败时静默处理，避免在控制台输出错误
     }
-  }, { immediate: true })
+  }
 
   /**
    * 创建订单并添加到订单列表中（同时写入服务端）。
@@ -120,7 +135,7 @@ export const useOrders = () => {
     createOrder,
     getOrderById,
     deleteOrder,
-    refreshOrders: refresh,
+    refreshOrders,
     resetOrdersLocal
   }
 }

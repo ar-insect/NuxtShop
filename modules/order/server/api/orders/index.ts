@@ -1,49 +1,63 @@
-import redis from '~/server/utils/redis'
-import { getSessionId } from '~/server/utils/session'
+import { ObjectId } from 'mongodb'
+import { findOrdersByUserId, insertOrder, deleteOrderByUser, clearOrdersByUser } from '~/server/utils/order'
 
-/**
- * 订单管理接口（GET/POST/DELETE）。
- * 将订单历史按用户维度存储在 Redis 中。
- * 
- * @param {H3Event} event - H3 事件对象
- * @returns {Promise<any>} 接口返回结果（订单列表 / 成功状态 / 新订单等）
- * @throws {H3Error} 删除订单时若缺少订单 ID 则抛出 400
- */
 export default defineEventHandler(async (event) => {
   const method = event.method
+  const token = getCookie(event, 'auth-token')
+
+  if (!token || !token.startsWith('user-jwt-token-')) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: '请先登录'
+    })
+  }
+
+  const userId = token.replace('user-jwt-token-', '')
+
+  if (!ObjectId.isValid(userId)) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token'
+    })
+  }
+
+  const userObjectId = new ObjectId(userId)
 
   if (method === 'GET') {
-    // 从会话中获取用户标识
-    const userId = getSessionId(event)
-    const orders = await redis.get(`orders:${userId}`)
-    return orders ? JSON.parse(orders) : []
+    try {
+      const orders = await findOrdersByUserId(userObjectId)
+      return orders
+    } catch (e) {
+      console.error('Failed to fetch orders from MongoDB:', e)
+      throw createError({
+        statusCode: 500,
+        statusMessage: '获取订单失败'
+      })
+    }
   }
 
   if (method === 'POST') {
     const body = await readBody(event)
-    const userId = getSessionId(event)
-    
-    // 获取已有订单
-    const existingOrdersStr = await redis.get(`orders:${userId}`)
-    const existingOrders = existingOrdersStr ? JSON.parse(existingOrdersStr) : []
-    
-    // 将新订单插入到列表头部
-    const newOrders = [body, ...existingOrders]
-    
-    // 写回 Redis
-    await redis.set(`orders:${userId}`, JSON.stringify(newOrders))
-    
-    return { success: true, order: body }
+
+    try {
+      await insertOrder(userObjectId, body)
+      return { success: true, order: body }
+    } catch (e) {
+      console.error('Failed to save order to MongoDB:', e)
+      throw createError({
+        statusCode: 500,
+        statusMessage: '创建订单失败'
+      })
+    }
   }
 
   if (method === 'DELETE') {
     const query = getQuery(event)
-    const orderId = query.id
+    const orderId = query.id as string | undefined
     const clearAll = query.clear === 'true'
-    const userId = getSessionId(event)
 
     if (clearAll) {
-      await redis.del(`orders:${userId}`)
+      await clearOrdersByUser(userObjectId)
       return { success: true, message: 'All orders cleared' }
     }
 
@@ -54,15 +68,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const existingOrdersStr = await redis.get(`orders:${userId}`)
-    if (!existingOrdersStr) {
-      return { success: false, message: 'No orders found' }
+    const deleted = await deleteOrderByUser(userObjectId, orderId)
+    if (!deleted) {
+      return { success: false, message: 'Order not found' }
     }
-
-    const existingOrders = JSON.parse(existingOrdersStr)
-    const newOrders = existingOrders.filter((order: any) => order.id !== orderId)
-
-    await redis.set(`orders:${userId}`, JSON.stringify(newOrders))
 
     return { success: true }
   }

@@ -41,28 +41,19 @@ export const useProducts = () => {
   const products = useState<Product[]>('products-list', () => [])
 
   /**
-   * 确保商品数据已加载
-   */
-  const ensureProducts = async () => {
-    if (products.value.length === 0) {
-      try {
-        const data = await http.get<Product[]>('/products')
-        products.value = data
-      } catch (error) {
-        console.error('Failed to fetch products:', error)
-      }
-    }
-  }
-
-  /**
    * 根据商品 ID 获取单个商品。
    * 
    * @param {number} id - 商品 ID
    * @returns {Promise<Product | undefined>} 找到则返回商品，否则返回 undefined
    */
   const getProductById = async (id: number) => {
-    await ensureProducts()
-    return products.value.find(p => p.id === id)
+    try {
+      const product = await http.get<Product | null>(`/products/${id}`)
+      return product ?? undefined
+    } catch (error) {
+      console.error('Failed to fetch product by id:', error)
+      return undefined
+    }
   }
 
   /**
@@ -75,33 +66,30 @@ export const useProducts = () => {
    * @returns {Promise<{ items: Product[]; total: number }>} 分页数据与总数
    */
   const getProducts = async (page: number = 1, limit: number = 16, category?: string, query?: string) => {
-    await ensureProducts()
-    
     const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1
     const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 16
 
-    const normalizedQuery = typeof query === 'string' ? query.trim().toLowerCase() : ''
-    const normalizedCategory = typeof category === 'string' && category.trim() ? category : undefined
-
-    let filtered = products.value
-
-    if (normalizedCategory) {
-      filtered = filtered.filter(p => p.category === normalizedCategory)
+    const params: Record<string, any> = {
+      page: safePage,
+      limit: safeLimit
     }
 
-    if (normalizedQuery) {
-      filtered = filtered.filter(p => {
-        const title = p.title?.toLowerCase?.() || ''
-        const desc = p.description?.toLowerCase?.() || ''
-        return title.includes(normalizedQuery) || desc.includes(normalizedQuery)
-      })
+    if (typeof category === 'string' && category.trim()) {
+      params.category = category.trim()
     }
 
-    const total = filtered.length
-    const start = (safePage - 1) * safeLimit
-    const items = filtered.slice(start, start + safeLimit)
+    if (typeof query === 'string' && query.trim()) {
+      params.query = query.trim()
+    }
 
-    return { items, total }
+    try {
+      const result = await http.get<{ items: Product[]; total: number }>('/products', params)
+      products.value = result.items
+      return result
+    } catch (error) {
+      console.error('Failed to fetch products with filters:', error)
+      return { items: [] as Product[], total: 0 }
+    }
   }
 
   return {

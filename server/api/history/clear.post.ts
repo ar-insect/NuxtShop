@@ -1,16 +1,27 @@
+import { ObjectId } from 'mongodb'
 import { getSessionId } from '../../utils/session'
-import { useRedis } from '../../utils/redis'
+import { clearHistory } from '~/server/utils/history'
 
 export default defineEventHandler(async (event) => {
   const sessionId = getSessionId(event)
-  const redis = useRedis()
 
-  if (!redis) {
-    return { success: false, message: 'Redis not available' }
+  let userObjectId: ObjectId | undefined
+  const token = getCookie(event, 'auth-token')
+
+  if (token && token.startsWith('user-jwt-token-')) {
+    const userId = token.replace('user-jwt-token-', '')
+    if (ObjectId.isValid(userId)) {
+      userObjectId = new ObjectId(userId)
+    }
   }
 
-  const historyKey = `history:${sessionId}`
-  await redis.del(historyKey)
+  const key = userObjectId ? { userId: userObjectId } : { sessionId }
 
-  return { success: true }
+  try {
+    await clearHistory(key)
+    return { success: true }
+  } catch (e) {
+    console.error('Failed to clear history in MongoDB:', e)
+    return { success: false, message: 'Failed to clear history' }
+  }
 })

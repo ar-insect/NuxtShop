@@ -1,4 +1,5 @@
 <template>
+  <ClientOnly>
   <div class="space-y-14">
     <HomeHero 
       :cart-count="cartCount"
@@ -98,6 +99,48 @@
       </div>
     </section>
 
+    <section
+      v-if="trendingProducts.length > 0"
+      class="px-4 sm:px-6 lg:px-8"
+    >
+      <div class="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-[var(--text-color)]">最近 7 天最常浏览</h2>
+          <p class="mt-1 text-[var(--text-secondary)]">根据全站浏览数据统计，展示最近一周最受关注的商品</p>
+        </div>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCard
+          v-for="p in trendingProducts"
+          :key="p.id"
+          :product="p"
+          @click="navigateTo(`/products/${p.id}`)"
+        />
+      </div>
+    </section>
+
+    <section
+      v-if="favoritedProducts.length > 0"
+      class="px-4 sm:px-6 lg:px-8"
+    >
+      <div class="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-[var(--text-color)]">最近 7 天收藏最多</h2>
+          <p class="mt-1 text-[var(--text-secondary)]">根据全站收藏数据统计，展示最近一周被加入收藏最多的商品</p>
+        </div>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCard
+          v-for="p in favoritedProducts"
+          :key="p.id"
+          :product="p"
+          @click="navigateTo(`/products/${p.id}`)"
+        />
+      </div>
+    </section>
+
     <section class="border border-[var(--border-color)] bg-[var(--card-bg)] px-6 py-10" :style="{ borderRadius: 'var(--border-radius)' }">
       <div class="grid gap-8 lg:grid-cols-3">
         <div class="flex items-start gap-3">
@@ -132,6 +175,7 @@
 
     <Newsletter @subscribe="subscribe" />
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -142,6 +186,7 @@ import {
   ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
@@ -187,6 +232,50 @@ const { data: productsData, pending } = await useAsyncData(
 )
 
 const products = computed(() => productsData.value?.items || [])
+
+interface TrendingItem extends Product {
+  views: number
+}
+
+const { data: trendingData } = await useAsyncData(
+  'trending-products',
+  () => http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
+    '/history/top-products',
+    { days: 7, limit: 8 }
+  ),
+  { default: () => ({ success: true, items: [] as { product: Product; views: number }[] }) }
+)
+
+const trendingProducts = computed<TrendingItem[]>(() => {
+  const payload = trendingData.value
+  if (!payload || !payload.items) return []
+  return payload.items.map((i) => ({
+    ...i.product,
+    views: i.views
+  }))
+})
+
+interface FavoritedItem extends Product {
+  favorites: number
+}
+
+const { data: favoritedData } = await useAsyncData(
+  'favorited-products',
+  () => http.get<{ success: boolean; items: { product: Product; favorites: number }[] }>(
+    '/wishlist/top-products',
+    { days: 7, limit: 8 }
+  ),
+  { default: () => ({ success: true, items: [] as { product: Product; favorites: number }[] }) }
+)
+
+const favoritedProducts = computed<FavoritedItem[]>(() => {
+  const payload = favoritedData.value
+  if (!payload || !payload.items) return []
+  return payload.items.map((i) => ({
+    ...i.product,
+    favorites: i.favorites
+  }))
+})
 
 const primaryTint = ref('rgba(59,130,246,0.22)')
 

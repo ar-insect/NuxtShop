@@ -1,4 +1,5 @@
 <template>
+  <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
       <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">我的收藏</h1>
@@ -55,6 +56,7 @@
       <BaseAdCarousel :ads="ads" />
     </section>
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">

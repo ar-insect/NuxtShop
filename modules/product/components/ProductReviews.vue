@@ -133,7 +133,7 @@ const toast = useToast()
 
 interface Review {
   id: string
-  userId: number
+  userId: string
   username: string
   userAvatar: string
   rating: number
@@ -155,12 +155,15 @@ const form = reactive({
 const fetchReviews = async () => {
   loading.value = true
   try {
-    const { data } = await useFetch<{ success: boolean, data: Review[] }>(`/api/reviews/${props.productId}`)
-    if (data.value?.success) {
-      reviews.value = data.value.data || []
+    const res = await http.get<{ success: boolean; data: Review[] }>(`/reviews/${props.productId}`)
+    if (res?.success) {
+      reviews.value = res.data || []
+    } else {
+      reviews.value = []
     }
   } catch (error) {
     console.error('Failed to fetch reviews', error)
+    reviews.value = []
   } finally {
     loading.value = false
   }

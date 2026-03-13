@@ -216,7 +216,6 @@ const demoLinks = [
   { to: '/tsx-demo', text: 'TSX 支持' },
   { to: '/styled-demo', text: 'Styled Components' },
   { to: '/bdd-demo', text: 'BDD 测试演示' },
-  { to: '/mongodb', text: 'MongoDB 演示' },
 ]
 </script>
 

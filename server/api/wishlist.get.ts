@@ -1,22 +1,25 @@
-import { getSessionId } from '../utils/session'
+import { ObjectId } from 'mongodb'
+import { findWishlistByUserId } from '~/server/utils/wishlist'
 
-/**
- * 从 Redis 获取用户收藏夹数据。
- * 使用会话 ID 来区分不同用户/会话的收藏夹。
- * 
- * @param {H3Event} event - H3 事件对象
- * @returns {Promise<any[]>} 收藏商品列表
- */
 export default defineEventHandler(async (event) => {
-  const sessionId = getSessionId(event)
-  const redis = useRedis()
-  
-  if (!redis) {
+  const token = getCookie(event, 'auth-token')
+
+  if (!token || !token.startsWith('user-jwt-token-')) {
+    // 未登录用户当前不支持服务端收藏夹
     return []
   }
 
-  const wishlistKey = `wishlist:${sessionId}`
-  const wishlistData = await redis.get(wishlistKey)
+  const userId = token.replace('user-jwt-token-', '')
 
-  return wishlistData ? JSON.parse(wishlistData) : []
+  if (!ObjectId.isValid(userId)) {
+    return []
+  }
+
+  try {
+    const items = await findWishlistByUserId(new ObjectId(userId))
+    return items
+  } catch (e) {
+    console.error('Failed to fetch wishlist from MongoDB:', e)
+    return []
+  }
 })

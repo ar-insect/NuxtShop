@@ -52,10 +52,7 @@ export const useHistory = () => {
     }
 
     try {
-      await $fetch('/api/history/add', {
-        method: 'POST',
-        body: product
-      })
+      await http.post('/history/add', product)
     } catch (e) {
       console.error('Failed to add to history:', e)
       // 失败时是否回滚：对历史记录而言通常不关键，可忽略

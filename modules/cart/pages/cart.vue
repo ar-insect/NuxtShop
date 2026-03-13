@@ -1,4 +1,5 @@
 <template>
+  <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
       <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">购物车</h1>
@@ -116,32 +117,47 @@
       </div>
     </section>
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import ProductCard from '~/modules/product/components/ProductCard.vue'
-import { useProducts } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart()
 const toast = useToast()
 const { confirm } = useConfirm()
-const { getProducts } = useProducts()
 
 useSeoMeta({
   title: '购物车',
   description: '查看您的购物车商品并结算。'
 })
 
-// Fetch recommended products
+// Fetch recommended products：最近 7 天全站浏览最多的商品，再排除购物车中已有的
 const { data: recommendedProductsData, pending: recommendedProductsPending } = await useAsyncData(
   'recommendedProducts',
-  () => getProducts(1, 4), // Fetch first 4 products as recommendations
+  () =>
+    http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
+      '/history/top-products',
+      { days: 7, limit: 8 }
+    ),
   {
-    default: () => ({ items: [], total: 0 })
+    default: () => ({ success: true, items: [] as { product: Product; views: number }[] })
   }
 )
 
-const recommendedProducts = computed(() => recommendedProductsData.value?.items || [])
+const recommendedProducts = computed<Product[]>(() => {
+  const payload = recommendedProductsData.value
+  if (!payload || !payload.items) return []
+
+  const inCartIds = new Set(cartItems.value.map((item) => item.id))
+
+  return payload.items
+    .map((i) => i.product)
+    .filter((p) => !inCartIds.has(p.id))
+    .slice(0, 4)
+})
 
 const handleRemoveItem = async (id: number) => {
   const isConfirmed = await confirm({

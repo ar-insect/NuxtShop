@@ -1,4 +1,5 @@
 <template>
+  <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
       <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">商品列表</h1>
@@ -57,7 +58,7 @@
             class="px-4 py-1.5 text-sm font-medium flex items-center gap-1.5"
             @click="setCategory(cat)"
           >
-            <component :is="categoryIcons[cat]" class="w-4 h-4" />
+            <component :is="getCategoryIcon(cat)" class="w-4 h-4" />
             {{ categoryLabels[cat] || cat }}
           </button>
           <button
@@ -115,6 +116,7 @@
         />
       </div>
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -123,6 +125,7 @@ import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,6 +165,17 @@ useSeoMeta({
   ogDescription: '浏览我们精选的各类优质商品。'
 })
 
+// 从 MongoDB 动态获取商品分类列表
+const { data: categoryData } = await useAsyncData(
+  'product-categories',
+  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  {
+    default: () => [] as { key: string; label: string }[]
+  }
+)
+
+const categories = computed(() => categoryData.value?.map(c => c.key) || [])
+
 // 通过 watch 响应路由变化并刷新数据
 const { data, pending } = await useAsyncData(
   'products',
@@ -179,18 +193,14 @@ const products = computed(() => {
 const total = computed(() => data.value?.total || 0)
 const totalPages = computed(() => Math.ceil(total.value / limit))
 
-const categories = [
-  "electronics",
-  "jewelery",
-  "men's clothing",
-  "women's clothing"
-]
-
 const categoryIcons: Record<string, any> = {
   electronics: ComputerDesktopIcon,
   jewelery: SparklesIcon,
   "men's clothing": UserIcon,
   "women's clothing": UserCircleIcon
+}
+const getCategoryIcon = (key: string) => {
+  return categoryIcons[key] || Squares2X2Icon
 }
 
 const paginationTo = (p: number) => {

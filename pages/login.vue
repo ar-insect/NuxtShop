@@ -73,10 +73,13 @@
 </template>
 
 <script setup lang="ts">
+import { validateUsername, validatePassword } from '~/utils/validation'
+
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const { login } = useAuth()
+const toast = useToast()
 
 useSeoMeta({
   title: '用户登录',
@@ -84,8 +87,17 @@ useSeoMeta({
 })
 
 const handleLogin = async () => {
-  if (!username.value || !password.value) return
-  
+  const usernameError = validateUsername(username.value)
+  if (usernameError) {
+    toast.error(usernameError)
+    return
+  }
+  const passwordError = validatePassword(password.value)
+  if (passwordError) {
+    toast.error(passwordError)
+    return
+  }
+
   loading.value = true
   try {
     const success = await login(username.value, password.value)

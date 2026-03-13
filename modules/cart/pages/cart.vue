@@ -86,23 +86,40 @@
             <dt class="text-sm text-[var(--text-secondary)]">小计</dt>
             <dd class="text-sm font-medium text-[var(--text-color)]">¥{{ cartTotal.toFixed(2) }}</dd>
           </div>
+          <div class="flex items-center justify-between">
+            <dt class="text-sm text-[var(--text-secondary)]">预计优惠</dt>
+            <dd class="text-sm font-medium text-emerald-600">¥0.00</dd>
+          </div>
           <div class="border-t border-[var(--border-color)] pt-4 flex items-center justify-between">
             <dt class="text-base font-medium text-[var(--text-color)]">订单总计</dt>
-            <dd class="text-base font-medium text-[var(--text-color)]">¥{{ cartTotal.toFixed(2) }}</dd>
+            <dd class="text-base font-bold text-[var(--text-color)]">¥{{ cartTotal.toFixed(2) }}</dd>
           </div>
         </dl>
 
+        <p class="mt-3 text-xs text-[var(--text-secondary)]">
+          当前为示例环境，暂未启用真实优惠规则，可在此接入满减、优惠券等逻辑。
+        </p>
+
         <div class="mt-6">
-          <BaseButton block size="lg" @click="handleCheckout">去结算</BaseButton>
+          <BaseButton block size="lg" :disabled="cartItems.length === 0" @click="handleCheckout">
+            {{ cartItems.length === 0 ? '请先添加商品' : '去结算' }}
+          </BaseButton>
         </div>
       </section>
     </div>
 
     <!-- Recommended Products -->
     <section aria-labelledby="recommended-products-heading" class="mt-16">
-      <h2 id="recommended-products-heading" class="text-2xl font-bold text-[var(--text-color)] mb-6">推荐商品</h2>
-      <div v-if="recommendedProductsPending" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"/>
+      <div class="flex items-end justify-between gap-4 mb-2">
+        <div>
+          <h2 id="recommended-products-heading" class="text-2xl font-bold text-[var(--text-color)]">推荐商品</h2>
+          <p class="mt-1 text-sm text-[var(--text-secondary)]">
+            根据最近 7 天全站浏览数据推荐，已排除你购物车中的商品。
+          </p>
+        </div>
+      </div>
+      <div v-if="recommendedProductsPending" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <ProductCardSkeleton v-for="n in 4" :key="n" />
       </div>
       <div v-else-if="recommendedProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         <ProductCard
@@ -122,6 +139,7 @@
 
 <script setup lang="ts">
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import type { Product } from '~/modules/product/composables/useProducts'
 import { http } from '~/utils/http'
 
@@ -174,7 +192,19 @@ const handleRemoveItem = async (id: number) => {
   }
 }
 
-const handleCheckout = () => {
+const handleCheckout = async () => {
+  if (cartItems.value.length === 0) return
+
+  const ok = await confirm({
+    title: '确认结算',
+    message: `本次将结算 ${cartItems.value.length} 件商品，订单总计 ¥${cartTotal.value.toFixed(2)}，是否继续？`,
+    type: 'warning',
+    confirmText: '去结算',
+    cancelText: '再逛逛'
+  })
+
+  if (!ok) return
+
   navigateTo('/checkout')
 }
 </script>

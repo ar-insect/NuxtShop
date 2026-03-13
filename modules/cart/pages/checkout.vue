@@ -165,6 +165,7 @@
 <script setup lang="ts">
 import { CreditCardIcon, QrCodeIcon, PlusIcon, CheckCircleIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import RegionSelect from '~/components/ui/RegionSelect.vue'
+import { validatePhone } from '~/utils/validation'
 
 definePageMeta({
   middleware: 'auth'
@@ -181,63 +182,47 @@ const isNewAddressMode = ref(false)
 const selectedAddressId = ref<string>('')
 const savedAddresses = ref<any[]>([])
 
-const phoneRegex = /^1[3-9]\d{9}$/
-
-const ADDRESS_KEY = 'nuxt-shop-addresses'
-const ADDRESS_DEFAULT_KEY = 'nuxt-shop-address-default'
-
-const persistAddresses = () => {
-  if (!import.meta.client) return
-  localStorage.setItem(ADDRESS_KEY, JSON.stringify(savedAddresses.value))
-  if (selectedAddressId.value) {
-    localStorage.setItem(ADDRESS_DEFAULT_KEY, String(selectedAddressId.value))
-  }
-}
-
-if (import.meta.client) {
-  const saved = localStorage.getItem(ADDRESS_KEY)
-  const savedDefaultId = localStorage.getItem(ADDRESS_DEFAULT_KEY)
+const loadServerAddresses = async () => {
   try {
-    savedAddresses.value = saved ? JSON.parse(saved) : []
+    const res = await $fetch<{ code: number; message: string; data: any[] }>('/api/user/addresses')
+    if (res.data && res.data.length > 0) {
+      savedAddresses.value = res.data.map((a) => ({
+        id: String(a._id),
+        name: a.name,
+        phone: a.phone,
+        detail: `${a.region} ${a.detail}`,
+        isDefault: a.isDefault
+      }))
+
+      let defaultAddr = savedAddresses.value.find(a => a.isDefault)
+      if (!defaultAddr && savedAddresses.value.length > 0) {
+        defaultAddr = savedAddresses.value[0]
+        savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
+      }
+      if (defaultAddr) {
+        selectedAddressId.value = String(defaultAddr.id)
+      }
+      isNewAddressMode.value = false
+      return
+    }
   } catch (e) {
-    console.error('Failed to parse addresses', e)
-    savedAddresses.value = []
+    console.error('Failed to load addresses from server', e)
   }
+
   if (savedAddresses.value.length === 0) {
     isNewAddressMode.value = true
-  } else {
-    // 优先选择默认地址
-    let defaultAddr = savedAddresses.value.find(a => a.isDefault)
-    // 如果没有标记为默认的地址，尝试使用上次保存的默认ID
-    if (!defaultAddr && savedDefaultId) {
-      defaultAddr = savedAddresses.value.find(a => String(a.id) === String(savedDefaultId))
-    }
-    
-    if (defaultAddr) {
-      selectedAddressId.value = String(defaultAddr.id)
-    } else {
-      // 如果既没有默认标记，也没有保存的默认ID，则强制选择第一个并设为默认
-      const firstAddr = savedAddresses.value[0]
-      savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
-      selectedAddressId.value = String(firstAddr.id)
-      persistAddresses()
-    }
   }
 }
 
-onMounted(() => {
-  if (savedAddresses.value.length > 0 && !selectedAddressId.value) {
-     const defaultAddr = savedAddresses.value.find(a => a.isDefault) || savedAddresses.value[0]
-     selectedAddressId.value = String(defaultAddr.id)
-  }
+onMounted(async () => {
+  await loadServerAddresses()
 })
 
 const selectAddress = (address: any) => {
   selectedAddressId.value = String(address.id)
   isNewAddressMode.value = false
-  // 将当前选择设为默认并持久化
+  // 前端仅标记当前选中项，默认状态由 Profile 中的地址管理控制
   savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: String(a.id) === String(address.id) }))
-  persistAddresses()
 }
 
 const { confirm } = useConfirm()
@@ -254,24 +239,17 @@ const deleteAddress = async (e: Event, id: string) => {
   })
 
   if (isConfirmed) {
+    await $fetch(`/api/user/addresses/${id}`, { method: 'DELETE' })
     savedAddresses.value = savedAddresses.value.filter(a => String(a.id) !== String(id))
-    
-    // 如果删除了当前选中的地址，重新选择一个
     if (String(selectedAddressId.value) === String(id)) {
       if (savedAddresses.value.length > 0) {
-        // 优先选默认的，否则选第一个
         const defaultAddr = savedAddresses.value.find(a => a.isDefault) || savedAddresses.value[0]
         selectedAddressId.value = String(defaultAddr.id)
-        // 确保新选中的也是默认状态（如果逻辑需要始终有一个默认）
-        if (!defaultAddr.isDefault) {
-           savedAddresses.value = savedAddresses.value.map((a, idx) => ({ ...a, isDefault: idx === 0 && String(a.id) === String(defaultAddr.id) }))
-        }
       } else {
         selectedAddressId.value = ''
         isNewAddressMode.value = true
       }
     }
-    persistAddresses()
     toast.success('地址已删除')
   }
 }
@@ -297,9 +275,7 @@ const isRegionValid = computed(() => {
   return parts.length >= 3
 })
 
-const isPhoneValid = computed(() => {
-  return phoneRegex.test(form.phone)
-})
+const isPhoneValid = computed(() => !validatePhone(form.phone))
 
 const isFormValid = computed(() => {
   if (!isNewAddressMode.value && selectedAddressId.value) return true
@@ -317,7 +293,7 @@ const handleCheckout = async () => {
     if (!isRegionValid.value) {
       toast.error('请选择完整的省、市、区')
     } else if (!isPhoneValid.value) {
-      toast.error('请输入有效的11位手机号码')
+      toast.error(validatePhone(form.phone) || '请输入有效的11位手机号码')
     }
     return
   }
@@ -334,20 +310,35 @@ const handleCheckout = async () => {
       phone: form.phone,
       address: `${form.region} ${form.address}`
     }
-    // 保存新地址并设为默认
-    const newAddr = {
-      id: String(Date.now()),
-      name: addressData.name,
-      phone: addressData.phone,
-      detail: addressData.address,
-      isDefault: true
+    // 保存新地址到服务器并设为默认
+    try {
+      const res = await $fetch<{ code: number; message: string; data: any }>('/api/user/addresses', {
+        method: 'POST',
+        body: {
+          name: addressData.name,
+          phone: addressData.phone,
+          region: form.region,
+          detail: form.address,
+          isDefault: true
+        }
+      })
+      const created = res.data
+      savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: false }))
+      const newAddr = {
+        id: String(created._id),
+        name: created.name,
+        phone: created.phone,
+        detail: `${created.region} ${created.detail}`,
+        isDefault: created.isDefault
+      }
+      savedAddresses.value.unshift(newAddr)
+      selectedAddressId.value = String(newAddr.id)
+      isNewAddressMode.value = false
+    } catch (e: any) {
+      isProcessing.value = false
+      toast.error(e.statusMessage || '保存地址失败')
+      return
     }
-    // 取消其他默认
-    savedAddresses.value = savedAddresses.value.map(a => ({ ...a, isDefault: false }))
-    savedAddresses.value.unshift(newAddr)
-    selectedAddressId.value = String(newAddr.id)
-    isNewAddressMode.value = false
-    persistAddresses()
   } else {
     const selected = savedAddresses.value.find(a => a.id === selectedAddressId.value)
     if (selected) {

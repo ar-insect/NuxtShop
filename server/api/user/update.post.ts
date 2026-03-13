@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { name, avatar } = body;
+  const { name, avatar, phone } = body;
 
   const token = getCookie(event, 'auth-token');
   if (!token) {
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const updatedUser = await updateUser(userId, { name, avatar });
+    const updatedUser = await updateUser(userId, { name, avatar, phone });
 
     if (!updatedUser) {
       throw createError({
@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
         username: updatedUser.username,
         name: updatedUser.name,
         avatar: updatedUser.avatar,
+        phone: updatedUser.phone,
       },
     };
   } catch (error) {

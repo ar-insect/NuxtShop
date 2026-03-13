@@ -29,3 +29,40 @@ export async function findReviewsByProductId(productId: number, limit = 50): Pro
     .toArray()
 }
 
+export interface ReviewSummary {
+  productId: number
+  avgRating: number
+  reviewCount: number
+}
+
+export async function getReviewSummaryByProductId(productId: number): Promise<ReviewSummary> {
+  const collection = getCollection<ReviewDocument>(COLLECTION_NAME)
+
+  const cursor = collection.aggregate<{ _id: number; avgRating: number; reviewCount: number }>([
+    { $match: { productId } },
+    {
+      $group: {
+        _id: '$productId',
+        avgRating: { $avg: '$rating' },
+        reviewCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const doc = await cursor.next()
+
+  if (!doc) {
+    return {
+      productId,
+      avgRating: 0,
+      reviewCount: 0
+    }
+  }
+
+  return {
+    productId: doc._id,
+    avgRating: doc.avgRating,
+    reviewCount: doc.reviewCount
+  }
+}
+

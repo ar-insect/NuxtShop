@@ -65,7 +65,13 @@ export const useProducts = () => {
    * @param {string} [query] - 搜索词（可选，匹配标题/描述）
    * @returns {Promise<{ items: Product[]; total: number }>} 分页数据与总数
    */
-  const getProducts = async (page: number = 1, limit: number = 16, category?: string, query?: string) => {
+  const getProducts = async (
+    page: number = 1,
+    limit: number = 16,
+    category?: string,
+    query?: string,
+    sort?: 'default' | 'price-asc' | 'price-desc' | 'rating-desc'
+  ) => {
     const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1
     const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 16
 
@@ -80,6 +86,10 @@ export const useProducts = () => {
 
     if (typeof query === 'string' && query.trim()) {
       params.query = query.trim()
+    }
+
+    if (sort && sort !== 'default') {
+      params.sort = sort
     }
 
     try {

@@ -8,6 +8,7 @@ export default defineNuxtPlugin(async () => {
   const user = useState<User | null>('auth-user')
   const token = useCookie('auth-token')
   const themeStore = useThemeStore()
+  const syncing = useState<boolean>('user-syncing', () => false)
 
   const { refreshCart } = useCart()
   const { refreshWishlist } = useWishlist()
@@ -15,12 +16,17 @@ export default defineNuxtPlugin(async () => {
 
   const syncUserData = async () => {
     if (!user.value?._id) return
-    await Promise.all([
-      themeStore.fetchTheme(),
-      refreshCart(),
-      refreshWishlist(),
-      refreshOrders()
-    ])
+    syncing.value = true
+    try {
+      await Promise.all([
+        themeStore.fetchTheme(),
+        refreshCart(),
+        refreshWishlist(),
+        refreshOrders()
+      ])
+    } finally {
+      syncing.value = false
+    }
   }
 
   if (token.value && !user.value) {

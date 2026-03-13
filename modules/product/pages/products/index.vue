@@ -9,7 +9,7 @@
     </div>
 
     <!-- Search and Filter -->
-    <div class="mb-8 flex flex-col sm:flex-row gap-4">
+    <div class="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div class="flex-1">
         <ProductAutocomplete
           v-model="searchText"
@@ -72,11 +72,48 @@
           </button>
         </div>
       </div>
+
+      <div class="flex items-center gap-2">
+        <label class="text-sm text-[var(--text-secondary)] whitespace-nowrap">排序：</label>
+        <select
+          v-model="sortKey"
+          class="border border-[var(--border-color)] bg-[var(--card-bg)] text-sm px-2 py-1 rounded-md text-[var(--text-color)]"
+        >
+          <option value="default">综合排序</option>
+          <option value="price-asc">价格从低到高</option>
+          <option value="price-desc">价格从高到低</option>
+          <option value="rating-desc">评分优先</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+      <p class="text-[var(--text-secondary)]">
+        当前筛选：
+        <span v-if="activeCategory && categoryLabels[activeCategory]">
+          分类「{{ categoryLabels[activeCategory] }}」
+        </span>
+        <span v-else>
+          全部分类
+        </span>
+        <span v-if="activeQuery">
+          ，关键字「{{ activeQuery }}」
+        </span>
+        <span>，共 {{ total }} 件商品</span>
+      </p>
+      <button
+        v-if="activeCategory || activeQuery"
+        type="button"
+        class="text-xs sm:text-sm text-[var(--primary-color)] hover:underline self-start sm:self-auto"
+        @click="clearFilters"
+      >
+        清除所有筛选
+      </button>
     </div>
 
       <!-- Loading State -->
-      <div v-if="pending" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"/>
+      <div v-if="pending" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <ProductCardSkeleton v-for="n in 8" :key="n" />
       </div>
 
       <!-- Product Grid -->
@@ -123,6 +160,7 @@
 import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { http } from '~/utils/http'
@@ -176,19 +214,19 @@ const { data: categoryData } = await useAsyncData(
 
 const categories = computed(() => categoryData.value?.map(c => c.key) || [])
 
+const sortKey = ref<'default' | 'price-asc' | 'price-desc' | 'rating-desc'>('default')
+
 // 通过 watch 响应路由变化并刷新数据
 const { data, pending } = await useAsyncData(
   'products',
-  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value),
+  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value, sortKey.value),
   {
-    watch: [page, activeCategory, activeQuery], // 当页码/分类/搜索词变化时重新拉取
+    watch: [page, activeCategory, activeQuery, sortKey], // 当页码/分类/搜索词变化时重新拉取
     default: () => ({ items: [], total: 0 })
   }
 )
 
-const products = computed(() => {
-  return data.value?.items || []
-})
+const products = computed(() => data.value?.items || [])
 
 const total = computed(() => data.value?.total || 0)
 const totalPages = computed(() => Math.ceil(total.value / limit))

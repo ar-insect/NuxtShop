@@ -28,6 +28,7 @@
               :src="selectedImage || product.image"
               :alt="product.title"
               class="w-full h-full object-center object-contain p-4 sm:p-6 select-none transition-opacity duration-300"
+              loading="lazy"
               draggable="false"
               @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/800x800/f3f4f6/9ca3af?text=No+Image'"
             >
@@ -60,6 +61,7 @@
               :src="img" 
               :alt="`${product.title} - view ${idx + 1}`"
               class="w-full h-full object-center object-contain p-1"
+              loading="lazy"
               @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x200/f3f4f6/9ca3af?text=Thumbnail'"
             >
           </button>
@@ -78,13 +80,25 @@
         <!-- Reviews -->
         <div class="mt-3">
           <h3 class="sr-only">评价</h3>
-          <div class="flex items-center">
+          <div class="flex items-center gap-3">
             <div class="flex items-center">
-              <svg v-for="rating in [0, 1, 2, 3, 4]" :key="rating" :class="[product.rating.rate > rating ? 'text-yellow-400' : 'text-[var(--border-color)]', 'h-5 w-5 flex-shrink-0']" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              <svg
+                v-for="rating in [0, 1, 2, 3, 4]"
+                :key="rating"
+                :class="[displayRatingRate > rating ? 'text-yellow-400' : 'text-[var(--border-color)]', 'h-5 w-5 flex-shrink-0']"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
               </svg>
             </div>
-            <p class="sr-only">{{ product.rating.rate }} 满分 5 星</p>
+            <p class="text-sm text-[var(--text-secondary)]">
+              {{ displayRatingCount }} 条评价（平均 {{ displayRatingRate.toFixed(1) }} / 5）
+            </p>
           </div>
         </div>
 
@@ -230,6 +244,30 @@ const currentImages = computed(() => {
   return [product.value.image]
 })
 
+const { data: ratingSummary } = await useAsyncData(
+  `product-rating-${id}`,
+  () => http.get<{ success: boolean; data: { avgRating: number; reviewCount: number } }>(`/reviews/summary/${id}`),
+  {
+    default: () => ({ success: true, data: { avgRating: 0, reviewCount: 0 } })
+  }
+)
+
+const displayRatingRate = computed(() => {
+  const payload = ratingSummary.value
+  if (payload?.success && payload.data.reviewCount > 0) {
+    return payload.data.avgRating
+  }
+  return product.value?.rating.rate ?? 0
+})
+
+const displayRatingCount = computed(() => {
+  const payload = ratingSummary.value
+  if (payload?.success && payload.data.reviewCount > 0) {
+    return payload.data.reviewCount
+  }
+  return product.value?.rating.count ?? 0
+})
+
 onMounted(async () => {
   await fetchHistory()
   if (product.value) {
@@ -268,7 +306,7 @@ const handleAddToCart = () => {
   setTimeout(() => {
     if (product.value) {
       addToCart(product.value)
-      toast.success(`已将 ${product.value.title} 加入购物车！`)
+      toast.success(`已将 ${product.value.title} 加入购物车，点击右上角购物车查看`)
     }
     addingToCart.value = false
   }, 500)

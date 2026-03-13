@@ -6,6 +6,7 @@
         :src="imageSrc" 
         :alt="product.title"
         class="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-105 p-4"
+        loading="lazy"
         @error="handleImageError"
       >
       
@@ -90,7 +91,7 @@ const handleAddToCart = () => {
     return
   }
   addToCart(props.product)
-  toast.success('已加入购物车')
+  toast.success('已加入购物车，点击右上角购物车查看')
 }
 
 const handleToggleWishlist = () => {

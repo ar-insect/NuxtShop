@@ -23,7 +23,7 @@
                 class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-[var(--text-color)] ring-1 ring-[var(--border-color)] backdrop-blur w-fit" 
                 :style="{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--card-bg), transparent 20%)' }"
               >
-                <component :is="currentSlide.icon" class="h-4 w-4" :style="{ color: 'var(--primary-color)' }" />
+                <SvgIcon :name="currentSlide.icon" class="h-4 w-4" :style="{ color: 'var(--primary-color)' }" />
                 {{ currentSlide.tag }}
               </div>
               
@@ -48,6 +48,10 @@
             </div>
           </div>
 
+          <p class="mt-3 text-xs sm:text-sm text-[var(--text-secondary)]">
+            小提示：先按分类快速浏览，再收藏或加入购物车，最后在购物车统一结算。
+          </p>
+
           <!-- Quick Links (Static) -->
           <div class="mt-8 flex flex-wrap gap-2 z-10">
             <button
@@ -57,7 +61,7 @@
               :style="{ borderRadius: 'var(--border-radius)' }"
               @click="goToProducts({ category: c.key })"
             >
-              <component :is="c.icon" class="h-4 w-4" :style="{ color: 'var(--primary-color)' }" />
+              <SvgIcon :name="c.icon" class="h-4 w-4" :style="{ color: 'var(--primary-color)' }" />
               {{ c.label }}
             </button>
           </div>
@@ -102,7 +106,7 @@
                     <div class="absolute -bottom-6 -left-6 bg-[var(--card-bg)] p-4 rounded-xl shadow-lg border border-[var(--border-color)] max-w-[200px] transform transition-transform duration-500 hover:-translate-y-2 animate-float-slow hidden xl:block">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-teal-100 rounded-lg text-teal-600">
-                                <TruckIcon class="h-5 w-5" />
+                                <SvgIcon name="truck" class="h-5 w-5" />
                             </div>
                             <div>
                                 <p class="text-xs text-[var(--text-secondary)]">极速配送</p>
@@ -114,7 +118,7 @@
                     <div class="absolute -top-6 -right-6 bg-[var(--card-bg)] p-4 rounded-xl shadow-lg border border-[var(--border-color)] max-w-[200px] transform transition-transform duration-500 hover:-translate-y-2 animate-float-delayed hidden xl:block">
                          <div class="flex items-center gap-3">
                             <div class="p-2 bg-rose-100 rounded-lg text-rose-600">
-                                <TagIcon class="h-5 w-5" />
+                                <SvgIcon name="tag" class="h-5 w-5" />
                             </div>
                             <div>
                                 <p class="text-xs text-[var(--text-secondary)]">限时优惠</p>
@@ -131,8 +135,8 @@
 </template>
 
 <script setup lang="ts">
-import { SparklesIcon, TruckIcon, TagIcon, FireIcon, StarIcon } from '@heroicons/vue/24/outline'
 import StyledTsxButton from '~/components/ui/StyledTsxButton'
+import SvgIcon from '~/components/ui/SvgIcon.vue'
 
 const _props = defineProps<{
   cartCount: number
@@ -151,7 +155,7 @@ const slides = [
     tag: '今日上新 / 热门推荐',
     title: '发现你喜欢的好物',
     description: '这里是一个 Nuxt 3 电商风格首页示例：商品推荐、分类入口、加入购物车与收藏。',
-    icon: SparklesIcon,
+    icon: 'sparkles',
     gradient: 'radial-gradient(1200px circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, rgba(255,255,255,0) 45%), radial-gradient(900px circle at 90% 10%, rgba(16,185,129,0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80'
   },
@@ -159,7 +163,7 @@ const slides = [
     tag: '限时特惠 / 低至5折',
     title: '夏季清仓大促销',
     description: '精选夏季服饰、户外装备限时特惠。立即抢购，手慢无！',
-    icon: FireIcon,
+    icon: 'fire',
     gradient: 'radial-gradient(1200px circle at 20% 80%, rgba(249, 115, 22, 0.15) 0%, rgba(255,255,255,0) 45%), radial-gradient(900px circle at 80% 20%, rgba(239, 68, 68, 0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80'
   },
@@ -167,7 +171,7 @@ const slides = [
     tag: '新品首发 / 科技潮流',
     title: '探索前沿数码科技',
     description: '最新发布的智能设备、电子配件，带你体验科技的魅力。',
-    icon: StarIcon,
+    icon: 'star',
     gradient: 'radial-gradient(1200px circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, rgba(255,255,255,0) 50%), radial-gradient(900px circle at 10% 10%, rgba(59, 130, 246, 0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1000&q=80'
   }

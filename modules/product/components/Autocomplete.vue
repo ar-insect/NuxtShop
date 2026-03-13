@@ -30,6 +30,21 @@
       </div>
       
       <ul v-else class="py-1">
+        <li
+          v-if="!query && hotKeywords.length > 0"
+          class="px-4 py-2 text-xs text-[var(--text-secondary)] flex flex-wrap gap-2 border-b border-[var(--border-color)]"
+        >
+          <span>推荐搜索：</span>
+          <button
+            v-for="kw in hotKeywords"
+            :key="kw"
+            type="button"
+            class="px-2 py-0.5 rounded-full border border-[var(--border-color)] text-[var(--text-color)] hover:bg-[var(--bg-color)] text-xs"
+            @click="applyKeyword(kw)"
+          >
+            {{ kw }}
+          </button>
+        </li>
         <li 
           v-for="(product, index) in filteredProducts" 
           :key="product.id"
@@ -82,6 +97,7 @@ const query = ref(props.modelValue)
 const showResults = ref(false)
 const activeIndex = ref(-1)
 const containerRef = ref<HTMLElement | null>(null)
+const hotKeywords = ref<string[]>(['背包', '男士夹克', '戒指', '耳饰'])
 
 // 同步内部 query 与外部 v-model
 watch(() => props.modelValue, (newVal) => {
@@ -127,6 +143,14 @@ const handleInput = (value: string) => {
   query.value = value
   emit('update:modelValue', value)
   emit('search', value)
+  showResults.value = true
+  activeIndex.value = -1
+}
+
+const applyKeyword = (kw: string) => {
+  query.value = kw
+  emit('update:modelValue', kw)
+  emit('search', kw)
   showResults.value = true
   activeIndex.value = -1
 }

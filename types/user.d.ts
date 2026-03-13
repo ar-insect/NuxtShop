@@ -9,6 +9,7 @@ export interface User {
   role: 'admin' | 'user';
   avatar?: string;
   name?: string;
+  phone?: string;
   createdAt: Date;
   updatedAt?: Date;
   preferences?: ThemeConfig; // 添加偏好设置字段

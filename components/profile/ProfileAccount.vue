@@ -55,8 +55,38 @@
               <span class="text-[var(--text-color)] font-medium">2,345</span>
             </div>
             <div class="flex flex-col">
-              <span class="text-[var(--text-secondary)] mb-1">注册时间：</span>
-              <span class="text-[var(--text-color)] font-medium">2023-01-15</span>
+              <span class="text-[var(--text-secondary)] mb-1">手机号：</span>
+              <div class="group flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 max-w-sm sm:max-w-md">
+                <div v-if="!isEditingPhone" class="flex items-center gap-2">
+                  <span class="text-[var(--text-color)]">
+                    {{ form.phone || '未设置手机号' }}
+                  </span>
+                  <button
+                    class="text-teal-500 hover:text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                    @click="isEditingPhone = true"
+                  >
+                    <PencilSquareIcon class="h-4 w-4" />
+                  </button>
+                </div>
+                <div v-else class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
+                  <BaseInput
+                    ref="phoneInput"
+                    v-model="form.phone"
+                    :error="phoneError"
+                    placeholder="请输入手机号"
+                    class="flex-1"
+                    @keyup.enter="savePhone"
+                  />
+                  <div class="flex items-center gap-2">
+                    <BaseButton size="sm" :loading="saving" class="whitespace-nowrap" @click="savePhone">
+                      保存
+                    </BaseButton>
+                    <BaseButton size="sm" variant="ghost" class="whitespace-nowrap" @click="cancelEditPhone">
+                      取消
+                    </BaseButton>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -110,6 +140,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch, nextTick } from 'vue'
 import { PencilIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
+import { validatePhone } from '~/utils/validation'
 
 const { user } = useAuth()
 const toast = useToast()
@@ -120,10 +151,14 @@ const showCropper = ref(false)
 const cropperImage = ref('')
 const isEditingName = ref(false)
 const nameInput = ref<HTMLInputElement | null>(null)
+const phoneError = ref('')
+const isEditingPhone = ref(false)
+const phoneInput = ref<HTMLInputElement | null>(null)
 
 const form = reactive({
   name: user.value?.name || '',
-  avatar: user.value?.avatar || ''
+  avatar: user.value?.avatar || '',
+  phone: user.value?.phone || ''
 })
 
 // 用户数据加载/刷新后同步表单内容
@@ -131,6 +166,7 @@ watch(user, (newUser) => {
   if (newUser) {
     form.name = newUser.name || ''
     form.avatar = newUser.avatar || ''
+    form.phone = newUser.phone || ''
   }
 }, { immediate: true })
 
@@ -139,6 +175,14 @@ watch(isEditingName, (val) => {
   if (val) {
     nextTick(() => {
       nameInput.value?.focus()
+    })
+  }
+})
+
+watch(isEditingPhone, (val) => {
+  if (val) {
+    nextTick(() => {
+      phoneInput.value?.focus()
     })
   }
 })
@@ -191,17 +235,32 @@ const handleCrop = async (blob: Blob) => {
 const saveProfile = async () => {
   saving.value = true;
   try {
+    if (form.phone) {
+      const err = validatePhone(form.phone)
+      if (err) {
+        toast.error(err)
+        phoneError.value = err
+        saving.value = false
+        return
+      }
+      phoneError.value = ''
+    } else {
+      phoneError.value = ''
+    }
+
     const response = await $fetch('/api/user/update', {
       method: 'POST',
       body: {
         name: form.name,
         avatar: form.avatar,
+        phone: form.phone,
       },
     });
     // 更新 useAuth 中的用户状态
     if (user.value && response.data) {
       user.value.name = response.data.name;
       user.value.avatar = response.data.avatar;
+      user.value.phone = response.data.phone;
     }
     toast.success('个人资料更新成功！');
   } catch (error: any) {
@@ -220,5 +279,18 @@ const saveName = async () => {
 const cancelEditName = () => {
   form.name = user.value?.name || ''
   isEditingName.value = false
+}
+
+const savePhone = async () => {
+  await saveProfile()
+  if (!phoneError.value) {
+    isEditingPhone.value = false
+  }
+}
+
+const cancelEditPhone = () => {
+  form.phone = user.value?.phone || ''
+  phoneError.value = ''
+  isEditingPhone.value = false
 }
 </script>

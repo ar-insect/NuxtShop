@@ -30,10 +30,14 @@
         </NuxtLink>
       </div>
 
-      <BaseLoading :loading="pending" text="正在加载推荐商品..." />
+      <div v-if="pending" class="px-4">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ProductCardSkeleton v-for="n in 4" :key="n" />
+        </div>
+      </div>
 
       <div
-        v-if="!pending"
+        v-else
         class="relative"
         @mouseenter="isCarouselHovering = true"
         @mouseleave="isCarouselHovering = false"
@@ -100,7 +104,7 @@
     </section>
 
     <section
-      v-if="trendingProducts.length > 0"
+      v-if="trendingPending || trendingProducts.length > 0"
       class="px-4 sm:px-6 lg:px-8"
     >
       <div class="flex items-end justify-between gap-4 mb-4">
@@ -110,7 +114,10 @@
         </div>
       </div>
 
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div v-if="trendingPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCardSkeleton v-for="n in 4" :key="n" />
+      </div>
+      <div v-else-if="trendingProducts.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <ProductCard
           v-for="p in trendingProducts"
           :key="p.id"
@@ -121,7 +128,7 @@
     </section>
 
     <section
-      v-if="favoritedProducts.length > 0"
+      v-if="favoritedPending || favoritedProducts.length > 0"
       class="px-4 sm:px-6 lg:px-8"
     >
       <div class="flex items-end justify-between gap-4 mb-4">
@@ -131,7 +138,10 @@
         </div>
       </div>
 
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div v-if="favoritedPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCardSkeleton v-for="n in 4" :key="n" />
+      </div>
+      <div v-else-if="favoritedProducts.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <ProductCard
           v-for="p in favoritedProducts"
           :key="p.id"
@@ -145,7 +155,7 @@
       <div class="grid gap-8 lg:grid-cols-3">
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <ShoppingBagIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="sparkles" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
             <div class="text-sm font-semibold text-[var(--text-color)]">丰富品类</div>
@@ -154,7 +164,7 @@
         </div>
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <ShieldCheckIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="shield-check" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
             <div class="text-sm font-semibold text-[var(--text-color)]">安全示例</div>
@@ -163,7 +173,7 @@
         </div>
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <SparklesIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="sparkles" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
             <div class="text-sm font-semibold text-[var(--text-color)]">可配置皮肤</div>
@@ -179,19 +189,16 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ShoppingBagIcon,
-  SparklesIcon,
-  TagIcon,
-  ShieldCheckIcon
-} from '@heroicons/vue/24/outline'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { http } from '~/utils/http'
+import { validateEmail } from '~/utils/validation'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue' // 引入 BaseAdCarousel
+import SvgIcon from '~/components/ui/SvgIcon.vue'
 
 useSeoMeta({
   title: '首页',
@@ -217,8 +224,9 @@ const { getCategoryLabel } = useCategoryMapper()
 const email = ref('')
 
 const subscribe = () => {
-  if (!email.value) {
-    toast.error('请输入有效的邮箱地址')
+  const emailError = validateEmail(email.value)
+  if (emailError) {
+    toast.error(emailError)
     return
   }
   toast.success('订阅成功！感谢您的关注')
@@ -237,7 +245,7 @@ interface TrendingItem extends Product {
   views: number
 }
 
-const { data: trendingData } = await useAsyncData(
+const { data: trendingData, pending: trendingPending } = await useAsyncData(
   'trending-products',
   () => http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
     '/history/top-products',
@@ -259,7 +267,7 @@ interface FavoritedItem extends Product {
   favorites: number
 }
 
-const { data: favoritedData } = await useAsyncData(
+const { data: favoritedData, pending: favoritedPending } = await useAsyncData(
   'favorited-products',
   () => http.get<{ success: boolean; items: { product: Product; favorites: number }[] }>(
     '/wishlist/top-products',
@@ -286,26 +294,26 @@ onMounted(() => {
   }
 })
 
-const categoryMeta: Record<string, { description: string; icon: any; image: string }> = {
-  "men's clothing": { 
-    description: '日常穿搭、外套与基础款', 
-    icon: ShoppingBagIcon,
-    image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=600&q=80'
-  },
-  'jewelery': { 
-    description: '戒指、耳饰、手链等', 
-    icon: SparklesIcon,
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
-  },
-  "electronics": { 
-    description: '数码产品、手机与配件', 
-    icon: TagIcon,
+const categoryMeta: Record<string, { description: string; icon: string; image: string }> = {
+  "electronics": {
+    description: '数码产品、手机与配件',
+    icon: 'computer-desktop',
     image: 'https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?auto=format&fit=crop&w=600&q=80'
   },
-  "women's clothing": { 
-    description: '时尚潮流、裙装与上衣', 
-    icon: ShoppingBagIcon,
+  "women's clothing": {
+    description: '时尚潮流、裙装与上衣',
+    icon: 'user-circle',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80'
+  },
+  "men's clothing": {
+    description: '日常穿搭、外套与基础款',
+    icon: 'user',
+    image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=600&q=80'
+  },
+  'jewelery': {
+    description: '戒指、耳饰、手链等',
+    icon: 'sparkles',
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
   }
 }
 
@@ -318,7 +326,7 @@ const categoryCards = computed(() => {
   return Object.keys(counts).map((key) => {
     const meta = categoryMeta[key] || { 
       description: '精选商品分类', 
-      icon: TagIcon, 
+      icon: 'sparkles', 
       image: 'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&w=600&q=80' 
     }
     return { key, ...meta, label: getCategoryLabel(key), count: counts[key] }

@@ -1,6 +1,6 @@
 # NuxtShop 全栈电商实战模板
 
-本项目是一个基于 Nuxt 3 的全栈电商演示应用，采用现代化的模块化架构。它不仅集成了 Redis 持久化、Playwright 自动化测试 (E2E/BDD) 和 Docker 部署方案，还包含了服务端渲染 (SSR)、增量静态再生 (ISR) 等企业级特性，旨在提供一个功能完备、最佳实践的开发参考。
+本项目是一个基于 Nuxt 3 的全栈电商演示应用，采用现代化的模块化架构。它不仅集成了 MongoDB/Redis 数据持久化、Playwright 自动化测试 (E2E/BDD) 和 Docker 部署方案，还包含了服务端渲染 (SSR)、增量静态再生 (ISR) 等企业级特性，旨在提供一个功能完备、最佳实践的开发参考。
 
 ## 🚀 特性
 
@@ -17,7 +17,7 @@
 - **调试配置**: 预配置 VS Code `launch.json`，支持客户端和服务端断点调试。
 - **SSR 支持**: 包含服务端渲染 API 和页面调试示例，支持 `useAsyncData` 数据获取。
 - **ISR 渲染**: 配置了增量静态再生 (ISR)，支持页面级缓存策略。
-- **Redis 持久化**: 集成 Redis 实现订单、购物车、收藏夹、主题设置及错误日志的数据持久化。
+- **数据持久化**: 使用 MongoDB 存储商品、购物车、订单、收藏夹、浏览历史、评价和用户主题偏好等核心数据，并可选集成 Redis 作为缓存与日志存储。
 - **功能演示**: 包含完整的商品列表、详情、购物车、订单管理、收藏夹及用户中心功能。
 
 ## 📂 目录结构
@@ -55,7 +55,7 @@
 ├── scripts/            # 自动化脚本
 ├── server/             # 全局服务端代码
 │   ├── api/            # 通用 API
-│   └── utils/          # 服务端工具函数 (redis, session 等)
+│   └── utils/          # 服务端工具函数 (mongodb, redis, session 等)
 ├── tests/              # 测试文件 (E2E/BDD)
 ├── types/              # 全局类型定义
 ├── utils/              # 通用工具函数
@@ -104,42 +104,36 @@
 - **Components**: `components/ui/` (基础 UI 组件), `components/home/` (首页组件)。
 - **Composables**: `useAuth` (认证), `useToast` (提示), `useConfirm` (确认框)。
 - **Utils**: `http.ts`, `format.ts` 等通用工具。
-- **Server Utils**: `server/utils/redis.ts` (Redis 客户端), `server/utils/session.ts` (会话管理)。
+- **Server Utils**: `server/utils/mongodb.ts` (MongoDB 工具), `server/utils/redis.ts` (Redis 客户端，可选缓存), `server/utils/session.ts` (会话管理)。
 
-### 6. 页面布局 (Layouts)
+### 4. 页面布局 (Layouts)
 - **`default`**: 默认布局，包含头部导航和底部版权信息。
 - **`auth`**: 认证布局，简洁的居中设计，专用于登录/注册页面。
 - **`dashboard`**: 仪表盘布局，包含侧边栏导航，适用于个人中心等管理页面。
 
-### 7. 样式方案
+### 5. 样式方案
 - **Tailwind CSS**: 主要样式工具。
 - **Styled Components**: 演示 CSS-in-JS 方案 (`pages/styled-demo.vue`)。
 
-### 8. 渲染策略 (Rendering)
+### 6. 渲染策略 (Rendering)
 本项目混合使用了多种渲染模式以优化性能：
 - **SSR (服务端渲染)**: 默认模式，适用于大多数动态页面。
 - **ISR (增量静态再生)**: 通过 `routeRules` 配置缓存策略。
   - `/docs`: SWR (Stale-While-Revalidate)，非阻塞后台更新。
   - `/products/**`: 缓存 1 小时 (3600秒)，适用于商品详情页。
 
-### 9. 数据持久化 (Redis Integration)
-本项目使用 Redis 作为核心数据存储，实现了用户数据的跨端持久化与状态同步：
+### 7. 数据持久化 (Redis Integration)
+本项目中的核心业务数据已全部迁移至 MongoDB。Redis 作为可选组件，主要用于缓存与扩展示例：
 
-- **用户资料 (User Profile)**:
-  - Key: `user:profile:{userId}`
-  - 机制: 存储用户自定义头像和昵称，登录时自动合并至用户状态。
-- **购物车 (Cart)**:
-  - Key: `cart:{userId}`
-  - 机制: 基于用户 ID 存储购物车数据。
-- **订单 (Orders)**:
-  - Key: `orders:{userId}`
-  - 机制: 存储用户订单历史，支持创建和删除操作。
-- **收藏夹 (Wishlist)**:
-  - Key: `wishlist:{sessionId}`
-  - 机制: 基于会话 ID (Cookie) 存储用户收藏的商品列表。
+- **缓存 / 临时数据**:
+  - 可用于实现页面级缓存、限流、会话扩展等（根据业务需要接入）。
+- **脚本与示例**:
+  - 保留 `server/utils/redis.ts` 作为 Redis 工具封装示例，方便在实际项目中扩展使用。
 
-### 10. 数据持久化 (MongoDB Integration)
-本项目集成了 MongoDB 作为 NoSQL 数据库，用于存储和管理非结构化数据，例如商品信息。
+在默认演示环境下，即使未启动 Redis，核心功能（商品、购物车、订单、收藏、浏览历史、评价等）也可以正常工作。
+
+### 8. 数据持久化 (MongoDB Integration)
+本项目集成了 MongoDB 作为核心数据存储，用于持久化所有电商相关业务数据。
 
 - **配置**:
   - `nuxt.config.ts` 中通过 `runtimeConfig` 配置 `MONGODB_URI` 和 `MONGODB_DB_NAME`。
@@ -149,16 +143,39 @@
   - `server/plugins/mongodb.ts`: Nuxt Nitro 插件，在应用启动时连接 MongoDB，应用关闭时断开连接。
 - **CRUD 工具**:
   - `server/utils/mongodb.ts` 中提供了 `find`, `findOne`, `insertOne`, `updateOne`, `deleteOne` 等通用 CRUD 方法，方便在服务端 API 中调用。
-- **演示页面**:
-  - `pages/mongodb.vue`: 提供了完整的商品 CRUD (创建、读取、更新、删除) 演示。
-  - `server/api/shop/products.get.ts`: 获取商品列表，如果集合为空则自动插入示例数据。
-  - `server/api/shop/products.post.ts`: 创建新商品。
-  - `server/api/shop/products/[id].put.ts`: 更新指定商品。
-  - `server/api/shop/products/[id].delete.ts`: 删除指定商品。
+- **业务数据持久化(核心集合)**:
+  - **商品 (Products)**  
+    - 集合: `shop_products_app`  
+    - 相关文件: `server/utils/product.ts`, `modules/product/server/api/products/*.ts`  
+    - 功能: 商品列表、详情、分页与分类筛选。
+  - **购物车 (Carts)**  
+    - 集合: `user_carts`  
+    - 相关文件: `server/utils/cart.ts`, `modules/cart/server/api/cart/*.ts`  
+    - 功能: 登录用户购物车持久化，刷新后与跨端访问保持一致。
+  - **订单 (Orders)**  
+    - 集合: `user_orders`  
+    - 相关文件: `server/utils/order.ts`, `modules/order/server/api/orders/index.ts`  
+    - 功能: 订单创建、列表与删除，按用户维度存储。
+  - **收藏夹 (Wishlists)**  
+    - 集合: `user_wishlists`  
+    - 相关文件: `server/utils/wishlist.ts`, `server/api/wishlist*.ts`  
+    - 功能: 登录用户收藏商品持久化，以及「最近 7 天收藏最多的商品」统计接口 `/api/wishlist/top-products`。
+  - **浏览历史 (Browse History)**  
+    - 集合: `browse_history`  
+    - 相关文件: `server/utils/history.ts`, `server/api/history/*.ts`  
+    - 功能: 最近浏览记录、最近 7 天浏览最多的商品统计接口 `/api/history/top-products`。
+  - **商品评价 (Reviews)**  
+    - 集合: `product_reviews`  
+    - 相关文件: `server/utils/review.ts`, `server/api/reviews/*.ts`  
+    - 功能: 商品评价的提交与按商品维度的评价列表展示。
+  - **用户主题偏好 (User Preferences)**  
+    - 集合: `users` 中的 `preferences` 字段  
+    - 相关文件: `server/api/theme.get.ts`, `server/api/theme.post.ts`  
+    - 功能: 存储每个用户的主题颜色、圆角、字号等个性化设置。
 
-### 11. 自动化测试
+### 9. 自动化测试
 
-#### 10.1 端到端测试 (Playwright BDD)
+#### 9.1 端到端测试 (Playwright BDD)
 
 本项目集成了 Playwright 和 `playwright-bdd`，支持行为驱动开发：
 
@@ -170,7 +187,7 @@
   npx bddgen && npx playwright test
   ```
 
-#### 10.2 单元测试 (Vitest)
+#### 9.2 单元测试 (Vitest)
 
 项目同时集成了 Vitest + Vue Test Utils，用于组件、组合式函数和工具函数的单元测试。
 
@@ -210,9 +227,9 @@ node .output/server/index.mjs
 - 默认端口：`4000`
 - 可通过环境变量覆盖：`PORT=4000 HOST=0.0.0.0`
 
-### 2) 必要环境变量 (Redis)
+### 2) 必要环境变量 (Redis，可选)
 
-项目在生产环境下会使用 Redis 做数据持久化与 Nitro Cache（ISR/SWR）缓存：
+如果在生产环境中启用了 Redis 作为缓存或扩展功能，需要配置以下环境变量：
 
 - `REDIS_HOST`（默认 `localhost`）
 - `REDIS_PORT`（默认 `6379`）

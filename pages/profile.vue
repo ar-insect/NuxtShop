@@ -40,18 +40,18 @@
         </BaseCard>
         
         <BaseCard>
-             <BaseButton
-                block
-                variant="danger"
-                class="flex items-center justify-center"
-                @click="logout"
-              >
-                <ArrowRightOnRectangleIcon
-                  class="flex-shrink-0 mr-2 h-5 w-5"
-                  aria-hidden="true"
-                />
-                退出登录
-              </BaseButton>
+          <BaseButton
+            block
+            variant="danger"
+            class="flex items-center justify-center"
+            @click="handleLogout"
+          >
+            <ArrowRightOnRectangleIcon
+              class="flex-shrink-0 mr-2 h-5 w-5"
+              aria-hidden="true"
+            />
+            退出登录
+          </BaseButton>
         </BaseCard>
       </aside>
 
@@ -102,6 +102,7 @@ definePageMeta({
 })
 
 const { logout } = useAuth()
+const { confirm } = useConfirm()
 
 useSeoMeta({
   title: '个人中心',
@@ -120,6 +121,20 @@ const navigation = reactive([
 ])
 
 const router = useRouter()
+
+const handleLogout = async () => {
+  const ok = await confirm({
+    title: '退出登录',
+    message: '确定要退出当前账号吗？',
+    type: 'danger',
+    confirmText: '退出登录',
+    cancelText: '取消'
+  })
+
+  if (ok) {
+    logout()
+  }
+}
 
 // 根据当前选中项更新导航状态
 watch(currentTab, (val) => {

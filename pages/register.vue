@@ -144,6 +144,7 @@ class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold t
 
 <script setup lang="ts">
 import PuzzleCaptcha from '~/components/ui/PuzzleCaptcha.vue'
+import { validatePhone, validateUsername, validatePassword, validateConfirmPassword } from '~/utils/validation'
 
 const { register } = useAuth()
 const { openLoginModal } = useLoginModal()
@@ -166,17 +167,20 @@ const confirmPassword = ref('')
 
 // Computed
 const isStep1Valid = computed(() => {
-  return phone.value.length >= 11 && captchaVerified.value && agreed.value
+  return !validatePhone(phone.value) && captchaVerified.value && agreed.value
 })
 
 const isStep2Valid = computed(() => {
-  return username.value.length > 0 && password.value.length >= 6 && password.value === confirmPassword.value
+  return !validateUsername(username.value) &&
+    !validatePassword(password.value) &&
+    !validateConfirmPassword(password.value, confirmPassword.value)
 })
 
 // Methods
 const handleNextStep = () => {
   if (!isStep1Valid.value) {
-    if (!phone.value) toast.error('请输入手机号')
+    const phoneError = validatePhone(phone.value)
+    if (phoneError) toast.error(phoneError)
     else if (!captchaVerified.value) toast.error('请完成验证')
     else if (!agreed.value) toast.error('请同意协议')
     return
@@ -185,7 +189,21 @@ const handleNextStep = () => {
 }
 
 const handleRegister = async () => {
-  if (!isStep2Valid.value) return
+  const usernameError = validateUsername(username.value)
+  if (usernameError) {
+    toast.error(usernameError)
+    return
+  }
+  const passwordError = validatePassword(password.value)
+  if (passwordError) {
+    toast.error(passwordError)
+    return
+  }
+  const confirmError = validateConfirmPassword(password.value, confirmPassword.value)
+  if (confirmError) {
+    toast.error(confirmError)
+    return
+  }
   
   loading.value = true
   try {

@@ -29,25 +29,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useLoginModal } from '~/composables/useLoginModal';
-import { useAuth } from '~/composables/useAuth';
+import { ref } from 'vue'
+import { useLoginModal } from '~/composables/useLoginModal'
+import { useAuth } from '~/composables/useAuth'
+import { validateUsername, validatePassword } from '~/utils/validation'
 
-const { isOpen, closeLoginModal } = useLoginModal();
-const { login } = useAuth();
+const { isOpen, closeLoginModal } = useLoginModal()
+const { login } = useAuth()
+const toast = useToast()
 
-const username = ref('');
-const password = ref('');
-const loading = ref(false);
+const username = ref('')
+const password = ref('')
+const loading = ref(false)
 
 const handleLogin = async () => {
-  loading.value = true;
-  const success = await login(username.value, password.value);
-  if (success) {
-    closeLoginModal();
-    username.value = '';
-    password.value = '';
+  const usernameError = validateUsername(username.value)
+  if (usernameError) {
+    toast.error(usernameError)
+    return
   }
-  loading.value = false;
-};
+  const passwordError = validatePassword(password.value)
+  if (passwordError) {
+    toast.error(passwordError)
+    return
+  }
+
+  loading.value = true
+  const success = await login(username.value, password.value)
+  if (success) {
+    closeLoginModal()
+    username.value = ''
+    password.value = ''
+  }
+  loading.value = false
+}
 </script>

@@ -94,7 +94,7 @@
         </div>
 
         <div v-else-if="reviews.length > 0" class="space-y-8">
-          <div v-for="review in reviews" :key="review.id" class="flex gap-4 border-b border-[var(--border-color)] pb-8 last:border-0">
+          <div v-for="review in visibleReviews" :key="review.id" class="flex gap-4 border-b border-[var(--border-color)] pb-8 last:border-0">
             <div class="flex-shrink-0">
               <img :src="review.userAvatar || 'https://www.gravatar.com/avatar?d=mp'" alt="" class="w-12 h-12 rounded-full object-cover border border-[var(--border-color)]">
             </div>
@@ -109,6 +109,19 @@
               <p class="text-[var(--text-color)] leading-relaxed">{{ review.content }}</p>
             </div>
           </div>
+        </div>
+
+        <div
+          v-if="reviews.length > 3"
+          class="mt-6 flex justify-center"
+        >
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium border border-[var(--border-color)] rounded-full text-[var(--text-color)] hover:bg-[var(--bg-color)] transition-colors"
+            @click="showAll = !showAll"
+          >
+            {{ showAll ? '收起部分评价' : `展开全部评价（共 ${reviews.length} 条）` }}
+          </button>
         </div>
 
         <div v-else class="text-center py-12 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl">
@@ -145,6 +158,7 @@ const reviews = ref<Review[]>([])
 const loading = ref(true)
 const submitting = ref(false)
 const hoverRating = ref(0)
+const showAll = ref(false)
 
 const form = reactive({
   rating: 0,
@@ -188,7 +202,7 @@ const submitReview = async () => {
       content: form.content
     })
 
-    toast.success('评价提交成功')
+    toast.success('评价提交成功，已刷新评价列表，一般会按时间排在前面')
     form.rating = 0
     form.content = ''
     fetchReviews() // Refresh list
@@ -214,6 +228,11 @@ const getPercentage = (star: number) => {
   if (reviews.value.length === 0) return 0
   return (getCount(star) / reviews.value.length) * 100
 }
+
+const visibleReviews = computed(() => {
+  if (showAll.value) return reviews.value
+  return reviews.value.slice(0, 3)
+})
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('zh-CN', {

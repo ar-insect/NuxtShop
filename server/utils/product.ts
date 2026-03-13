@@ -34,6 +34,7 @@ export interface ProductQueryParams {
   limit?: number
   category?: string
   query?: string
+  sort?: 'default' | 'price-asc' | 'price-desc' | 'rating-desc'
 }
 
 export interface ProductQueryResult {
@@ -65,9 +66,77 @@ export async function findProductsWithFilters(params: ProductQueryParams): Promi
   }
 
   const skip = (page - 1) * safeLimit
+  const sortKey = params.sort || 'default'
+
+  if (sortKey === 'rating-desc') {
+    const pipeline: any[] = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'product_reviews',
+          localField: 'id',
+          foreignField: 'productId',
+          as: 'reviewDocs'
+        }
+      },
+      {
+        $addFields: {
+          reviewCount: { $size: '$reviewDocs' },
+          avgRating: {
+            $cond: [
+              { $gt: [{ $size: '$reviewDocs' }, 0] },
+              { $avg: '$reviewDocs.rating' },
+              '$rating.rate'
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          ratingScore: {
+            $cond: [
+              { $gt: ['$reviewCount', 0] },
+              {
+                $multiply: [
+                  '$avgRating',
+                  { $log10: { $add: ['$reviewCount', 10] } }
+                ]
+              },
+              {
+                $multiply: [
+                  '$rating.rate',
+                  { $log10: { $add: ['$rating.count', 10] } }
+                ]
+              }
+            ]
+          },
+          'rating.rate': '$avgRating',
+          'rating.count': '$reviewCount'
+        }
+      },
+      { $sort: { ratingScore: -1, id: 1 } },
+      { $skip: skip },
+      { $limit: safeLimit },
+      { $project: { reviewDocs: 0, reviewCount: 0, avgRating: 0, ratingScore: 0 } }
+    ]
+
+    const [items, total] = await Promise.all([
+      collection.aggregate<DbProduct>(pipeline).toArray(),
+      collection.countDocuments(filter)
+    ])
+
+    return { items, total }
+  }
+
+  let sort: Record<string, 1 | -1> = { id: 1 }
+  if (sortKey === 'price-asc') {
+    sort = { price: 1, id: 1 }
+  } else if (sortKey === 'price-desc') {
+    sort = { price: -1, id: 1 }
+  }
 
   const [items, total] = await Promise.all([
-    collection.find(filter).sort({ id: 1 }).skip(skip).limit(safeLimit).toArray(),
+    collection.find(filter).sort(sort).skip(skip).limit(safeLimit).toArray(),
     collection.countDocuments(filter)
   ])
 
@@ -80,4 +149,3 @@ export async function findAllCategories(): Promise<string[]> {
   const categories = await collection.distinct('category')
   return categories.filter((c): c is string => typeof c === 'string')
 }
-

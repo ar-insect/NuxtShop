@@ -1,12 +1,13 @@
 <template>
-  <header
-    class="sticky top-0 z-50 w-full backdrop-blur-xl border-b"
-    :style="{
-      backgroundColor: 'color-mix(in srgb, var(--primary-color) 8%, var(--card-bg) 92%)',
-      opacity: '0.92',
-      borderColor: 'color-mix(in srgb, var(--primary-color) 14%, var(--border-color))'
-    }"
-  >
+  <header class="sticky top-0 z-50 w-full backdrop-blur-xl border-b relative" :style="headerStyle">
+    <transition name="fade">
+      <div
+        v-if="syncing"
+        class="absolute top-0 left-0 right-0 h-0.5 overflow-hidden"
+      >
+        <div class="w-full h-full bg-gradient-to-r from-[var(--primary-color)] via-sky-400 to-emerald-400 animate-pulse" />
+      </div>
+    </transition>
     <div class="w-full px-6 h-16 flex items-center justify-between">
       <!-- Left Side: Logo & Navigation -->
       <div class="flex items-center gap-8">
@@ -26,10 +27,11 @@
             <li v-for="link in mainLinks" :key="link.to">
               <NuxtLink 
                 :to="link.to"
-                class="px-3 py-2 text-sm font-medium hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 transition-all duration-200"
-                active-class="text-[var(--primary-color)] bg-[var(--primary-color)]/10 font-semibold shadow-sm"
-                :style="{ borderRadius: 'var(--border-radius)', color: 'var(--text-secondary)' }"
-                @click.prevent="navigateTo(link.to)"
+                class="px-3 py-2 text-sm font-medium transition-all duration-200"
+                :class="link.to === currentPath 
+                  ? 'text-[var(--primary-color)] bg-[var(--primary-color)]/10 font-semibold shadow-sm' 
+                  : 'hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 text-[var(--text-secondary)]'"
+                :style="{ borderRadius: 'var(--border-radius)' }"
               >
                 {{ link.text }}
               </NuxtLink>
@@ -70,47 +72,6 @@
               </BaseDropdown>
             </li>
 
-            <!-- Support Dropdown -->
-            <li class="relative group">
-              <BaseDropdown label="技术支持" :close-on-click="true">
-                <template #trigger="{ isOpen }">
-                  <button
-                    class="flex items-center gap-1 px-3 py-2 text-sm font-medium hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 transition-all duration-200"
-                    :style="{ borderRadius: 'var(--border-radius)', color: 'var(--text-secondary)' }"
-                  >
-                    技术支持
-                    <svg 
-                      class="h-4 w-4 transition-transform duration-200" 
-                      :class="{ 'rotate-180': isOpen }"
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </template>
-                
-                <template #default="{ close }">
-                  <a 
-                    href="https://github.com/ar-insect/NuxtShop"
-                    target="_blank"
-                    class="block px-4 py-2 text-sm hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)]"
-                    :style="{ color: 'var(--text-color)' }"
-                    @click="close"
-                  >
-                    GitHub 仓库
-                  </a>
-                  <a 
-                    href="https://github.com/ar-insect/NuxtShop/issues"
-                    target="_blank"
-                    class="block px-4 py-2 text-sm hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)]"
-                    :style="{ color: 'var(--text-color)' }"
-                    @click="close"
-                  >
-                    提交 Issues
-                  </a>
-                </template>
-              </BaseDropdown>
-            </li>
           </ul>
         </nav>
       </div>
@@ -119,7 +80,12 @@
       <div class="hidden md:flex items-center gap-4">
         <!-- Cart & Wishlist -->
         <div v-if="user" class="flex items-center gap-2 border-r pr-4 mr-4" :style="{ borderColor: 'var(--border-color)' }">
-          <NuxtLink to="/wishlist" class="relative p-2 hover:text-red-500 transition-colors" :style="{ color: 'var(--text-secondary)' }" title="收藏夹">
+          <NuxtLink
+            to="/wishlist"
+            class="relative p-2 transition-colors"
+            :class="currentPath.startsWith('/wishlist') ? 'text-red-500' : 'hover:text-red-500 text-[var(--text-secondary)]'"
+            title="收藏夹"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
@@ -129,7 +95,12 @@
               </span>
             </ClientOnly>
           </NuxtLink>
-          <NuxtLink to="/cart" class="relative p-2 hover:text-[var(--primary-color)] transition-colors" :style="{ color: 'var(--text-secondary)' }" title="购物车">
+          <NuxtLink
+            to="/cart"
+            class="relative p-2 transition-colors"
+            :class="currentPath.startsWith('/cart') ? 'text-[var(--primary-color)]' : 'hover:text-[var(--primary-color)] text-[var(--text-secondary)]'"
+            title="购物车"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -143,18 +114,54 @@
 
         <!-- User Actions -->
         <div v-if="user" class="flex items-center gap-3">
-          <NuxtLink to="/profile" class="flex items-center gap-2 text-sm font-medium hover:text-[var(--primary-color)] transition-colors" :style="{ color: 'var(--text-color)' }">
-            <img v-if="user.avatar" :src="user.avatar" class="w-8 h-8 rounded-full border" :style="{ borderColor: 'var(--border-color)' }" alt="用户" >
-            <span>{{ user.name }}</span>
-          </NuxtLink>
-          <BaseButton 
-            variant="link" 
-            size="sm"
-            class="px-4 py-2 text-sm font-medium"
-            @click="logout"
-          >
-            退出登录
-          </BaseButton>
+          <BaseDropdown :label="user.name || '账户'" :close-on-click="true">
+            <template #trigger="{ isOpen }">
+              <button
+                class="flex items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--primary-color)]"
+                :style="{ color: 'var(--text-color)' }"
+              >
+                <img v-if="user.avatar" :src="user.avatar" class="w-8 h-8 rounded-full border" :style="{ borderColor: 'var(--border-color)' }" alt="用户" >
+                <span>{{ user.name }}</span>
+                <svg
+                  class="h-4 w-4 transition-transform duration-200"
+                  :class="{ 'rotate-180': isOpen }"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </template>
+
+            <template #default="{ close }">
+              <NuxtLink
+                to="/profile"
+                class="block px-4 py-2 text-sm transition-colors"
+                :class="currentPath.startsWith('/profile') 
+                  ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
+                  : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                @click="close"
+              >
+                个人中心
+              </NuxtLink>
+              <NuxtLink
+                to="/orders"
+                class="block px-4 py-2 text-sm transition-colors"
+                :class="currentPath.startsWith('/orders') 
+                  ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
+                  : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                @click="close"
+              >
+                我的订单
+              </NuxtLink>
+              <button
+                type="button"
+                class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50"
+                @click="() => { close(); logout() }"
+              >
+                退出登录
+              </button>
+            </template>
+          </BaseDropdown>
         </div>
         <div v-else class="flex items-center gap-2">
           <BaseButton 
@@ -199,6 +206,16 @@ const { user, logout } = useAuth()
 const { cartCount } = useCart()
 const { wishlistItems } = useWishlist()
 const { openLoginModal } = useLoginModal()
+const route = useRoute()
+const syncing = useState<boolean>('user-syncing', () => false)
+
+const headerStyle = computed(() => ({
+  backgroundColor: 'color-mix(in srgb, var(--primary-color) 8%, var(--card-bg) 92%)',
+  opacity: '0.92',
+  borderColor: 'color-mix(in srgb, var(--primary-color) 14%, var(--border-color))'
+}))
+
+const currentPath = computed(() => route.path)
 const mainLinks = [
   { to: '/', text: '首页' },
   { to: '/products', text: '商品' },

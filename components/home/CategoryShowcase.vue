@@ -39,7 +39,7 @@
           <div class="transform transition-transform duration-300 group-hover:-translate-y-2">
             <div class="flex items-center gap-3 mb-2">
               <div class="p-2 rounded-lg bg-white/20 backdrop-blur-sm shadow-inner">
-                <component :is="category.icon" class="h-6 w-6 text-white" />
+                <SvgIcon :name="category.icon" class="h-6 w-6 text-white" />
               </div>
               <h3 class="text-xl font-bold tracking-wide">{{ category.label }}</h3>
             </div>
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+import SvgIcon from '~/components/ui/SvgIcon.vue'
 
 defineProps<{
   categories: any[]

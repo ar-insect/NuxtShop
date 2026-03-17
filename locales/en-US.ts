@@ -46,7 +46,45 @@ const enUS = {
       featureThemeDesc: 'Theme color and border radius powered by CSS variables, switch in real time',
       adElectronics: 'Electronics advertisement',
       adJewelery: 'Jewelry advertisement',
-      adMen: 'Menswear advertisement'
+      adMen: 'Menswear advertisement',
+      heroSlides: {
+        slide1: {
+          tag: 'New today / Trending',
+          title: 'Discover products you love',
+          description: 'A Nuxt 3 e-commerce style homepage demo with recommendations, categories, cart and wishlist.'
+        },
+        slide2: {
+          tag: 'Limited-time deals / Up to 50% off',
+          title: 'Summer clearance sale',
+          description: 'Selected summer apparel and outdoor gear on sale for a limited time. Grab them before they are gone.'
+        },
+        slide3: {
+          tag: 'New arrivals / Tech trends',
+          title: 'Explore cutting-edge tech',
+          description: 'The latest smart devices and accessories to experience the charm of technology.'
+        }
+      },
+      heroOverlay: {
+        viewDetail: 'View details',
+        fastShippingTitle: 'Fast delivery',
+        fastShippingDesc: 'Delivery as fast as next day',
+        saleTitle: 'Limited-time offer',
+        saleDesc: 'Save ¥30 when you spend ¥200'
+      },
+      categoryShowcase: {
+        title: 'Product categories',
+        description: 'Start from categories to quickly find what you need',
+        viewAll: 'View all',
+        viewProducts: 'Browse products',
+        countLabel: '{count} items'
+      },
+      categoryDescriptions: {
+        electronics: 'Digital devices, phones and accessories',
+        womens: 'Trendy womenswear: dresses and tops',
+        mens: 'Everyday menswear: outerwear and basics',
+        jewelery: 'Rings, earrings, bracelets and more',
+        default: 'Curated product category'
+      }
     },
     login: {
       title: 'User Login',
@@ -93,6 +131,163 @@ const enUS = {
       submit: 'Register now',
       goLoginPrefix: 'Already have an account?',
       goLoginLink: 'Sign in'
+    },
+    products: {
+      list: {
+        title: 'Product list',
+        subtitle: 'Browse curated products across all categories.',
+        searchPlaceholder: 'Search product name or description...',
+        allCategory: 'All',
+        clearFilterAria: 'Clear filters',
+        sortLabel: 'Sort by:',
+        sortDefault: 'Recommended',
+        sortPriceAsc: 'Price: low to high',
+        sortPriceDesc: 'Price: high to low',
+        sortRatingDesc: 'Rating: high to low',
+        filterCurrent: 'Current filters:',
+        filterCategory: 'Category “{category}”',
+        filterAll: 'All categories',
+        filterKeyword: ', keyword “{keyword}”',
+        filterCount: ', {count} items in total',
+        clearAllFilters: 'Clear all filters',
+        emptyTitle: 'No products found',
+        emptyDesc: 'Try adjusting your search keywords or filters.',
+        emptyButton: 'Clear filters'
+      },
+      detail: {
+        loading: 'Loading product details...',
+        notFoundTitle: 'Product not found',
+        backToList: 'Back to product list',
+        srInfo: 'Product information',
+        srReviews: 'Reviews',
+        srDescription: 'Description',
+        ratingSummary: '{count} reviews (average {rate} / 5)',
+        addToCart: 'Add to cart',
+        wishlistAddAria: 'Add to wishlist',
+        wishlistRemoveAria: 'Remove from wishlist',
+        wishlistAddSrOnly: 'Add to wishlist',
+        loginHint: 'Sign in to purchase or add products to wishlist',
+        loginButton: 'Sign in now',
+        historyTitle: 'Recently viewed',
+        historyClear: 'Clear history'
+      }
+    },
+    cart: {
+      title: 'Cart',
+      emptyTitle: 'Your cart is empty',
+      emptyDesc: 'Start adding some products to your cart.',
+      continueShopping: 'Continue shopping',
+      itemsHeading: 'Items in your cart',
+      quantityLabel: 'Quantity, {title}',
+      removeSrOnly: 'Remove',
+      summaryTitle: 'Order summary',
+      subtotalLabel: 'Subtotal',
+      discountLabel: 'Estimated discount',
+      totalLabel: 'Order total',
+      summaryHint: 'Demo environment only. You can plug in coupons or discount rules here.',
+      buttonEmpty: 'Please add items first',
+      buttonCheckout: 'Proceed to checkout',
+      recommendedTitle: 'Recommended products',
+      recommendedDesc: 'Recommended based on site-wide views in the last 7 days, excluding items in your cart.',
+      recommendedEmpty: 'No recommended products found.',
+      removeConfirmTitle: 'Remove item',
+      removeConfirmMessage: 'Remove this item from your cart?',
+      removeConfirmConfirm: 'Remove',
+      removeConfirmCancel: 'Cancel',
+      checkoutConfirmTitle: 'Confirm checkout',
+      checkoutConfirmMessage: 'You are checking out {count} items, total ¥{total}. Continue?',
+      checkoutConfirmConfirm: 'Checkout',
+      checkoutConfirmCancel: 'Keep browsing'
+    },
+    checkout: {
+      addressTitle: 'Shipping address',
+      useNewAddress: 'Use a new address',
+      newAddressTitle: 'Add new address',
+      firstNameLabel: 'First name',
+      firstNamePlaceholder: 'e.g. Zhang',
+      lastNameLabel: 'Last name',
+      lastNamePlaceholder: 'e.g. San',
+      regionLabel: 'Province / City / District',
+      addressLabel: 'Address details',
+      addressPlaceholder: 'Street, door number, etc.',
+      postalCodeLabel: 'Postal code',
+      postalCodePlaceholder: 'e.g. 200000',
+      phoneLabel: 'Phone number',
+      phonePlaceholder: 'Used for delivery notifications',
+      paymentTitle: 'Payment method',
+      paymentMethodAlipay: 'Alipay',
+      paymentMethodWechat: 'WeChat Pay',
+      paymentMethodCard: 'Credit card',
+      orderSummaryTitle: 'Order summary',
+      quantityLabel: 'Quantity',
+      itemsSubtotalLabel: 'Items subtotal',
+      shippingLabel: 'Shipping',
+      totalLabel: 'Order total',
+      processingButton: 'Processing...',
+      payButton: 'Confirm payment',
+      deleteAddressTitle: 'Delete address',
+      deleteAddressMessage: 'Are you sure you want to delete this address?',
+      deleteAddressConfirm: 'Delete',
+      deleteAddressCancel: 'Cancel',
+      addressDeleted: 'Address deleted',
+      addressSaveFailed: 'Failed to save address',
+      orderPaidSuccess: 'Order paid successfully!',
+      addressRequired: 'Please select a shipping address'
+    },
+    orders: {
+      list: {
+        title: 'My Orders',
+        emptyTitle: 'No orders yet',
+        emptyDesc: 'You have not placed any orders yet. Start shopping!',
+        goShopping: 'Go shopping',
+        tabAll: 'All',
+        tabPending: 'Pending',
+        tabProcessing: 'Processing',
+        tabShipped: 'Shipped',
+        tabDelivered: 'Completed',
+        tabCancelled: 'Cancelled',
+        statusEmptyTitle: 'No orders under this status',
+        statusEmptyDesc: 'Try switching the status filter above or keep browsing products.',
+        labelOrderId: 'Order ID',
+        labelOrderDate: 'Order date',
+        labelOrderTotal: 'Total amount',
+        viewDetail: 'View detail',
+        reorder: 'Buy again',
+        afterSale: 'After-sales',
+        deleteOrder: 'Delete order',
+        deleteConfirmTitle: 'Delete order',
+        deleteConfirmMessage: 'Are you sure you want to delete this order? This action cannot be undone.',
+        deleteConfirmConfirm: 'Delete',
+        deleteConfirmCancel: 'Cancel'
+      },
+      detail: {
+        loadingErrorTitle: 'Failed to load order detail',
+        loadingErrorFallback: 'The order does not exist or has been deleted.',
+        backToList: 'Back to order list',
+        title: 'Order detail',
+        statusPending: 'Pending payment',
+        statusProcessing: 'Processing',
+        statusShipped: 'Shipped',
+        statusCompleted: 'Completed',
+        statusCancelled: 'Cancelled',
+        headerOrderIdLabel: 'Order ID: ',
+        payNow: 'Pay now',
+        itemsTitle: 'Order items',
+        timelineTitle: 'Order timeline',
+        timelineCreated: 'Order created',
+        timelinePaid: 'Payment successful',
+        priceSummaryTitle: 'Price summary',
+        priceItemsTotal: 'Items total',
+        priceShipping: 'Shipping',
+        priceDiscount: 'Discount',
+        pricePaidTotal: 'Amount paid',
+        shippingInfoTitle: 'Shipping info',
+        shippingReceiverLabel: 'Receiver:',
+        shippingPhoneLabel: 'Phone:',
+        shippingAddressLabel: 'Address:',
+        shippingAddressDemo: 'Sanlitun SOHO, Chaoyang, Beijing',
+        shippingPhoneDemo: '138****8888'
+      }
     }
   },
   seo: {
@@ -107,6 +302,31 @@ const enUS = {
     register: {
       title: 'Register - NuxtShop',
       description: 'Create a new NuxtShop account.'
+    },
+    products: {
+      listTitle: 'Product list - NuxtShop',
+      listDescription: 'Browse curated products across all categories.',
+      listCategoryTitle: '{category} - Product list - NuxtShop',
+      listCategoryDescription: 'Browse products in the {category} category.',
+      listSearchTitle: 'Search: {keyword} - Product list - NuxtShop',
+      listSearchDescription: 'Search for products related to “{keyword}”.',
+      detailTitle: 'Product detail - NuxtShop',
+      detailDescription: 'View product detail',
+      detailOgTitle: 'Product detail - NuxtShop',
+      detailOgDescription: 'View product detail'
+    },
+    cart: {
+      title: 'Cart - NuxtShop',
+      description: 'Review items in your cart and proceed to checkout.'
+    },
+    checkout: {
+      title: 'Checkout - NuxtShop',
+      description: 'Fill in shipping address and payment method, then place your order.'
+    },
+    orders: {
+      listTitle: 'My Orders - NuxtShop',
+      listDescription: 'View your order history and status.',
+      detailTitle: 'Order detail - NuxtShop'
     }
   },
   validation: {
@@ -126,7 +346,10 @@ const enUS = {
     cartAdded: 'Added to cart. Click the cart icon in the header to view.',
     profileUpdated: 'Profile updated successfully!',
     languageUpdateFailed: 'Failed to update language setting',
-    timezoneUpdateFailed: 'Failed to update timezone'
+    timezoneUpdateFailed: 'Failed to update timezone',
+    cartItemRemoved: 'Item removed from cart',
+    orderReorderInfo: '“Buy again” is a demo placeholder. You can implement one-click re-add here.',
+    orderDeleted: 'Order deleted'
   },
   reviews: {
     title: 'Customer reviews',
@@ -456,6 +679,12 @@ const enUS = {
         styledDefault: 'Default style',
         styledPrimary: 'Primary style'
       }
+  ,
+  footer: {
+    mit: 'Released under the MIT license',
+    repo: 'GitHub repository',
+    issues: 'Submit issues'
+  }
     }
   }
 } as const

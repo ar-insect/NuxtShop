@@ -2,14 +2,18 @@
   <section class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-[var(--text-color)]">商品分类</h2>
-        <p class="mt-1 text-sm text-[var(--text-secondary)]">从分类开始，快速找到你想要的商品</p>
+        <h2 class="text-2xl font-bold tracking-tight text-[var(--text-color)]">
+          {{ t('pages.home.categoryShowcase.title') }}
+        </h2>
+        <p class="mt-1 text-sm text-[var(--text-secondary)]">
+          {{ t('pages.home.categoryShowcase.description') }}
+        </p>
       </div>
       <button 
         class="hidden sm:flex items-center text-sm font-medium text-[var(--primary-color)] hover:text-[var(--primary-color-dark)] transition-colors"
         @click="goToProducts()"
       >
-        查看全部
+        {{ t('pages.home.categoryShowcase.viewAll') }}
         <ArrowRightIcon class="ml-1 h-4 w-4" />
       </button>
     </div>
@@ -49,14 +53,14 @@
             </p>
             
             <div class="flex items-center text-sm font-medium text-[var(--primary-color)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 translate-y-4 group-hover:translate-y-0">
-              <span class="text-white">浏览商品</span>
+              <span class="text-white">{{ t('pages.home.categoryShowcase.viewProducts') }}</span>
               <ArrowRightIcon class="ml-2 h-4 w-4 text-white" />
             </div>
           </div>
           
           <!-- Item Count Badge -->
           <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-white border border-white/10 shadow-sm group-hover:bg-[var(--primary-color)]/80 group-hover:border-transparent transition-colors duration-300">
-            {{ category.count }} 件商品
+            {{ t('pages.home.categoryShowcase.countLabel', { count: category.count }) }}
           </div>
         </div>
       </div>
@@ -67,12 +71,14 @@
 <script setup lang="ts">
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 import SvgIcon from '~/components/ui/SvgIcon.vue'
+import { useI18n } from '~/composables/useI18n'
 
 defineProps<{
   categories: any[]
 }>()
 
 const emit = defineEmits(['navigate'])
+const { t } = useI18n()
 
 const goToProducts = (query?: any) => {
   emit('navigate', query)

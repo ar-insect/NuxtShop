@@ -2,9 +2,9 @@
   <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
-      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">商品列表</h1>
+      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.products.list.title') }}</h1>
       <p class="mt-2 text-lg text-[var(--text-secondary)]">
-        浏览我们要选的优质商品。
+        {{ t('pages.products.list.subtitle') }}
       </p>
     </div>
 
@@ -14,7 +14,7 @@
         <ProductAutocomplete
           v-model="searchText"
           :products="products || []"
-          placeholder="搜索商品名称或描述..."
+          :placeholder="t('pages.products.list.searchPlaceholder')"
           @select="handleProductSelect"
           @search="handleSearch"
         />
@@ -32,13 +32,13 @@
             @click="setCategory()"
           >
             <Squares2X2Icon class="w-4 h-4" />
-            全部
+            {{ t('pages.products.list.allCategory') }}
           </button>
           <button
             v-if="!activeCategory && activeQuery"
             type="button"
             class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
-            aria-label="清除筛选"
+            :aria-label="t('pages.products.list.clearFilterAria')"
             @click="clearFilters"
           >
             <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
@@ -65,7 +65,7 @@
             v-if="activeCategory === cat"
             type="button"
             class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
-            aria-label="清除筛选"
+            :aria-label="t('pages.products.list.clearFilterAria')"
             @click="clearFilters"
           >
             <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
@@ -74,32 +74,32 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <label class="text-sm text-[var(--text-secondary)] whitespace-nowrap">排序：</label>
+        <label class="text-sm text-[var(--text-secondary)] whitespace-nowrap">{{ t('pages.products.list.sortLabel') }}</label>
         <select
           v-model="sortKey"
           class="border border-[var(--border-color)] bg-[var(--card-bg)] text-sm px-2 py-1 rounded-md text-[var(--text-color)]"
         >
-          <option value="default">综合排序</option>
-          <option value="price-asc">价格从低到高</option>
-          <option value="price-desc">价格从高到低</option>
-          <option value="rating-desc">评分优先</option>
+          <option value="default">{{ t('pages.products.list.sortDefault') }}</option>
+          <option value="price-asc">{{ t('pages.products.list.sortPriceAsc') }}</option>
+          <option value="price-desc">{{ t('pages.products.list.sortPriceDesc') }}</option>
+          <option value="rating-desc">{{ t('pages.products.list.sortRatingDesc') }}</option>
         </select>
       </div>
     </div>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
       <p class="text-[var(--text-secondary)]">
-        当前筛选：
+        {{ t('pages.products.list.filterCurrent') }}
         <span v-if="activeCategory && categoryLabels[activeCategory]">
-          分类「{{ categoryLabels[activeCategory] }}」
+          {{ t('pages.products.list.filterCategory', { category: categoryLabels[activeCategory] }) }}
         </span>
         <span v-else>
-          全部分类
+          {{ t('pages.products.list.filterAll') }}
         </span>
         <span v-if="activeQuery">
-          ，关键字「{{ activeQuery }}」
+          {{ t('pages.products.list.filterKeyword', { keyword: activeQuery }) }}
         </span>
-        <span>，共 {{ total }} 件商品</span>
+        <span>{{ t('pages.products.list.filterCount', { count: total }) }}</span>
       </p>
       <button
         v-if="activeCategory || activeQuery"
@@ -107,7 +107,7 @@
         class="text-xs sm:text-sm text-[var(--primary-color)] hover:underline self-start sm:self-auto"
         @click="clearFilters"
       >
-        清除所有筛选
+        {{ t('pages.products.list.clearAllFilters') }}
       </button>
     </div>
 
@@ -131,16 +131,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 class="text-lg font-medium text-[var(--text-color)]">未找到商品</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)]">{{ t('pages.products.list.emptyTitle') }}</h3>
         <p class="mt-2 text-[var(--text-secondary)]">
-          尝试调整搜索词或筛选条件。
+          {{ t('pages.products.list.emptyDesc') }}
         </p>
         <BaseButton
           variant="outline"
           class="mt-6"
           @click="clearFilters"
         >
-          清除筛选
+          {{ t('pages.products.list.emptyButton') }}
         </BaseButton>
       </div>
 
@@ -164,11 +164,13 @@ import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleto
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { http } from '~/utils/http'
+import { useI18n } from '~/composables/useI18n'
 
 const route = useRoute()
 const router = useRouter()
 const { getProducts } = useProducts()
 const { categoryLabels } = useCategoryMapper()
+const { t } = useI18n()
 
 const page = computed(() => Number(route.query.page) || 1)
 const limit = 16 // Show 16 products per page
@@ -186,21 +188,24 @@ const activeQuery = computed<string>(() => {
 useSeoMeta({
   title: computed(() => {
     if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return `${categoryLabels[activeCategory.value]} - 商品列表`
+      return t('seo.products.listCategoryTitle', { category: categoryLabels[activeCategory.value] })
     }
     if (activeQuery.value) {
-      return `搜索：${activeQuery.value} - 商品列表`
+      return t('seo.products.listSearchTitle', { keyword: activeQuery.value })
     }
-    return '商品列表'
+    return t('seo.products.listTitle')
   }),
   description: computed(() => {
     if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return `浏览我们的${categoryLabels[activeCategory.value]}系列商品。`
+      return t('seo.products.listCategoryDescription', { category: categoryLabels[activeCategory.value] })
     }
-    return '浏览我们精选的各类优质商品。'
+    if (activeQuery.value) {
+      return t('seo.products.listSearchDescription', { keyword: activeQuery.value })
+    }
+    return t('seo.products.listDescription')
   }),
-  ogTitle: computed(() => activeCategory.value ? `${categoryLabels[activeCategory.value]} - NuxtShop` : '商品列表 - NuxtShop'),
-  ogDescription: '浏览我们精选的各类优质商品。'
+  ogTitle: computed(() => t('seo.products.listTitle')),
+  ogDescription: t('seo.products.listDescription')
 })
 
 // 从 MongoDB 动态获取商品分类列表

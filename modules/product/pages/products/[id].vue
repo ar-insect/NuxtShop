@@ -1,13 +1,13 @@
 
 <template>
   <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-    <BaseLoading :loading="pending" text="正在加载商品详情..." />
+    <BaseLoading :loading="pending" :text="t('pages.products.detail.loading')" />
 
     <div v-if="error" class="text-center py-12">
-      <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">未找到商品</h3>
+      <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">{{ t('pages.products.detail.notFoundTitle') }}</h3>
       <div class="mt-6">
         <NuxtLink to="/products">
-          <BaseButton variant="primary">返回商品列表</BaseButton>
+          <BaseButton variant="primary">{{ t('pages.products.detail.backToList') }}</BaseButton>
         </NuxtLink>
       </div>
     </div>
@@ -73,13 +73,13 @@
         <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-color)]">{{ product.title }}</h1>
         
         <div class="mt-3">
-          <h2 class="sr-only">商品信息</h2>
+          <h2 class="sr-only">{{ t('pages.products.detail.srInfo') }}</h2>
           <p class="text-3xl text-[var(--text-color)]">¥{{ product.price }}</p>
         </div>
 
         <!-- Reviews -->
         <div class="mt-3">
-          <h3 class="sr-only">评价</h3>
+          <h3 class="sr-only">{{ t('pages.products.detail.srReviews') }}</h3>
           <div class="flex items-center gap-3">
             <div class="flex items-center">
               <svg
@@ -97,13 +97,13 @@
               </svg>
             </div>
             <p class="text-sm text-[var(--text-secondary)]">
-              {{ displayRatingCount }} 条评价（平均 {{ displayRatingRate.toFixed(1) }} / 5）
+              {{ t('pages.products.detail.ratingSummary', { count: displayRatingCount, rate: displayRatingRate.toFixed(1) }) }}
             </p>
           </div>
         </div>
 
         <div class="mt-6">
-          <h3 class="sr-only">描述</h3>
+          <h3 class="sr-only">{{ t('pages.products.detail.srDescription') }}</h3>
           <div 
             class="text-base text-[var(--text-secondary)] space-y-6 rich-content" 
             v-html="product.detailHtml || product.description" 
@@ -128,7 +128,7 @@
             @click="handleAddToCart"
           >
             <ShoppingCartIcon class="h-6 w-6" />
-            加入购物车
+            {{ t('pages.products.detail.addToCart') }}
           </BaseButton>
           
           <ClientOnly>
@@ -136,21 +136,21 @@
               type="button" 
               class="ml-4 py-3 px-3 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-color)] hover:text-[var(--text-color)] transition-colors"
               :class="{ 'text-red-500 hover:text-red-600': product && isInWishlist(product.id) }"
-              :aria-label="product && isInWishlist(product.id) ? '取消收藏' : '加入收藏'"
+              :aria-label="product && isInWishlist(product.id) ? t('pages.products.detail.wishlistRemoveAria') : t('pages.products.detail.wishlistAddAria')"
               data-testid="product-wishlist-toggle"
               @click="handleToggleWishlist"
             >
               <svg class="h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" :fill="product && isInWishlist(product.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span class="sr-only">加入收藏</span>
+              <span class="sr-only">{{ t('pages.products.detail.wishlistAddSrOnly') }}</span>
             </button>
           </ClientOnly>
         </div>
         
         <div v-else class="mt-10 flex flex-col items-center justify-center p-6 border border-dashed rounded-lg bg-[var(--muted-bg)]" :style="{ borderColor: 'var(--border-color)' }">
-          <p class="text-[var(--text-secondary)] mb-4">登录后即可购买商品和收藏</p>
-          <BaseButton @click="openLoginModal">立即登录</BaseButton>
+          <p class="text-[var(--text-secondary)] mb-4">{{ t('pages.products.detail.loginHint') }}</p>
+          <BaseButton @click="openLoginModal">{{ t('pages.products.detail.loginButton') }}</BaseButton>
         </div>
         
         <div class="mt-8 border-t pt-8" :style="{ borderColor: 'var(--border-color)' }">
@@ -158,7 +158,7 @@
              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
              </svg>
-             返回商品列表
+             {{ t('pages.products.detail.backToList') }}
            </NuxtLink>
         </div>
       </div>
@@ -170,13 +170,13 @@
 
     <div v-if="historyItems.length > 0" class="mt-16 border-t pt-10" :style="{ borderColor: 'var(--border-color)' }">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-medium text-[var(--text-color)]">最近浏览</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)]">{{ t('pages.products.detail.historyTitle') }}</h3>
         <button 
           class="text-sm transition-colors" 
           :style="{ color: 'var(--text-secondary)' }"
           @click="clearHistory"
         >
-          清空历史
+          {{ t('pages.products.detail.historyClear') }}
         </button>
       </div>
       <div class="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 lg:gap-x-8">
@@ -212,6 +212,7 @@ import { useProducts, type Product } from '~/modules/product/composables/useProd
 import { useHistory } from '~/composables/useHistory'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import ProductReviews from '~/modules/product/components/ProductReviews.vue'
+import { useI18n } from '~/composables/useI18n'
 
 const route = useRoute()
 const { getProductById } = useProducts()
@@ -221,6 +222,7 @@ const { addToCart } = useCart()
 const { toggleWishlist, isInWishlist } = useWishlist()
 const { historyItems, addToHistory, fetchHistory, clearHistory } = useHistory()
 const { getCategoryLabel } = useCategoryMapper()
+const { t } = useI18n()
 
 const id = parseInt(route.params.id as string)
 
@@ -284,10 +286,10 @@ watch(product, (newProduct) => {
 })
 
 useSeoMeta({
-  title: () => product.value?.title || '商品详情',
-  description: () => product.value?.description?.substring(0, 160) || '查看商品详情',
-  ogTitle: () => product.value?.title || '商品详情 - NuxtShop',
-  ogDescription: () => product.value?.description?.substring(0, 160) || '查看商品详情',
+  title: () => product.value?.title || t('seo.products.detailTitle'),
+  description: () => product.value?.description?.substring(0, 160) || t('seo.products.detailDescription'),
+  ogTitle: () => product.value?.title || t('seo.products.detailOgTitle'),
+  ogDescription: () => product.value?.description?.substring(0, 160) || t('seo.products.detailOgDescription'),
   ogImage: () => product.value?.image || '/og-image.png',
   twitterCard: 'summary_large_image',
 })
@@ -306,7 +308,7 @@ const handleAddToCart = () => {
   setTimeout(() => {
     if (product.value) {
       addToCart(product.value)
-      toast.success(`已将 ${product.value.title} 加入购物车，点击右上角购物车查看`)
+      toast.success(t('toast.cartAdded'))
     }
     addingToCart.value = false
   }, 500)

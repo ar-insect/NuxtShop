@@ -46,7 +46,45 @@ const zhCN = {
       featureThemeDesc: '主题色与圆角由 CSS 变量驱动，支持实时切换',
       adElectronics: '电子产品广告',
       adJewelery: '珠宝广告',
-      adMen: '男装广告'
+      adMen: '男装广告',
+      heroSlides: {
+        slide1: {
+          tag: '今日上新 / 热门推荐',
+          title: '发现你喜欢的好物',
+          description: '这里是一个 Nuxt 3 电商风格首页示例：商品推荐、分类入口、加入购物车与收藏。'
+        },
+        slide2: {
+          tag: '限时特惠 / 低至5折',
+          title: '夏季清仓大促销',
+          description: '精选夏季服饰、户外装备限时特惠。立即抢购，手慢无！'
+        },
+        slide3: {
+          tag: '新品首发 / 科技潮流',
+          title: '探索前沿数码科技',
+          description: '最新发布的智能设备、电子配件，带你体验科技的魅力。'
+        }
+      },
+      heroOverlay: {
+        viewDetail: '点击查看详情',
+        fastShippingTitle: '极速配送',
+        fastShippingDesc: '最快次日达',
+        saleTitle: '限时优惠',
+        saleDesc: '满200减30'
+      },
+      categoryShowcase: {
+        title: '商品分类',
+        description: '从分类开始，快速找到你想要的商品',
+        viewAll: '查看全部',
+        viewProducts: '浏览商品',
+        countLabel: '{count} 件商品'
+      },
+      categoryDescriptions: {
+        electronics: '数码产品、手机与配件',
+        womens: '时尚潮流、裙装与上衣',
+        mens: '日常穿搭、外套与基础款',
+        jewelery: '戒指、耳饰、手链等',
+        default: '精选商品分类'
+      }
     },
     login: {
       title: '用户登录',
@@ -93,6 +131,163 @@ const zhCN = {
       submit: '立即注册',
       goLoginPrefix: '已经有账号？',
       goLoginLink: '去登录'
+    },
+    products: {
+      list: {
+        title: '商品列表',
+        subtitle: '浏览我们精选的优质商品。',
+        searchPlaceholder: '搜索商品名称或描述...',
+        allCategory: '全部',
+        clearFilterAria: '清除筛选',
+        sortLabel: '排序：',
+        sortDefault: '综合排序',
+        sortPriceAsc: '价格从低到高',
+        sortPriceDesc: '价格从高到低',
+        sortRatingDesc: '评分优先',
+        filterCurrent: '当前筛选：',
+        filterCategory: '分类「{category}」',
+        filterAll: '全部分类',
+        filterKeyword: '，关键字「{keyword}」',
+        filterCount: '，共 {count} 件商品',
+        clearAllFilters: '清除所有筛选',
+        emptyTitle: '未找到商品',
+        emptyDesc: '尝试调整搜索词或筛选条件。',
+        emptyButton: '清除筛选'
+      },
+      detail: {
+        loading: '正在加载商品详情...',
+        notFoundTitle: '未找到商品',
+        backToList: '返回商品列表',
+        srInfo: '商品信息',
+        srReviews: '评价',
+        srDescription: '描述',
+        ratingSummary: '{count} 条评价（平均 {rate} / 5）',
+        addToCart: '加入购物车',
+        wishlistAddAria: '加入收藏',
+        wishlistRemoveAria: '取消收藏',
+        wishlistAddSrOnly: '加入收藏',
+        loginHint: '登录后即可购买商品和收藏',
+        loginButton: '立即登录',
+        historyTitle: '最近浏览',
+        historyClear: '清空历史'
+      }
+    },
+    cart: {
+      title: '购物车',
+      emptyTitle: '您的购物车是空的',
+      emptyDesc: '开始添加一些商品到您的购物车吧。',
+      continueShopping: '继续购物',
+      itemsHeading: '购物车中的商品',
+      quantityLabel: '数量, {title}',
+      removeSrOnly: '移除',
+      summaryTitle: '订单摘要',
+      subtotalLabel: '小计',
+      discountLabel: '预计优惠',
+      totalLabel: '订单总计',
+      summaryHint: '当前为示例环境，暂未启用真实优惠规则，可在此接入满减、优惠券等逻辑。',
+      buttonEmpty: '请先添加商品',
+      buttonCheckout: '去结算',
+      recommendedTitle: '推荐商品',
+      recommendedDesc: '根据最近 7 天全站浏览数据推荐，已排除你购物车中的商品。',
+      recommendedEmpty: '没有找到推荐商品。',
+      removeConfirmTitle: '移除商品',
+      removeConfirmMessage: '确定要从购物车移除这件商品吗？',
+      removeConfirmConfirm: '移除',
+      removeConfirmCancel: '取消',
+      checkoutConfirmTitle: '确认结算',
+      checkoutConfirmMessage: '本次将结算 {count} 件商品，订单总计 ¥{total}，是否继续？',
+      checkoutConfirmConfirm: '去结算',
+      checkoutConfirmCancel: '再逛逛'
+    },
+    checkout: {
+      addressTitle: '收货地址',
+      useNewAddress: '使用新地址',
+      newAddressTitle: '填写新地址',
+      firstNameLabel: '姓氏',
+      firstNamePlaceholder: '例如：张',
+      lastNameLabel: '名字',
+      lastNamePlaceholder: '例如：三',
+      regionLabel: '省市区',
+      addressLabel: '详细地址',
+      addressPlaceholder: '街道、门牌号等',
+      postalCodeLabel: '邮政编码',
+      postalCodePlaceholder: '例如：200000',
+      phoneLabel: '联系电话',
+      phonePlaceholder: '用于接收配送通知',
+      paymentTitle: '支付方式',
+      paymentMethodAlipay: '支付宝',
+      paymentMethodWechat: '微信支付',
+      paymentMethodCard: '信用卡',
+      orderSummaryTitle: '订单摘要',
+      quantityLabel: '数量',
+      itemsSubtotalLabel: '商品小计',
+      shippingLabel: '运费',
+      totalLabel: '订单总计',
+      processingButton: '处理中...',
+      payButton: '确认支付',
+      deleteAddressTitle: '删除地址',
+      deleteAddressMessage: '确定要删除这个地址吗？',
+      deleteAddressConfirm: '删除',
+      deleteAddressCancel: '取消',
+      addressDeleted: '地址已删除',
+      addressSaveFailed: '保存地址失败',
+      orderPaidSuccess: '订单支付成功！',
+      addressRequired: '请选择收货地址'
+    },
+    orders: {
+      list: {
+        title: '我的订单',
+        emptyTitle: '暂无订单',
+        emptyDesc: '您还没有购买过任何商品，快去逛逛吧！',
+        goShopping: '去购物',
+        tabAll: '全部',
+        tabPending: '处理中',
+        tabProcessing: '处理中(处理中)',
+        tabShipped: '已发货',
+        tabDelivered: '已完成',
+        tabCancelled: '已取消',
+        statusEmptyTitle: '当前状态暂无订单',
+        statusEmptyDesc: '可以切换上方状态筛选，或继续浏览商品。',
+        labelOrderId: '订单号',
+        labelOrderDate: '下单时间',
+        labelOrderTotal: '总金额',
+        viewDetail: '查看详情',
+        reorder: '再次购买',
+        afterSale: '申请售后',
+        deleteOrder: '删除订单',
+        deleteConfirmTitle: '删除订单',
+        deleteConfirmMessage: '确定要删除这个订单吗？此操作无法撤销。',
+        deleteConfirmConfirm: '删除',
+        deleteConfirmCancel: '取消'
+      },
+      detail: {
+        loadingErrorTitle: '无法加载订单详情',
+        loadingErrorFallback: '订单不存在或已被删除',
+        backToList: '返回订单列表',
+        title: '订单详情',
+        statusPending: '待付款',
+        statusProcessing: '处理中',
+        statusShipped: '已发货',
+        statusCompleted: '已完成',
+        statusCancelled: '已取消',
+        headerOrderIdLabel: '订单号：',
+        payNow: '立即支付',
+        itemsTitle: '商品清单',
+        timelineTitle: '订单进度',
+        timelineCreated: '订单创建成功',
+        timelinePaid: '支付成功',
+        priceSummaryTitle: '费用明细',
+        priceItemsTotal: '商品总额',
+        priceShipping: '运费',
+        priceDiscount: '优惠',
+        pricePaidTotal: '实付款',
+        shippingInfoTitle: '收货信息',
+        shippingReceiverLabel: '收货人：',
+        shippingPhoneLabel: '联系电话：',
+        shippingAddressLabel: '收货地址：',
+        shippingAddressDemo: '北京市朝阳区三里屯 SOHO',
+        shippingPhoneDemo: '138****8888'
+      }
     }
   },
   seo: {
@@ -107,6 +302,31 @@ const zhCN = {
     register: {
       title: '注册 - NuxtShop',
       description: '注册一个新的 NuxtShop 账户。'
+    },
+    products: {
+      listTitle: '商品列表 - NuxtShop',
+      listDescription: '浏览我们精选的各类优质商品。',
+      listCategoryTitle: '{category} - 商品列表 - NuxtShop',
+      listCategoryDescription: '浏览我们的{category}系列商品。',
+      listSearchTitle: '搜索：{keyword} - 商品列表 - NuxtShop',
+      listSearchDescription: '搜索与「{keyword}」相关的商品。',
+      detailTitle: '商品详情 - NuxtShop',
+      detailDescription: '查看商品详情',
+      detailOgTitle: '商品详情 - NuxtShop',
+      detailOgDescription: '查看商品详情'
+    },
+    cart: {
+      title: '购物车 - NuxtShop',
+      description: '查看您的购物车商品并结算。'
+    },
+    checkout: {
+      title: '结算 - NuxtShop',
+      description: '填写收货地址和支付方式，提交订单。'
+    },
+    orders: {
+      listTitle: '我的订单 - NuxtShop',
+      listDescription: '查看您的历史订单与状态。',
+      detailTitle: '订单详情 - NuxtShop'
     }
   },
   validation: {
@@ -126,7 +346,10 @@ const zhCN = {
     cartAdded: '已加入购物车，点击右上角购物车查看',
     profileUpdated: '个人资料更新成功！',
     languageUpdateFailed: '更新语言设置失败',
-    timezoneUpdateFailed: '更新时区失败'
+    timezoneUpdateFailed: '更新时区失败',
+    cartItemRemoved: '商品已移除',
+    orderReorderInfo: '再次购买功能为演示占位，可在此实现一键加购逻辑',
+    orderDeleted: '订单已删除'
   },
   reviews: {
     title: '顾客评价',
@@ -456,6 +679,12 @@ const zhCN = {
         styledDefault: '默认样式',
         styledPrimary: '主要样式'
       }
+  ,
+  footer: {
+    mit: '基于 MIT 许可发布',
+    repo: 'GitHub 仓库',
+    issues: '提交 Issues'
+  }
     }
   }
 } as const

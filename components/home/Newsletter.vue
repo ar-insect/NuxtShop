@@ -21,10 +21,10 @@ class="absolute inset-0 opacity-20" :style="{
 
     <div class="relative mx-auto max-w-2xl text-center z-10">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl" :style="{ color: 'var(--text-color)' }">
-        订阅新品通知
+        {{ t('pages.home.newsletterTitle') }}
       </h2>
       <p class="mx-auto mt-4 max-w-xl text-lg" :style="{ color: 'var(--text-secondary)' }">
-        第一时间获取最新商品上架信息与限时优惠活动，不错过任何好物。
+        {{ t('pages.home.newsletterDescription') }}
       </p>
       
       <form class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center" @submit.prevent="handleSubmit">
@@ -32,7 +32,7 @@ class="absolute inset-0 opacity-20" :style="{
           v-model="email"
           type="email"
           required
-          placeholder="请输入您的邮箱地址"
+          :placeholder="t('pages.home.newsletterPlaceholder')"
           class="w-full rounded-md border px-5 py-3 text-base outline-none transition-all sm:max-w-xs"
           :style="{ 
             backgroundColor: 'var(--input-bg)',
@@ -47,7 +47,7 @@ class="absolute inset-0 opacity-20" :style="{
             backgroundColor: 'var(--primary-color)'
           }"
         >
-          立即订阅
+          {{ t('pages.home.newsletterButton') }}
         </button>
       </form>
     </div>
@@ -55,8 +55,11 @@ class="absolute inset-0 opacity-20" :style="{
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '~/composables/useI18n'
+
 const email = ref('')
 const emit = defineEmits(['subscribe'])
+const { t } = useI18n()
 
 const handleSubmit = () => {
   if (email.value) {

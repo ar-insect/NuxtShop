@@ -37,19 +37,25 @@
             </div>
           </transition>
 
-          <!-- Search Bar (Static) -->
+          <!-- Search Bar -->
           <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center z-10">
             <div class="w-full sm:flex-1">
-              <BaseInput v-model="searchQuery" placeholder="搜索商品，例如：背包 / 戒指 / 夹克" @keyup.enter="handleSearch" />
+              <BaseInput
+                v-model="searchQuery"
+                :placeholder="t('pages.home.heroSearchPlaceholder')"
+                @keyup.enter="handleSearch"
+              />
             </div>
             <div class="flex gap-3 items-center">
-              <StyledTsxButton label="去逛逛" variant="primary" @click="goToProducts()" />
-              <BaseButton size="md" variant="outline" @click="handleSearch">搜索</BaseButton>
+              <StyledTsxButton :label="t('pages.home.heroGoExplore')" variant="primary" @click="goToProducts()" />
+              <BaseButton size="md" variant="outline" @click="handleSearch">
+                {{ t('pages.home.heroSearch') }}
+              </BaseButton>
             </div>
           </div>
 
           <p class="mt-3 text-xs sm:text-sm text-[var(--text-secondary)]">
-            小提示：先按分类快速浏览，再收藏或加入购物车，最后在购物车统一结算。
+            {{ t('pages.home.heroHint') }}
           </p>
 
           <!-- Quick Links (Static) -->
@@ -69,11 +75,11 @@
           <!-- Slide Indicators -->
           <div class="absolute bottom-4 left-6 sm:left-10 flex gap-2">
             <button 
-              v-for="(_, index) in slides" 
+              v-for="(_, index) in slideDefs" 
               :key="index"
               class="h-1.5 rounded-full transition-all duration-300"
               :class="index === currentIndex ? 'w-6 bg-[var(--primary-color)]' : 'w-1.5 bg-[var(--text-secondary)]/30 hover:bg-[var(--text-secondary)]'"
-              :aria-label="`切换到第 ${index + 1} 张幻灯片`"
+              :aria-label="t('pages.home.carouselDot', { index: index + 1 })"
               @click="setSlide(index)"
             />
           </div>
@@ -98,7 +104,7 @@
                           @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/1000x800/f3f4f6/9ca3af?text=No+Image'"
                         >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                            <span class="text-white font-medium">点击查看详情</span>
+                            <span class="text-white font-medium">{{ t('pages.home.heroOverlay.viewDetail') }}</span>
                         </div>
                     </div>
                     
@@ -109,8 +115,8 @@
                                 <SvgIcon name="truck" class="h-5 w-5" />
                             </div>
                             <div>
-                                <p class="text-xs text-[var(--text-secondary)]">极速配送</p>
-                                <p class="text-sm font-bold text-[var(--text-color)]">最快次日达</p>
+                                <p class="text-xs text-[var(--text-secondary)]">{{ t('pages.home.heroOverlay.fastShippingTitle') }}</p>
+                                <p class="text-sm font-bold text-[var(--text-color)]">{{ t('pages.home.heroOverlay.fastShippingDesc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -121,8 +127,8 @@
                                 <SvgIcon name="tag" class="h-5 w-5" />
                             </div>
                             <div>
-                                <p class="text-xs text-[var(--text-secondary)]">限时优惠</p>
-                                <p class="text-sm font-bold text-[var(--text-color)]">满200减30</p>
+                                <p class="text-xs text-[var(--text-secondary)]">{{ t('pages.home.heroOverlay.saleTitle') }}</p>
+                                <p class="text-sm font-bold text-[var(--text-color)]">{{ t('pages.home.heroOverlay.saleDesc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -137,6 +143,7 @@
 <script setup lang="ts">
 import StyledTsxButton from '~/components/ui/StyledTsxButton'
 import SvgIcon from '~/components/ui/SvgIcon.vue'
+import { useI18n } from '~/composables/useI18n'
 
 const _props = defineProps<{
   cartCount: number
@@ -150,39 +157,44 @@ const searchQuery = ref('')
 const currentIndex = ref(0)
 const timer = ref<any>(null)
 
-const slides = [
+const { t } = useI18n()
+
+const slideDefs = [
   {
-    tag: '今日上新 / 热门推荐',
-    title: '发现你喜欢的好物',
-    description: '这里是一个 Nuxt 3 电商风格首页示例：商品推荐、分类入口、加入购物车与收藏。',
     icon: 'sparkles',
     gradient: 'radial-gradient(1200px circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, rgba(255,255,255,0) 45%), radial-gradient(900px circle at 90% 10%, rgba(16,185,129,0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80'
   },
   {
-    tag: '限时特惠 / 低至5折',
-    title: '夏季清仓大促销',
-    description: '精选夏季服饰、户外装备限时特惠。立即抢购，手慢无！',
     icon: 'fire',
     gradient: 'radial-gradient(1200px circle at 20% 80%, rgba(249, 115, 22, 0.15) 0%, rgba(255,255,255,0) 45%), radial-gradient(900px circle at 80% 20%, rgba(239, 68, 68, 0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80'
   },
   {
-    tag: '新品首发 / 科技潮流',
-    title: '探索前沿数码科技',
-    description: '最新发布的智能设备、电子配件，带你体验科技的魅力。',
     icon: 'star',
     gradient: 'radial-gradient(1200px circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, rgba(255,255,255,0) 50%), radial-gradient(900px circle at 10% 10%, rgba(59, 130, 246, 0.15) 0%, rgba(255,255,255,0) 40%)',
     image: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1000&q=80'
   }
 ]
 
-const currentSlide = computed(() => slides[currentIndex.value])
+const slides = computed(() =>
+  slideDefs.map((slide, index) => {
+    const base = `pages.home.heroSlides.slide${index + 1}`
+    return {
+      ...slide,
+      tag: t(`${base}.tag`),
+      title: t(`${base}.title`),
+      description: t(`${base}.description`)
+    }
+  })
+)
+
+const currentSlide = computed(() => slides.value[currentIndex.value])
 
 const startTimer = () => {
   stopTimer()
   timer.value = setInterval(() => {
-    currentIndex.value = (currentIndex.value + 1) % slides.length
+    currentIndex.value = (currentIndex.value + 1) % slideDefs.length
   }, 5000)
 }
 

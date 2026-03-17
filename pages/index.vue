@@ -297,26 +297,37 @@ onMounted(() => {
   }
 })
 
-const categoryMeta: Record<string, { description: string; icon: string; image: string }> = {
-  "electronics": {
-    description: '数码产品、手机与配件',
+const categoryMeta: Record<string, { icon: string; image: string }> = {
+  electronics: {
     icon: 'computer-desktop',
     image: 'https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?auto=format&fit=crop&w=600&q=80'
   },
   "women's clothing": {
-    description: '时尚潮流、裙装与上衣',
     icon: 'user-circle',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80'
   },
   "men's clothing": {
-    description: '日常穿搭、外套与基础款',
     icon: 'user',
     image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=600&q=80'
   },
-  'jewelery': {
-    description: '戒指、耳饰、手链等',
+  jewelery: {
     icon: 'sparkles',
     image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+  }
+}
+
+const getCategoryDescription = (key: string) => {
+  switch (key) {
+    case 'electronics':
+      return t('pages.home.categoryDescriptions.electronics')
+    case "women's clothing":
+      return t('pages.home.categoryDescriptions.womens')
+    case "men's clothing":
+      return t('pages.home.categoryDescriptions.mens')
+    case 'jewelery':
+      return t('pages.home.categoryDescriptions.jewelery')
+    default:
+      return t('pages.home.categoryDescriptions.default')
   }
 }
 
@@ -326,14 +337,21 @@ const categoryCards = computed(() => {
     return acc
   }, {})
 
-  return Object.keys(counts).map((key) => {
-    const meta = categoryMeta[key] || { 
-      description: '精选商品分类', 
-      icon: 'sparkles', 
-      image: 'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&w=600&q=80' 
-    }
-    return { key, ...meta, label: getCategoryLabel(key), count: counts[key] }
-  }).sort((a, b) => b.count - a.count)
+  return Object.keys(counts)
+    .map((key) => {
+      const meta = categoryMeta[key] || {
+        icon: 'sparkles',
+        image: 'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&w=600&q=80'
+      }
+      return {
+        key,
+        ...meta,
+        label: getCategoryLabel(key),
+        description: getCategoryDescription(key),
+        count: counts[key]
+      }
+    })
+    .sort((a, b) => b.count - a.count)
 })
 
 const recommended = computed(() => {

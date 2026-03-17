@@ -12,7 +12,7 @@
       <div class="container mx-auto px-4 text-sm flex flex-col gap-2 md:flex-row md:items-center md:justify-between" :style="{ color: 'var(--text-secondary)' }">
         <div class="text-center md:text-left">
           <p class="mb-1">&copy; {{ new Date().getFullYear() }} NuxtShop</p>
-          <p>基于 MIT 许可发布</p>
+          <p>{{ t('footer.mit') }}</p>
         </div>
         <div class="flex justify-center md:justify-end gap-4 mt-2 md:mt-0">
           <a
@@ -21,7 +21,7 @@
             rel="noopener noreferrer"
             class="hover:text-[var(--primary-color)] transition-colors"
           >
-            GitHub 仓库
+            {{ t('footer.repo') }}
           </a>
           <a
             href="https://github.com/ar-insect/NuxtShop/issues"
@@ -29,7 +29,7 @@
             rel="noopener noreferrer"
             class="hover:text-[var(--primary-color)] transition-colors"
           >
-            提交 Issues
+            {{ t('footer.issues') }}
           </a>
         </div>
       </div>
@@ -43,4 +43,7 @@
 
 <script setup lang="ts">
 import BaseConfirm from '~/components/ui/BaseConfirm.vue'
+import { useI18n } from '~/composables/useI18n'
+
+const { t } = useI18n()
 </script>

@@ -288,6 +288,28 @@ const enUS = {
         shippingAddressDemo: 'Sanlitun SOHO, Chaoyang, Beijing',
         shippingPhoneDemo: '138****8888'
       }
+    },
+    wishlist: {
+      title: 'My wishlist',
+      emptyTitle: 'Your wishlist is empty',
+      emptyDesc: 'Save products you like to your wishlist.',
+      emptyButton: 'Browse products',
+      summary: 'You have {count} items in your wishlist',
+      addAllButton: 'Add all to cart',
+      clearButton: 'Clear wishlist',
+      removeAria: 'Remove from wishlist',
+      adAltElectronics: 'Wishlist electronics advertisement',
+      adAltJewelery: 'Wishlist jewelry advertisement',
+      addAllConfirmTitle: 'Add all to cart',
+      addAllConfirmMessage: 'Add all {count} items in your wishlist to the cart? Duplicate items will be merged automatically.',
+      addAllConfirmConfirm: 'Add all',
+      addAllConfirmCancel: 'Cancel',
+      addAllSuccess: 'Wishlist items have been added to the cart (duplicates merged).',
+      clearConfirmTitle: 'Clear wishlist',
+      clearConfirmMessage: 'Are you sure you want to clear all items in your wishlist? This action cannot be undone.',
+      clearConfirmConfirm: 'Clear',
+      clearConfirmCancel: 'Cancel',
+      clearSuccess: 'Wishlist has been cleared'
     }
   },
   seo: {
@@ -302,6 +324,10 @@ const enUS = {
     register: {
       title: 'Register - NuxtShop',
       description: 'Create a new NuxtShop account.'
+    },
+    docs: {
+      title: 'Docs - NuxtShop',
+      description: 'NuxtShop documentation with installation, configuration and usage details.'
     },
     products: {
       listTitle: 'Product list - NuxtShop',
@@ -327,6 +353,10 @@ const enUS = {
       listTitle: 'My Orders - NuxtShop',
       listDescription: 'View your order history and status.',
       detailTitle: 'Order detail - NuxtShop'
+    },
+    wishlist: {
+      title: 'My wishlist - NuxtShop',
+      description: 'View products that you have added to your wishlist.'
     }
   },
   validation: {
@@ -679,13 +709,17 @@ const enUS = {
         styledDefault: 'Default style',
         styledPrimary: 'Primary style'
       }
-  ,
+    }
+  },
   footer: {
     mit: 'Released under the MIT license',
     repo: 'GitHub repository',
     issues: 'Submit issues'
-  }
-    }
+  },
+  docs: {
+    empty: 'Failed to load documentation or content is empty',
+    backHome: 'Back to Home',
+    tocTitle: 'Table of contents'
   }
 } as const
 

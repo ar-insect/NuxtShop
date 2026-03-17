@@ -16,17 +16,28 @@ export default defineNuxtConfig({
     'build:before': () => {
       const readmePath = path.resolve(process.cwd(), 'README.md')
       const contentPath = path.resolve(process.cwd(), 'content/index.md')
+      const readmeEnPath = path.resolve(process.cwd(), 'README_EN.md')
+      const contentEnPath = path.resolve(process.cwd(), 'content/index-en.md')
       if (fs.existsSync(readmePath)) {
         fs.copyFileSync(readmePath, contentPath)
       }
+      if (fs.existsSync(readmeEnPath)) {
+        fs.copyFileSync(readmeEnPath, contentEnPath)
+      }
     },
     'builder:watch': (event, relativePath) => {
-      if (relativePath === 'README.md') {
-        const readmePath = path.resolve(process.cwd(), 'README.md')
-        const contentPath = path.resolve(process.cwd(), 'content/index.md')
+      if (relativePath === 'README.md' || relativePath === 'README_EN.md') {
+        const root = process.cwd()
+        const readmePath = path.resolve(root, 'README.md')
+        const contentPath = path.resolve(root, 'content/index.md')
+        const readmeEnPath = path.resolve(root, 'README_EN.md')
+        const contentEnPath = path.resolve(root, 'content/index-en.md')
+
         if (fs.existsSync(readmePath)) {
           fs.copyFileSync(readmePath, contentPath)
-          // 如有需要可触发 content/index.md 的 HMR（通常 copy 已足够）
+        }
+        if (fs.existsSync(readmeEnPath)) {
+          fs.copyFileSync(readmeEnPath, contentEnPath)
         }
       }
     }

@@ -288,6 +288,28 @@ const zhCN = {
         shippingAddressDemo: '北京市朝阳区三里屯 SOHO',
         shippingPhoneDemo: '138****8888'
       }
+    },
+    wishlist: {
+      title: '我的收藏',
+      emptyTitle: '您的收藏夹是空的',
+      emptyDesc: '将您喜欢的商品保存到收藏夹。',
+      emptyButton: '浏览商品',
+      summary: '共收藏 {count} 件商品',
+      addAllButton: '全部加入购物车',
+      clearButton: '清空收藏夹',
+      removeAria: '移除收藏',
+      adAltElectronics: '收藏夹电子产品广告',
+      adAltJewelery: '收藏夹珠宝广告',
+      addAllConfirmTitle: '全部加入购物车',
+      addAllConfirmMessage: '确定将当前 {count} 件收藏商品全部加入购物车吗？如有重复会自动合并数量。',
+      addAllConfirmConfirm: '全部加入',
+      addAllConfirmCancel: '取消',
+      addAllSuccess: '已将收藏的商品加入购物车（如有重复会自动合并数量）',
+      clearConfirmTitle: '清空收藏夹',
+      clearConfirmMessage: '确定要清空收藏夹中的所有商品吗？该操作无法撤销。',
+      clearConfirmConfirm: '清空',
+      clearConfirmCancel: '取消',
+      clearSuccess: '已清空收藏夹'
     }
   },
   seo: {
@@ -302,6 +324,10 @@ const zhCN = {
     register: {
       title: '注册 - NuxtShop',
       description: '注册一个新的 NuxtShop 账户。'
+    },
+    docs: {
+      title: '项目文档 - NuxtShop',
+      description: 'NuxtShop 项目详细文档，包含安装、配置、组件使用等说明。'
     },
     products: {
       listTitle: '商品列表 - NuxtShop',
@@ -327,6 +353,10 @@ const zhCN = {
       listTitle: '我的订单 - NuxtShop',
       listDescription: '查看您的历史订单与状态。',
       detailTitle: '订单详情 - NuxtShop'
+    },
+    wishlist: {
+      title: '我的收藏 - NuxtShop',
+      description: '查看您收藏的商品。'
     }
   },
   validation: {
@@ -679,13 +709,17 @@ const zhCN = {
         styledDefault: '默认样式',
         styledPrimary: '主要样式'
       }
-  ,
+    }
+  },
   footer: {
     mit: '基于 MIT 许可发布',
     repo: 'GitHub 仓库',
     issues: '提交 Issues'
-  }
-    }
+  },
+  docs: {
+    empty: '文档加载失败或内容为空',
+    backHome: '返回首页',
+    tocTitle: '目录'
   }
 } as const
 

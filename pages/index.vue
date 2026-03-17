@@ -1,4 +1,5 @@
 <template>
+  <ClientOnly>
   <div class="space-y-14">
     <HomeHero 
       :cart-count="cartCount"
@@ -21,18 +22,22 @@
     <section class="space-y-6">
       <div class="flex items-end justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-[var(--text-color)]">推荐商品</h2>
-          <p class="mt-1 text-[var(--text-secondary)]">按评分与热度精选，支持加入购物车与收藏</p>
+          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.recommendTitle') }}</h2>
+          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.recommendSubtitle') }}</p>
         </div>
         <NuxtLink to="/products" class="text-sm font-medium text-[var(--text-color)] hover:text-[var(--primary-color)]">
-          去逛更多 →
+          {{ t('pages.home.recommendMore') }} →
         </NuxtLink>
       </div>
 
-      <BaseLoading :loading="pending" text="正在加载推荐商品..." />
+      <div v-if="pending" class="px-4">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ProductCardSkeleton v-for="n in 4" :key="n" />
+        </div>
+      </div>
 
       <div
-        v-if="!pending"
+        v-else
         class="relative"
         @mouseenter="isCarouselHovering = true"
         @mouseleave="isCarouselHovering = false"
@@ -64,7 +69,7 @@
           type="button"
           class="absolute left-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[var(--border-color)] text-[var(--text-color)] shadow-sm transition-all hover:bg-[var(--card-bg)]"
           :style="{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--card-bg), transparent 10%)' }"
-          aria-label="上一页"
+          :aria-label="t('pages.home.carouselPrev')"
           @click="prevSlide"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -76,7 +81,7 @@
           type="button"
           class="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[var(--border-color)] text-[var(--text-color)] shadow-sm transition-all hover:bg-[var(--card-bg)]"
           :style="{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--card-bg), transparent 10%)' }"
-          aria-label="下一页"
+          :aria-label="t('pages.home.carouselNext')"
           @click="nextSlide"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -91,10 +96,58 @@
             type="button"
             class="h-2.5 w-2.5 transition-all"
             :style="{ borderRadius: '999px', backgroundColor: i === activeSlide ? 'var(--primary-color)' : 'var(--border-color)' }"
-            :aria-label="`跳转到第 ${i + 1} 页`"
+            :aria-label="t('pages.home.carouselDot', { index: i + 1 })"
             @click="goToSlide(i)"
           />
         </div>
+      </div>
+    </section>
+
+    <section
+      v-if="trendingPending || trendingProducts.length > 0"
+      class="px-4 sm:px-6 lg:px-8"
+    >
+      <div class="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.trendingTitle') }}</h2>
+          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.trendingSubtitle') }}</p>
+        </div>
+      </div>
+
+      <div v-if="trendingPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCardSkeleton v-for="n in 4" :key="n" />
+      </div>
+      <div v-else-if="trendingProducts.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCard
+          v-for="p in trendingProducts"
+          :key="p.id"
+          :product="p"
+          @click="navigateTo(`/products/${p.id}`)"
+        />
+      </div>
+    </section>
+
+    <section
+      v-if="favoritedPending || favoritedProducts.length > 0"
+      class="px-4 sm:px-6 lg:px-8"
+    >
+      <div class="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.favoritedTitle') }}</h2>
+          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.favoritedSubtitle') }}</p>
+        </div>
+      </div>
+
+      <div v-if="favoritedPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCardSkeleton v-for="n in 4" :key="n" />
+      </div>
+      <div v-else-if="favoritedProducts.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ProductCard
+          v-for="p in favoritedProducts"
+          :key="p.id"
+          :product="p"
+          @click="navigateTo(`/products/${p.id}`)"
+        />
       </div>
     </section>
 
@@ -102,29 +155,29 @@
       <div class="grid gap-8 lg:grid-cols-3">
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <ShoppingBagIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="sparkles" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
-            <div class="text-sm font-semibold text-[var(--text-color)]">丰富品类</div>
-            <div class="mt-1 text-sm text-[var(--text-secondary)]">基础电商结构：分类、列表、详情、购物车、收藏</div>
+            <div class="text-sm font-semibold text-[var(--text-color)]">{{ t('pages.home.featureCategoriesTitle') }}</div>
+            <div class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.home.featureCategoriesDesc') }}</div>
           </div>
         </div>
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <ShieldCheckIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="shield-check" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
-            <div class="text-sm font-semibold text-[var(--text-color)]">安全示例</div>
-            <div class="mt-1 text-sm text-[var(--text-secondary)]">示例级数据与交互，不涉及真实支付与敏感信息</div>
+            <div class="text-sm font-semibold text-[var(--text-color)]">{{ t('pages.home.featureSafeTitle') }}</div>
+            <div class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.home.featureSafeDesc') }}</div>
           </div>
         </div>
         <div class="flex items-start gap-3">
           <div class="flex h-10 w-10 items-center justify-center bg-[var(--primary-color)]/10" :style="{ borderRadius: 'var(--border-radius)' }">
-            <SparklesIcon class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
+            <SvgIcon name="sparkles" class="h-5 w-5" :style="{ color: 'var(--primary-color)' }" />
           </div>
           <div>
-            <div class="text-sm font-semibold text-[var(--text-color)]">可配置皮肤</div>
-            <div class="mt-1 text-sm text-[var(--text-secondary)]">主题色与圆角由 CSS 变量驱动，支持实时切换</div>
+            <div class="text-sm font-semibold text-[var(--text-color)]">{{ t('pages.home.featureThemeTitle') }}</div>
+            <div class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.home.featureThemeDesc') }}</div>
           </div>
         </div>
       </div>
@@ -132,56 +185,54 @@
 
     <Newsletter @subscribe="subscribe" />
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import {
-  HeartIcon,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-  SparklesIcon,
-  StarIcon,
-  TagIcon,
-  ShieldCheckIcon
-} from '@heroicons/vue/24/outline'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
-import StyledButton from '~/components/ui/StyledButton'
+import { http } from '~/utils/http'
+import { validateEmail } from '~/utils/validation'
+import { useI18n } from '~/composables/useI18n'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue' // 引入 BaseAdCarousel
+import SvgIcon from '~/components/ui/SvgIcon.vue'
+
+const { t } = useI18n()
 
 useSeoMeta({
-  title: '首页',
-  description: 'Nuxt3 演示项目首页，展示商品列表、购物车和收藏夹功能。',
-  ogTitle: 'Nuxt3 演示 - 首页',
-  ogDescription: '发现你喜欢的好物。Nuxt 3 电商风格首页示例：商品推荐、分类入口、加入购物车与收藏。',
+  title: t('seo.home.title'),
+  description: t('seo.home.description'),
+  ogTitle: t('seo.home.title'),
+  ogDescription: t('seo.home.description'),
   ogImage: '/og-image.png'
 })
 
 const ads = [
-  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: '电子产品广告' },
-  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: '珠宝广告' },
-  { id: 3, image: 'https://images.unsplash.com/photo-1523381294911-8d3cead290f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=men%27s%20clothing', alt: "男装广告" }
+  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: t('pages.home.adElectronics') },
+  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: t('pages.home.adJewelery') },
+  { id: 3, image: 'https://images.unsplash.com/photo-1523381294911-8d3cead290f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=men%27s%20clothing', alt: t('pages.home.adMen') }
 ]
 
 const router = useRouter()
 const toast = useToast()
-const { addToCart, cartCount } = useCart()
-const { wishlistItems, toggleWishlist, isInWishlist } = useWishlist()
+const { cartCount } = useCart()
+const { wishlistItems } = useWishlist()
 const { getProducts } = useProducts()
 const { getCategoryLabel } = useCategoryMapper()
-const { isAuthenticated } = useAuth()
 
 const email = ref('')
 
 const subscribe = () => {
-  if (!email.value) {
-    toast.error('请输入有效的邮箱地址')
+  const emailError = validateEmail(email.value)
+  if (emailError) {
+    toast.error(t(emailError))
     return
   }
-  toast.success('订阅成功！感谢您的关注')
+  toast.success(t('toast.subscribeSuccess'))
   email.value = ''
 }
 
@@ -193,6 +244,50 @@ const { data: productsData, pending } = await useAsyncData(
 
 const products = computed(() => productsData.value?.items || [])
 
+interface TrendingItem extends Product {
+  views: number
+}
+
+const { data: trendingData, pending: trendingPending } = await useAsyncData(
+  'trending-products',
+  () => http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
+    '/history/top-products',
+    { days: 7, limit: 8 }
+  ),
+  { default: () => ({ success: true, items: [] as { product: Product; views: number }[] }) }
+)
+
+const trendingProducts = computed<TrendingItem[]>(() => {
+  const payload = trendingData.value
+  if (!payload || !payload.items) return []
+  return payload.items.map((i) => ({
+    ...i.product,
+    views: i.views
+  }))
+})
+
+interface FavoritedItem extends Product {
+  favorites: number
+}
+
+const { data: favoritedData, pending: favoritedPending } = await useAsyncData(
+  'favorited-products',
+  () => http.get<{ success: boolean; items: { product: Product; favorites: number }[] }>(
+    '/wishlist/top-products',
+    { days: 7, limit: 8 }
+  ),
+  { default: () => ({ success: true, items: [] as { product: Product; favorites: number }[] }) }
+)
+
+const favoritedProducts = computed<FavoritedItem[]>(() => {
+  const payload = favoritedData.value
+  if (!payload || !payload.items) return []
+  return payload.items.map((i) => ({
+    ...i.product,
+    favorites: i.favorites
+  }))
+})
+
 const primaryTint = ref('rgba(59,130,246,0.22)')
 
 onMounted(() => {
@@ -202,26 +297,37 @@ onMounted(() => {
   }
 })
 
-const categoryMeta: Record<string, { description: string; icon: any; image: string }> = {
-  "men's clothing": { 
-    description: '日常穿搭、外套与基础款', 
-    icon: ShoppingBagIcon,
-    image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=600&q=80'
-  },
-  'jewelery': { 
-    description: '戒指、耳饰、手链等', 
-    icon: SparklesIcon,
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
-  },
-  "electronics": { 
-    description: '数码产品、手机与配件', 
-    icon: TagIcon,
+const categoryMeta: Record<string, { icon: string; image: string }> = {
+  electronics: {
+    icon: 'computer-desktop',
     image: 'https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?auto=format&fit=crop&w=600&q=80'
   },
-  "women's clothing": { 
-    description: '时尚潮流、裙装与上衣', 
-    icon: ShoppingBagIcon,
+  "women's clothing": {
+    icon: 'user-circle',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80'
+  },
+  "men's clothing": {
+    icon: 'user',
+    image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=600&q=80'
+  },
+  jewelery: {
+    icon: 'sparkles',
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+  }
+}
+
+const getCategoryDescription = (key: string) => {
+  switch (key) {
+    case 'electronics':
+      return t('pages.home.categoryDescriptions.electronics')
+    case "women's clothing":
+      return t('pages.home.categoryDescriptions.womens')
+    case "men's clothing":
+      return t('pages.home.categoryDescriptions.mens')
+    case 'jewelery':
+      return t('pages.home.categoryDescriptions.jewelery')
+    default:
+      return t('pages.home.categoryDescriptions.default')
   }
 }
 
@@ -231,14 +337,21 @@ const categoryCards = computed(() => {
     return acc
   }, {})
 
-  return Object.keys(counts).map((key) => {
-    const meta = categoryMeta[key] || { 
-      description: '精选商品分类', 
-      icon: TagIcon, 
-      image: 'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&w=600&q=80' 
-    }
-    return { key, ...meta, label: getCategoryLabel(key), count: counts[key] }
-  }).sort((a, b) => b.count - a.count)
+  return Object.keys(counts)
+    .map((key) => {
+      const meta = categoryMeta[key] || {
+        icon: 'sparkles',
+        image: 'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&w=600&q=80'
+      }
+      return {
+        key,
+        ...meta,
+        label: getCategoryLabel(key),
+        description: getCategoryDescription(key),
+        count: counts[key]
+      }
+    })
+    .sort((a, b) => b.count - a.count)
 })
 
 const recommended = computed(() => {
@@ -311,8 +424,4 @@ const goToProducts = (query?: Record<string, string | undefined>) => {
   router.push({ path: '/products', query: normalized })
 }
 
-const addToCartAndToast = (p: Product) => {
-  addToCart(p)
-  toast.success(`已加入购物车：${p.title}`)
-}
 </script>

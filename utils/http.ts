@@ -1,4 +1,4 @@
-import { $fetch } from 'ofetch'
+import { $fetch as ofetch } from 'ofetch'
 import type { FetchOptions } from 'ofetch'
 
 /**
@@ -37,15 +37,16 @@ class Http {
    * @private
    */
   private async request<T>(url: string, options: FetchOptions<any> = {}): Promise<T> {
+    // 手动拼接基础路径，避免在 Node 环境中使用相对 baseURL 导致 URL 解析错误
+    const finalUrl = `${this.baseUrl}${url}`
+
     const defaultOptions: FetchOptions<any> = {
-      baseURL: this.baseUrl,
       // 请求拦截器
       onRequest() {
-        // 如有需要，可在此处添加全局 token
-        // const token = useCookie('token').value
-        // if (token) {
-        //   options.headers = { ...options.headers, Authorization: `Bearer ${token}` }
-        // }
+        // 说明：
+        // - 项目内部 API 统一依赖服务端通过 Cookie（auth-token）做鉴权
+        // - 因此这里默认不在客户端自动附加 Authorization 头
+        // - 若将来需要调用第三方接口，可在此处按需添加 token
       },
       // 响应拦截器
       onResponse({ response }) {
@@ -72,7 +73,11 @@ class Http {
       }
     }
 
-    return $fetch(url as any, newOptions as any) as any
+    // 优先使用 Nuxt 运行时提供的全局 $fetch（已与 Nitro 集成，支持相对路径 /api/...）
+    // 回退到 ofetch 的 $fetch，便于在测试环境中复用
+    const runtimeFetch = (globalThis as any).$fetch || ofetch
+
+    return runtimeFetch(finalUrl as any, newOptions as any) as any
   }
 
   /**

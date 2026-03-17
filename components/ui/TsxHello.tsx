@@ -1,4 +1,5 @@
 import { defineComponent, ref } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 
 export default defineComponent({
   name: 'TsxHello',
@@ -9,6 +10,7 @@ export default defineComponent({
     }
   },
   setup(props) {
+    const { t } = useI18n()
     const count = ref(0)
 
     const increment = () => {
@@ -24,7 +26,7 @@ export default defineComponent({
           onClick={increment}
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          增加
+          {t('ui.tsx.helloIncrement')}
         </button>
       </div>
     )

@@ -2,15 +2,16 @@
   <div>
     <div>
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        登录您的账户
+        {{ t('pages.login.heading') }}
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
-        或者使用 <span class="font-medium text-indigo-600 hover:text-indigo-500">admin / 123456</span>
+        {{ t('pages.login.helperPrefix') }}
+        <span class="font-medium text-indigo-600 hover:text-indigo-500">admin / 123456</span>
       </p>
       <p class="mt-2 text-center text-sm text-gray-600">
-        还没有账号？
+        {{ t('pages.login.goRegisterPrefix') }}
         <NuxtLink to="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
-          立即注册
+          {{ t('pages.login.goRegisterLink') }}
         </NuxtLink>
       </p>
     </div>
@@ -18,7 +19,7 @@
       <input type="hidden" name="remember" value="true" >
       <div class="rounded-md shadow-sm -space-y-px">
         <div>
-          <label for="username" class="sr-only">用户名</label>
+          <label for="username" class="sr-only">{{ t('pages.login.usernameLabel') }}</label>
           <input
             id="username"
             v-model="username"
@@ -26,11 +27,11 @@
             type="text"
             required
             class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="用户名"
+            :placeholder="t('pages.login.usernamePlaceholder')"
           >
         </div>
         <div>
-          <label for="password" class="sr-only">密码</label>
+          <label for="password" class="sr-only">{{ t('pages.login.passwordLabel') }}</label>
           <input
             id="password"
             v-model="password"
@@ -38,7 +39,7 @@
             type="password"
             required
             class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="密码"
+            :placeholder="t('pages.login.passwordPlaceholder')"
           >
         </div>
       </div>
@@ -65,7 +66,7 @@
               />
             </svg>
           </span>
-          {{ loading ? '登录中...' : '登录' }}
+          {{ loading ? t('pages.login.submitting') : t('pages.login.submit') }}
         </button>
       </div>
     </form>
@@ -73,20 +74,33 @@
 </template>
 
 <script setup lang="ts">
+import { validateUsername, validatePassword } from '~/utils/validation'
+import { useI18n } from '~/composables/useI18n'
+
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const { login } = useAuth()
 const toast = useToast()
+const { t } = useI18n()
 
 useSeoMeta({
-  title: '用户登录',
-  description: '登录您的 NuxtShop 账户。'
+  title: t('seo.login.title'),
+  description: t('seo.login.description')
 })
 
 const handleLogin = async () => {
-  if (!username.value || !password.value) return
-  
+  const usernameError = validateUsername(username.value)
+  if (usernameError) {
+    toast.error(t(usernameError))
+    return
+  }
+  const passwordError = validatePassword(password.value)
+  if (passwordError) {
+    toast.error(t(passwordError))
+    return
+  }
+
   loading.value = true
   try {
     const success = await login(username.value, password.value)

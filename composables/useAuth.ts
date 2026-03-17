@@ -1,21 +1,21 @@
+// composables/useAuth.ts
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useOrders } from '~/modules/order/composables/useOrders'
+import type { User as MongoUser } from '~/types/user'; // 导入 MongoDB 的 User 类型
+import { http } from '~/utils/http'
+
 /**
  * 表示已登录用户的接口。
  * @interface User
- * @property {number} id - 用户唯一标识
+ * @property {string} _id - 用户唯一标识 (MongoDB ObjectId 的字符串表示)
  * @property {string} username - 登录用户名
  * @property {string} name - 展示名称
  * @property {string} role - 用户角色（如 admin、user）
  * @property {string} avatar - 头像 URL
  */
-export interface User {
-  id: number
-  username: string
-  name: string
-  role: string
-  avatar: string
+export interface User extends Omit<MongoUser, 'password' | 'createdAt' | 'updatedAt' | '_id'> {
+  _id: string; // 确保 _id 存在且为 string
 }
 
 type LoginOptions = {
@@ -57,9 +57,9 @@ export const useAuth = () => {
    */
   const login = async (username: string, password: string, options: LoginOptions = {}) => {
     try {
-      const res = await $fetch<{ token: string; user: User }>('/api/auth/login' as any, {
-        method: 'POST',
-        body: { username, password }
+      const res = await http.post<{ token: string; user: User }>('/auth/login', {
+        username,
+        password
       })
       token.value = res.token
       user.value = res.user as User
@@ -87,17 +87,23 @@ export const useAuth = () => {
    * @async
    * @param {string} username - 注册用户名
    * @param {string} password - 密码
-   * @param {string} phone - 手机号
+   * @param {string} confirmPassword - 确认密码
+   * @param {string} phone - 手机号 (可选)
    * @returns {Promise<boolean>} 注册成功返回 true，否则返回 false
    */
   const register = async (username: string, password: string, confirmPassword: string, phone?: string) => {
     try {
-      await $fetch('/api/auth/register' as any, {
-        method: 'POST',
-        body: { username, password, confirmPassword, phone }
+      const res = await http.post<{ success: boolean; message: string; user: User }>('/auth/register', {
+        username,
+        password,
+        confirmPassword,
+        phone
       })
       toast.success('注册成功！请登录。')
-      await login(username, password)
+      // 注册成功后自动登录
+      token.value = `user-jwt-token-${res.user._id}`; // 使用新用户的 _id 生成 token
+      user.value = res.user;
+      await login(username, password) // 重新调用 login 确保所有状态正确设置
       return true
     } catch (e: any) {
       toast.error(e?.data?.statusMessage || e.message || '注册过程中发生错误')

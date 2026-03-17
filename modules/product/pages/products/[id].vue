@@ -1,13 +1,13 @@
 
 <template>
   <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-    <BaseLoading :loading="pending" text="正在加载商品详情..." />
+    <BaseLoading :loading="pending" :text="t('pages.products.detail.loading')" />
 
     <div v-if="error" class="text-center py-12">
-      <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">未找到商品</h3>
+      <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">{{ t('pages.products.detail.notFoundTitle') }}</h3>
       <div class="mt-6">
         <NuxtLink to="/products">
-          <BaseButton variant="primary">返回商品列表</BaseButton>
+          <BaseButton variant="primary">{{ t('pages.products.detail.backToList') }}</BaseButton>
         </NuxtLink>
       </div>
     </div>
@@ -28,6 +28,7 @@
               :src="selectedImage || product.image"
               :alt="product.title"
               class="w-full h-full object-center object-contain p-4 sm:p-6 select-none transition-opacity duration-300"
+              loading="lazy"
               draggable="false"
               @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/800x800/f3f4f6/9ca3af?text=No+Image'"
             >
@@ -60,6 +61,7 @@
               :src="img" 
               :alt="`${product.title} - view ${idx + 1}`"
               class="w-full h-full object-center object-contain p-1"
+              loading="lazy"
               @error="(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/200x200/f3f4f6/9ca3af?text=Thumbnail'"
             >
           </button>
@@ -71,25 +73,37 @@
         <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-color)]">{{ product.title }}</h1>
         
         <div class="mt-3">
-          <h2 class="sr-only">商品信息</h2>
+          <h2 class="sr-only">{{ t('pages.products.detail.srInfo') }}</h2>
           <p class="text-3xl text-[var(--text-color)]">¥{{ product.price }}</p>
         </div>
 
         <!-- Reviews -->
         <div class="mt-3">
-          <h3 class="sr-only">评价</h3>
-          <div class="flex items-center">
+          <h3 class="sr-only">{{ t('pages.products.detail.srReviews') }}</h3>
+          <div class="flex items-center gap-3">
             <div class="flex items-center">
-              <svg v-for="rating in [0, 1, 2, 3, 4]" :key="rating" :class="[product.rating.rate > rating ? 'text-yellow-400' : 'text-[var(--border-color)]', 'h-5 w-5 flex-shrink-0']" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              <svg
+                v-for="rating in [0, 1, 2, 3, 4]"
+                :key="rating"
+                :class="[displayRatingRate > rating ? 'text-yellow-400' : 'text-[var(--border-color)]', 'h-5 w-5 flex-shrink-0']"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
               </svg>
             </div>
-            <p class="sr-only">{{ product.rating.rate }} 满分 5 星</p>
+            <p class="text-sm text-[var(--text-secondary)]">
+              {{ t('pages.products.detail.ratingSummary', { count: displayRatingCount, rate: displayRatingRate.toFixed(1) }) }}
+            </p>
           </div>
         </div>
 
         <div class="mt-6">
-          <h3 class="sr-only">描述</h3>
+          <h3 class="sr-only">{{ t('pages.products.detail.srDescription') }}</h3>
           <div 
             class="text-base text-[var(--text-secondary)] space-y-6 rich-content" 
             v-html="product.detailHtml || product.description" 
@@ -114,7 +128,7 @@
             @click="handleAddToCart"
           >
             <ShoppingCartIcon class="h-6 w-6" />
-            加入购物车
+            {{ t('pages.products.detail.addToCart') }}
           </BaseButton>
           
           <ClientOnly>
@@ -122,21 +136,21 @@
               type="button" 
               class="ml-4 py-3 px-3 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-color)] hover:text-[var(--text-color)] transition-colors"
               :class="{ 'text-red-500 hover:text-red-600': product && isInWishlist(product.id) }"
-              :aria-label="product && isInWishlist(product.id) ? '取消收藏' : '加入收藏'"
+              :aria-label="product && isInWishlist(product.id) ? t('pages.products.detail.wishlistRemoveAria') : t('pages.products.detail.wishlistAddAria')"
               data-testid="product-wishlist-toggle"
               @click="handleToggleWishlist"
             >
               <svg class="h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" :fill="product && isInWishlist(product.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span class="sr-only">加入收藏</span>
+              <span class="sr-only">{{ t('pages.products.detail.wishlistAddSrOnly') }}</span>
             </button>
           </ClientOnly>
         </div>
         
         <div v-else class="mt-10 flex flex-col items-center justify-center p-6 border border-dashed rounded-lg bg-[var(--muted-bg)]" :style="{ borderColor: 'var(--border-color)' }">
-          <p class="text-[var(--text-secondary)] mb-4">登录后即可购买商品和收藏</p>
-          <BaseButton @click="openLoginModal">立即登录</BaseButton>
+          <p class="text-[var(--text-secondary)] mb-4">{{ t('pages.products.detail.loginHint') }}</p>
+          <BaseButton @click="openLoginModal">{{ t('pages.products.detail.loginButton') }}</BaseButton>
         </div>
         
         <div class="mt-8 border-t pt-8" :style="{ borderColor: 'var(--border-color)' }">
@@ -144,7 +158,7 @@
              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
              </svg>
-             返回商品列表
+             {{ t('pages.products.detail.backToList') }}
            </NuxtLink>
         </div>
       </div>
@@ -156,13 +170,13 @@
 
     <div v-if="historyItems.length > 0" class="mt-16 border-t pt-10" :style="{ borderColor: 'var(--border-color)' }">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-medium text-[var(--text-color)]">最近浏览</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)]">{{ t('pages.products.detail.historyTitle') }}</h3>
         <button 
           class="text-sm transition-colors" 
           :style="{ color: 'var(--text-secondary)' }"
           @click="clearHistory"
         >
-          清空历史
+          {{ t('pages.products.detail.historyClear') }}
         </button>
       </div>
       <div class="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 lg:gap-x-8">
@@ -198,6 +212,7 @@ import { useProducts, type Product } from '~/modules/product/composables/useProd
 import { useHistory } from '~/composables/useHistory'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import ProductReviews from '~/modules/product/components/ProductReviews.vue'
+import { useI18n } from '~/composables/useI18n'
 
 const route = useRoute()
 const { getProductById } = useProducts()
@@ -207,6 +222,7 @@ const { addToCart } = useCart()
 const { toggleWishlist, isInWishlist } = useWishlist()
 const { historyItems, addToHistory, fetchHistory, clearHistory } = useHistory()
 const { getCategoryLabel } = useCategoryMapper()
+const { t } = useI18n()
 
 const id = parseInt(route.params.id as string)
 
@@ -230,6 +246,30 @@ const currentImages = computed(() => {
   return [product.value.image]
 })
 
+const { data: ratingSummary } = await useAsyncData(
+  `product-rating-${id}`,
+  () => http.get<{ success: boolean; data: { avgRating: number; reviewCount: number } }>(`/reviews/summary/${id}`),
+  {
+    default: () => ({ success: true, data: { avgRating: 0, reviewCount: 0 } })
+  }
+)
+
+const displayRatingRate = computed(() => {
+  const payload = ratingSummary.value
+  if (payload?.success && payload.data.reviewCount > 0) {
+    return payload.data.avgRating
+  }
+  return product.value?.rating.rate ?? 0
+})
+
+const displayRatingCount = computed(() => {
+  const payload = ratingSummary.value
+  if (payload?.success && payload.data.reviewCount > 0) {
+    return payload.data.reviewCount
+  }
+  return product.value?.rating.count ?? 0
+})
+
 onMounted(async () => {
   await fetchHistory()
   if (product.value) {
@@ -246,10 +286,10 @@ watch(product, (newProduct) => {
 })
 
 useSeoMeta({
-  title: () => product.value?.title || '商品详情',
-  description: () => product.value?.description?.substring(0, 160) || '查看商品详情',
-  ogTitle: () => product.value?.title || '商品详情 - NuxtShop',
-  ogDescription: () => product.value?.description?.substring(0, 160) || '查看商品详情',
+  title: () => product.value?.title || t('seo.products.detailTitle'),
+  description: () => product.value?.description?.substring(0, 160) || t('seo.products.detailDescription'),
+  ogTitle: () => product.value?.title || t('seo.products.detailOgTitle'),
+  ogDescription: () => product.value?.description?.substring(0, 160) || t('seo.products.detailOgDescription'),
   ogImage: () => product.value?.image || '/og-image.png',
   twitterCard: 'summary_large_image',
 })
@@ -268,7 +308,7 @@ const handleAddToCart = () => {
   setTimeout(() => {
     if (product.value) {
       addToCart(product.value)
-      toast.success(`已将 ${product.value.title} 加入购物车！`)
+      toast.success(t('toast.cartAdded'))
     }
     addingToCart.value = false
   }, 500)

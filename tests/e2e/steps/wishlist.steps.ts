@@ -22,19 +22,6 @@ const getDetailWishlistButton = (page: any) => {
   return page.locator('[data-testid="product-wishlist-toggle"]').first()
 }
 
-const clickWithDetachRetry = async (locator: any, page: any) => {
-  for (let i = 0; i < 3; i++) {
-    try {
-      await locator.scrollIntoViewIfNeeded().catch(() => {})
-      await locator.click({ force: true, timeout: 10000 })
-      return
-    } catch {
-      await page.waitForTimeout(300)
-    }
-  }
-  await locator.click({ force: true })
-}
-
 const addWishlistFromDetail = async (page: any) => {
   const btn = getDetailWishlistButton(page)
   await expect(btn).toBeVisible({ timeout: 15000 })

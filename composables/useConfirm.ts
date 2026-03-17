@@ -1,3 +1,5 @@
+import { useI18n } from '~/composables/useI18n'
+
 interface ConfirmOptions {
   title?: string
   message: string
@@ -20,22 +22,24 @@ interface ConfirmState {
 
 const state = reactive<ConfirmState>({
   isOpen: false,
-  title: '提示',
+  title: '',
   message: '',
   type: 'warning',
-  confirmText: '确认',
-  cancelText: '取消',
+  confirmText: '',
+  cancelText: '',
   closeOnMask: true,
   resolve: null
 })
 
 export const useConfirm = () => {
+  const { t } = useI18n()
+
   const confirm = (options: ConfirmOptions | string): Promise<boolean> => {
-    // Reset state defaults
-    state.title = '提示'
+    // Reset state defaults（使用当前语言）
+    state.title = t('ui.modal.title')
     state.type = 'warning'
-    state.confirmText = '确认'
-    state.cancelText = '取消'
+    state.confirmText = t('ui.modal.confirm')
+    state.cancelText = t('ui.modal.cancel')
     state.closeOnMask = true
 
     if (typeof options === 'string') {

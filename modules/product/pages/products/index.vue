@@ -1,19 +1,20 @@
 <template>
+  <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
-      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">商品列表</h1>
+      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.products.list.title') }}</h1>
       <p class="mt-2 text-lg text-[var(--text-secondary)]">
-        浏览我们要选的优质商品。
+        {{ t('pages.products.list.subtitle') }}
       </p>
     </div>
 
     <!-- Search and Filter -->
-    <div class="mb-8 flex flex-col sm:flex-row gap-4">
+    <div class="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div class="flex-1">
         <ProductAutocomplete
           v-model="searchText"
           :products="products || []"
-          placeholder="搜索商品名称或描述..."
+          :placeholder="t('pages.products.list.searchPlaceholder')"
           @select="handleProductSelect"
           @search="handleSearch"
         />
@@ -31,13 +32,13 @@
             @click="setCategory()"
           >
             <Squares2X2Icon class="w-4 h-4" />
-            全部
+            {{ t('pages.products.list.allCategory') }}
           </button>
           <button
             v-if="!activeCategory && activeQuery"
             type="button"
             class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
-            aria-label="清除筛选"
+            :aria-label="t('pages.products.list.clearFilterAria')"
             @click="clearFilters"
           >
             <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
@@ -57,25 +58,62 @@
             class="px-4 py-1.5 text-sm font-medium flex items-center gap-1.5"
             @click="setCategory(cat)"
           >
-            <component :is="categoryIcons[cat]" class="w-4 h-4" />
+            <component :is="getCategoryIcon(cat)" class="w-4 h-4" />
             {{ categoryLabels[cat] || cat }}
           </button>
           <button
             v-if="activeCategory === cat"
             type="button"
             class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
-            aria-label="清除筛选"
+            :aria-label="t('pages.products.list.clearFilterAria')"
             @click="clearFilters"
           >
             <XMarkIcon class="w-4 h-4" stroke-width="2.5" />
           </button>
         </div>
       </div>
+
+      <div class="flex items-center gap-2">
+        <label class="text-sm text-[var(--text-secondary)] whitespace-nowrap">{{ t('pages.products.list.sortLabel') }}</label>
+        <select
+          v-model="sortKey"
+          class="border border-[var(--border-color)] bg-[var(--card-bg)] text-sm px-2 py-1 rounded-md text-[var(--text-color)]"
+        >
+          <option value="default">{{ t('pages.products.list.sortDefault') }}</option>
+          <option value="price-asc">{{ t('pages.products.list.sortPriceAsc') }}</option>
+          <option value="price-desc">{{ t('pages.products.list.sortPriceDesc') }}</option>
+          <option value="rating-desc">{{ t('pages.products.list.sortRatingDesc') }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+      <p class="text-[var(--text-secondary)]">
+        {{ t('pages.products.list.filterCurrent') }}
+        <span v-if="activeCategory && categoryLabels[activeCategory]">
+          {{ t('pages.products.list.filterCategory', { category: categoryLabels[activeCategory] }) }}
+        </span>
+        <span v-else>
+          {{ t('pages.products.list.filterAll') }}
+        </span>
+        <span v-if="activeQuery">
+          {{ t('pages.products.list.filterKeyword', { keyword: activeQuery }) }}
+        </span>
+        <span>{{ t('pages.products.list.filterCount', { count: total }) }}</span>
+      </p>
+      <button
+        v-if="activeCategory || activeQuery"
+        type="button"
+        class="text-xs sm:text-sm text-[var(--primary-color)] hover:underline self-start sm:self-auto"
+        @click="clearFilters"
+      >
+        {{ t('pages.products.list.clearAllFilters') }}
+      </button>
     </div>
 
       <!-- Loading State -->
-      <div v-if="pending" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"/>
+      <div v-if="pending" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <ProductCardSkeleton v-for="n in 8" :key="n" />
       </div>
 
       <!-- Product Grid -->
@@ -93,16 +131,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 class="text-lg font-medium text-[var(--text-color)]">未找到商品</h3>
+        <h3 class="text-lg font-medium text-[var(--text-color)]">{{ t('pages.products.list.emptyTitle') }}</h3>
         <p class="mt-2 text-[var(--text-secondary)]">
-          尝试调整搜索词或筛选条件。
+          {{ t('pages.products.list.emptyDesc') }}
         </p>
         <BaseButton
           variant="outline"
           class="mt-6"
           @click="clearFilters"
         >
-          清除筛选
+          {{ t('pages.products.list.emptyButton') }}
         </BaseButton>
       </div>
 
@@ -115,19 +153,24 @@
         />
       </div>
   </div>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
+import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
+import { useI18n } from '~/composables/useI18n'
 
 const route = useRoute()
 const router = useRouter()
 const { getProducts } = useProducts()
 const { categoryLabels } = useCategoryMapper()
+const { t } = useI18n()
 
 const page = computed(() => Number(route.query.page) || 1)
 const limit = 16 // Show 16 products per page
@@ -145,52 +188,62 @@ const activeQuery = computed<string>(() => {
 useSeoMeta({
   title: computed(() => {
     if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return `${categoryLabels[activeCategory.value]} - 商品列表`
+      return t('seo.products.listCategoryTitle', { category: categoryLabels[activeCategory.value] })
     }
     if (activeQuery.value) {
-      return `搜索：${activeQuery.value} - 商品列表`
+      return t('seo.products.listSearchTitle', { keyword: activeQuery.value })
     }
-    return '商品列表'
+    return t('seo.products.listTitle')
   }),
   description: computed(() => {
     if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return `浏览我们的${categoryLabels[activeCategory.value]}系列商品。`
+      return t('seo.products.listCategoryDescription', { category: categoryLabels[activeCategory.value] })
     }
-    return '浏览我们精选的各类优质商品。'
+    if (activeQuery.value) {
+      return t('seo.products.listSearchDescription', { keyword: activeQuery.value })
+    }
+    return t('seo.products.listDescription')
   }),
-  ogTitle: computed(() => activeCategory.value ? `${categoryLabels[activeCategory.value]} - NuxtShop` : '商品列表 - NuxtShop'),
-  ogDescription: '浏览我们精选的各类优质商品。'
+  ogTitle: computed(() => t('seo.products.listTitle')),
+  ogDescription: t('seo.products.listDescription')
 })
+
+// 从 MongoDB 动态获取商品分类列表
+const { data: categoryData } = await useAsyncData(
+  'product-categories',
+  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  {
+    default: () => [] as { key: string; label: string }[]
+  }
+)
+
+const categories = computed(() => categoryData.value?.map(c => c.key) || [])
+
+const sortKey = ref<'default' | 'price-asc' | 'price-desc' | 'rating-desc'>('default')
 
 // 通过 watch 响应路由变化并刷新数据
 const { data, pending } = await useAsyncData(
   'products',
-  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value),
+  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value, sortKey.value),
   {
-    watch: [page, activeCategory, activeQuery], // 当页码/分类/搜索词变化时重新拉取
+    watch: [page, activeCategory, activeQuery, sortKey], // 当页码/分类/搜索词变化时重新拉取
     default: () => ({ items: [], total: 0 })
   }
 )
 
-const products = computed(() => {
-  return data.value?.items || []
-})
+const products = computed(() => data.value?.items || [])
 
 const total = computed(() => data.value?.total || 0)
 const totalPages = computed(() => Math.ceil(total.value / limit))
-
-const categories = [
-  "electronics",
-  "jewelery",
-  "men's clothing",
-  "women's clothing"
-]
 
 const categoryIcons: Record<string, any> = {
   electronics: ComputerDesktopIcon,
   jewelery: SparklesIcon,
   "men's clothing": UserIcon,
   "women's clothing": UserCircleIcon
+}
+const getCategoryIcon = (key: string) => {
+  return categoryIcons[key] || Squares2X2Icon
 }
 
 const paginationTo = (p: number) => {
@@ -260,11 +313,4 @@ const handleSearch = (query: string) => {
   // debouncedSearch 会由 watch(searchText) 触发
 }
 
-const highlightText = (text: string, query: string) => {
-  if (!query) return text
-  // 转义 query 中的特殊字符，避免正则错误
-  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = new RegExp(`(${escapedQuery})`, 'gi')
-  return text.replace(regex, '<mark class="bg-yellow-200 text-gray-900 rounded-sm px-0.5">$1</mark>')
-}
 </script>

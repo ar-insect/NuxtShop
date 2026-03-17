@@ -8,8 +8,8 @@
         <slot name="prefix"/>
       </div>
       <input
-        ref="inputRef"
         :id="inputId"
+        ref="inputRef"
         :type="type"
         :value="modelValue"
         class="focus:outline-none focus:border-[var(--primary-color)] block w-full sm:text-sm border py-2 transition-colors"
@@ -38,7 +38,7 @@
           :style="{ color: 'var(--text-secondary)' }"
           @click="clearInput"
         >
-          <span class="sr-only">清除</span>
+          <span class="sr-only">{{ t('ui.clear') }}</span>
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -61,6 +61,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '~/composables/useI18n'
+
 defineOptions({ inheritAttrs: false })
 interface Props {
   modelValue?: string | number
@@ -85,6 +87,8 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   clearable: false
 })
+
+const { t } = useI18n()
 
 const uid = useId()
 const inputId = computed(() => props.id || uid)

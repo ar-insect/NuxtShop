@@ -1,13 +1,12 @@
+import { http } from '~/utils/http'
+
 export default defineNuxtPlugin((nuxtApp) => {
   // 辅助函数：发送日志到后端
   const sendErrorToService = (log: any) => {
     if (import.meta.client) {
       // 使用 useFetch 或 $fetch 发送日志
       // 使用 catch 忽略发送失败的情况，避免无限循环
-      $fetch('/api/log', {
-        method: 'POST',
-        body: log
-      }).catch((err) => {
+      http.post('/log', log).catch((err) => {
         console.error('Failed to send error log to server:', err)
       })
     }

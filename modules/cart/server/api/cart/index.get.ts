@@ -1,16 +1,25 @@
-import { getSessionId } from '~/server/utils/session'
+import { ObjectId } from 'mongodb'
+import { findCartByUserId } from '~/server/utils/cart'
 
 export default defineEventHandler(async (event) => {
-  const sessionId = getSessionId(event)
-  const redis = useRedis()
-  
-  if (!redis) {
-    // Redis 不可用时，降级返回空数组
+  const token = getCookie(event, 'auth-token')
+
+  if (!token || !token.startsWith('user-jwt-token-')) {
+    // 未登录用户目前不支持服务端购物车，前端也会禁用加入购物车按钮
     return []
   }
 
-  const cartKey = `cart:${sessionId}`
-  const cartData = await redis.get(cartKey)
+  const userId = token.replace('user-jwt-token-', '')
 
-  return cartData ? JSON.parse(cartData) : []
+  if (!ObjectId.isValid(userId)) {
+    return []
+  }
+
+  try {
+    const items = await findCartByUserId(new ObjectId(userId))
+    return items
+  } catch (e) {
+    console.error('Failed to fetch cart from MongoDB:', e)
+    return []
+  }
 })

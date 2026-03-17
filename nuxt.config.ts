@@ -16,17 +16,28 @@ export default defineNuxtConfig({
     'build:before': () => {
       const readmePath = path.resolve(process.cwd(), 'README.md')
       const contentPath = path.resolve(process.cwd(), 'content/index.md')
+      const readmeEnPath = path.resolve(process.cwd(), 'README_EN.md')
+      const contentEnPath = path.resolve(process.cwd(), 'content/index-en.md')
       if (fs.existsSync(readmePath)) {
         fs.copyFileSync(readmePath, contentPath)
       }
+      if (fs.existsSync(readmeEnPath)) {
+        fs.copyFileSync(readmeEnPath, contentEnPath)
+      }
     },
     'builder:watch': (event, relativePath) => {
-      if (relativePath === 'README.md') {
-        const readmePath = path.resolve(process.cwd(), 'README.md')
-        const contentPath = path.resolve(process.cwd(), 'content/index.md')
+      if (relativePath === 'README.md' || relativePath === 'README_EN.md') {
+        const root = process.cwd()
+        const readmePath = path.resolve(root, 'README.md')
+        const contentPath = path.resolve(root, 'content/index.md')
+        const readmeEnPath = path.resolve(root, 'README_EN.md')
+        const contentEnPath = path.resolve(root, 'content/index-en.md')
+
         if (fs.existsSync(readmePath)) {
           fs.copyFileSync(readmePath, contentPath)
-          // 如有需要可触发 content/index.md 的 HMR（通常 copy 已足够）
+        }
+        if (fs.existsSync(readmeEnPath)) {
+          fs.copyFileSync(readmeEnPath, contentEnPath)
         }
       }
     }
@@ -119,9 +130,17 @@ export default defineNuxtConfig({
       password: process.env.REDIS_PASSWORD || '',
       db: Number(process.env.REDIS_DB) || 0
     },
+    mongodb: {
+      uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
+      dbName: process.env.MONGODB_DB_NAME || 'nuxtshop'
+    },
     public: {
       // 客户端公共配置
       disableCaptcha: process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1' || process.env.NODE_ENV === 'test'
+    },
+    admin: { // 添加 admin 配置
+      username: process.env.ADMIN_USERNAME || 'admin',
+      password: process.env.ADMIN_PASSWORD || '123456',
     }
   },
   typescript: {

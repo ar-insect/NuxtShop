@@ -1,8 +1,10 @@
 <template>
-  <BaseCard title="偏好设置">
+  <BaseCard :title="t('profile.preferences.title')">
     <div class="py-2 space-y-8">
        <div>
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">外观主题</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.themeTitle') }}
+          </h4>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div 
                 v-for="theme in themes" 
@@ -22,7 +24,9 @@
        </div>
 
        <div class="pt-8 border-t border-[var(--border-color)]">
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">字体大小</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.fontSizeTitle') }}
+          </h4>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               v-for="size in fontSizes"
@@ -42,7 +46,9 @@
        </div>
 
        <div class="pt-8 border-t border-[var(--border-color)]">
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">主题色</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.primaryColorTitle') }}
+          </h4>
           <div class="flex flex-wrap gap-3">
             <button
               v-for="color in colors"
@@ -60,7 +66,9 @@
        </div>
 
        <div class="pt-8 border-t border-[var(--border-color)]">
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">圆角</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.radiusTitle') }}
+          </h4>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               v-for="radius in radii"
@@ -80,7 +88,9 @@
        </div>
 
        <div class="pt-8 border-t border-[var(--border-color)]">
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">语言设置</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.languageTitle') }}
+          </h4>
           <div class="max-w-xs">
               <BaseSelect 
                 v-model="currentLanguage"
@@ -94,7 +104,9 @@
 
        <!-- Timezone -->
        <div class="pt-8 border-t border-[var(--border-color)]">
-          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">时区</h4>
+          <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+            {{ t('profile.preferences.timezoneTitle') }}
+          </h4>
           <div class="max-w-xs">
               <BaseSelect 
                 v-model="currentTimezone"
@@ -108,43 +120,49 @@
        </div>
 
        <div class="pt-8 border-t border-[var(--border-color)] flex justify-end">
-          <BaseButton variant="outline" @click="resetTheme">恢复默认外观</BaseButton>
+          <BaseButton variant="outline" @click="resetTheme">
+            {{ t('profile.preferences.resetTheme') }}
+          </BaseButton>
        </div>
     </div>
   </BaseCard>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/vue/24/outline'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { useI18nStore, type Locale } from '~/stores/i18n'
+import { useI18n } from '~/composables/useI18n'
 
-const { user } = useAuth()
 const themeStore = useThemeStore()
+const i18nStore = useI18nStore()
+const { user } = useAuth()
+const toast = useToast()
+const { t } = useI18n()
 
-const userId = computed(() => user.value?.id?.toString())
-const themes = [
-  { value: 'light', label: '浅色', icon: SunIcon },
-  { value: 'dark', label: '深色', icon: MoonIcon },
-  { value: 'system', label: '跟随系统', icon: ComputerDesktopIcon },
-]
+const themes = computed(() => ([
+  { value: 'light', label: t('profile.preferences.themeLight'), icon: SunIcon },
+  { value: 'dark', label: t('profile.preferences.themeDark'), icon: MoonIcon },
+  { value: 'system', label: t('profile.preferences.themeSystem'), icon: ComputerDesktopIcon }
+]))
 const currentTheme = computed(() => themeStore.theme.mode)
 const currentFontSize = computed(() => themeStore.theme.fontSize)
-const currentPrimaryColor = computed(() => themeStore.theme.primaryColor)
+const currentPrimaryColor = computed(() => themeStore.theme.primaryColor?.toLowerCase() || '#3b82f6')
 const currentBorderRadius = computed(() => themeStore.theme.borderRadius)
-const currentLanguage = ref('zh-CN')
-const currentTimezone = ref('Asia/Shanghai')
+const currentLanguage = ref<Locale>(i18nStore.locale)
+const currentTimezone = ref(user.value?.timezone || 'Asia/Shanghai')
 
 const setTheme = (mode: string) => {
-  themeStore.updateTheme({ mode: mode as any }, userId.value)
+  themeStore.updateTheme({ mode: mode as any })
 }
 
-const fontSizes = [
-  { label: '小', value: 'sm' },
-  { label: '中', value: 'md' },
-  { label: '大', value: 'lg' },
-  { label: '特大', value: 'xl' }
-] as const
+const fontSizes = computed(() => ([
+  { label: t('profile.preferences.fontSmall'), value: 'sm' },
+  { label: t('profile.preferences.fontMedium'), value: 'md' },
+  { label: t('profile.preferences.fontLarge'), value: 'lg' },
+  { label: t('profile.preferences.fontXL'), value: 'xl' }
+] as const))
 
 const colors = [
   '#3b82f6',
@@ -155,26 +173,54 @@ const colors = [
   '#ec4899'
 ]
 
-const radii = [
-  { label: '直角', value: '0px' },
-  { label: '小圆角', value: '0.25rem' },
-  { label: '中圆角', value: '0.5rem' },
-  { label: '大圆角', value: '1rem' }
-]
+const radii = computed(() => ([
+  { label: t('profile.preferences.radiusNone'), value: '0px' },
+  { label: t('profile.preferences.radiusSm'), value: '0.25rem' },
+  { label: t('profile.preferences.radiusMd'), value: '0.5rem' },
+  { label: t('profile.preferences.radiusLg'), value: '1rem' }
+]))
 
-const setFontSize = (size: typeof fontSizes[number]['value']) => {
-  themeStore.updateTheme({ fontSize: size }, userId.value)
+const setFontSize = (size: any) => {
+  themeStore.updateTheme({ fontSize: size })
 }
 
 const setPrimaryColor = (color: string) => {
-  themeStore.updateTheme({ primaryColor: color }, userId.value)
+  themeStore.updateTheme({ primaryColor: color })
 }
 
 const setBorderRadius = (radius: string) => {
-  themeStore.updateTheme({ borderRadius: radius }, userId.value)
+  themeStore.updateTheme({ borderRadius: radius })
 }
 
 const resetTheme = () => {
-  themeStore.resetTheme(userId.value)
+  themeStore.resetTheme()
 }
+
+watch(currentLanguage, async (val) => {
+  i18nStore.setLocale(val)
+
+  if (!user.value?._id) return
+
+  try {
+    await $fetch('/api/user/update', {
+      method: 'POST',
+      body: { language: val }
+    })
+  } catch (e: any) {
+    toast.error(e?.statusMessage || '更新语言设置失败')
+  }
+})
+
+watch(currentTimezone, async (val) => {
+  if (!user.value?._id) return
+
+  try {
+    await $fetch('/api/user/update', {
+      method: 'POST',
+      body: { timezone: val }
+    })
+  } catch (e: any) {
+    toast.error(e?.statusMessage || '更新时区失败')
+  }
+})
 </script>

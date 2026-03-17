@@ -1,5 +1,7 @@
-import { v4 as uuidv4 } from 'uuid'
-import { useRedis } from '~/server/utils/redis'
+// server/api/reviews/add.post.ts
+import { ObjectId } from 'mongodb'
+import { findUserById } from '~/server/utils/user'
+import { insertReview } from '~/server/utils/review'
 
 export default defineEventHandler(async (event) => {
   const token = getCookie(event, 'auth-token')
@@ -11,58 +13,24 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // 获取用户信息
-  let user = null
-  const redis = useRedis()
-
+  let userId: string | null = null
   if (token.startsWith('user-jwt-token-')) {
-    const username = token.replace('user-jwt-token-', '')
-    try {
-      const authData = await redis.get(`user:auth:${username}`)
-      if (authData) {
-        const record = JSON.parse(authData)
-        user = {
-          id: record.id,
-          username: record.username,
-          name: record.username,
-          avatar: record.avatar || `https://ui-avatars.com/api/?name=${record.username}&background=random`
-        }
-        
-        // 尝试获取最新资料
-        try {
-            const profileData = await redis.get(`user:profile:${user.id}`)
-            if (profileData) {
-                const profile = JSON.parse(profileData)
-                if (profile.name) user.name = profile.name
-                if (profile.avatar) user.avatar = profile.avatar
-            }
-        } catch (e) {
-            // ignore
-        }
-      }
-    } catch (e) {
-      console.error('Error fetching user:', e)
-    }
-  } else if (token.startsWith('mock-jwt-token-')) {
-    user = {
-      id: 1,
-      username: 'admin',
-      name: 'Admin User',
-      avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
-    }
-     // 尝试获取最新资料
-     try {
-        const profileData = await redis.get(`user:profile:${user.id}`)
-        if (profileData) {
-            const profile = JSON.parse(profileData)
-            if (profile.name) user.name = profile.name
-            if (profile.avatar) user.avatar = profile.avatar
-        }
-    } catch (e) {
-        // ignore
-    }
+    userId = token.replace('user-jwt-token-', '')
+  } else {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token'
+    })
   }
 
+  if (!userId || !ObjectId.isValid(userId)) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token'
+    })
+  }
+
+  const user = await findUserById(userId)
   if (!user) {
     throw createError({
       statusCode: 401,
@@ -73,35 +41,41 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { productId, rating, content } = body
 
-  if (!productId || !rating || !content) {
+  const numericProductId = Number(productId)
+
+  if (!numericProductId || !rating || !content) {
     throw createError({
       statusCode: 400,
       statusMessage: '缺少必要参数'
     })
   }
 
-  const review = {
-    id: uuidv4(),
-    productId,
-    userId: user.id,
-    username: user.name || user.username,
-    userAvatar: user.avatar,
-    rating: Number(rating),
-    content,
-    createdAt: new Date().toISOString()
-  }
-
   try {
-    // 将评价存储到 Redis 列表
-    // 使用 lpush 将最新评价插入到列表头部
-    await redis.lpush(`reviews:product:${productId}`, JSON.stringify(review))
-    
+    const created = await insertReview({
+      productId: numericProductId,
+      userId: user._id as ObjectId,
+      username: user.name || user.username,
+      userAvatar: user.avatar,
+      rating: Number(rating),
+      content,
+      createdAt: new Date()
+    })
+
     return {
       success: true,
-      data: review
+      data: {
+        id: created._id?.toHexString() || '',
+        productId: created.productId,
+        userId: (created.userId as ObjectId).toHexString(),
+        username: created.username,
+        userAvatar: created.userAvatar,
+        rating: created.rating,
+        content: created.content,
+        createdAt: created.createdAt.toISOString()
+      }
     }
   } catch (error) {
-    console.error('Redis error adding review:', error)
+    console.error('Mongo error adding review:', error)
     throw createError({
       statusCode: 500,
       statusMessage: '评价提交失败，请稍后重试'

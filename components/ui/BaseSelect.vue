@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full" ref="containerRef">
+  <div ref="containerRef" class="relative w-full">
     <label v-if="label" class="block text-sm font-medium text-[var(--text-color)] mb-1">
       {{ label }}
     </label>

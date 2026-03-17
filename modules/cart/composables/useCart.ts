@@ -1,4 +1,5 @@
 import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 /**
  * 表示购物车中的一条商品项。
@@ -27,19 +28,32 @@ export interface CartItem extends Product {
 export const useCart = () => {
   const cartItems = useState<CartItem[]>('cart', () => [])
 
-  // 与服务端同步
-  const { data, refresh } = useFetch<CartItem[]>('/api/cart', {
-    key: 'cart-data',
-    // 移除 server: false 以支持 SSR，避免水合不一致
-    // 移除 lazy: true 以确保服务端渲染时数据已就绪
-  })
+  // 首次调用时从服务端拉取一次购物车数据
+  const cartInitialized = useState<boolean>('cart-fetched', () => false)
 
-  // 监听服务端数据变化
-  watch(data, (newCart) => {
-    if (newCart) {
-      cartItems.value = newCart
+  if (!cartInitialized.value) {
+    const { data } = useFetch<CartItem[]>('/api/cart', {
+      key: 'cart-data',
+      server: false
+    })
+
+    watch(data, (newCart) => {
+      if (newCart) {
+        cartItems.value = newCart
+      }
+    }, { immediate: true })
+
+    cartInitialized.value = true
+  }
+
+  const refreshCart = async () => {
+    try {
+      const fresh = await http.get<CartItem[]>('/cart')
+      cartItems.value = fresh
+    } catch (e) {
+      console.error('Failed to refresh cart', e)
     }
-  }, { immediate: true })
+  }
 
   /**
    * 将当前购物车状态持久化到服务端。
@@ -48,10 +62,7 @@ export const useCart = () => {
    */
   const saveCart = async () => {
     try {
-      await $fetch('/api/cart', {
-        method: 'POST',
-        body: cartItems.value
-      })
+      await http.post('/cart', cartItems.value)
     } catch (e) {
       console.error('Failed to save cart', e)
     }
@@ -141,6 +152,6 @@ export const useCart = () => {
     cartTotal,
     cartCount,
     resetCartLocal,
-    refreshCart: refresh
+    refreshCart
   }
 }

@@ -1,87 +1,57 @@
-import { useRedis } from '~/server/utils/redis'
+// server/api/auth/me.get.ts
+import { findUserById } from '~/server/utils/user';
+import { ObjectId } from 'mongodb';
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth-token')
+  const token = getCookie(event, 'auth-token');
 
   if (!token) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Unauthorized'
-    })
+      statusMessage: 'Unauthorized',
+    });
   }
 
-  // 已注册用户的 token：user-jwt-token-<username>
+  // 从 token 中提取用户 ID
+  let userId: string | null = null;
   if (token.startsWith('user-jwt-token-')) {
-    const username = token.replace('user-jwt-token-', '')
-    const redis = useRedis()
-    try {
-      const authData = await redis.get(`user:auth:${username}`)
-      if (authData) {
-        const record = JSON.parse(authData)
-        const baseUser = {
-          id: record.id,
-          username: record.username,
-          name: record.username,
-          role: record.role || 'user',
-          avatar: record.avatar
-        }
-
-        try {
-          const key = `user:profile:${baseUser.id}`
-          const profileData = await redis.get(key)
-          if (profileData) {
-            const profile = JSON.parse(profileData)
-            if (profile.name) baseUser.name = profile.name
-            if (profile.avatar) baseUser.avatar = profile.avatar
-          }
-        } catch (e) {
-          console.error('Error fetching user profile from Redis:', e)
-        }
-
-        return { user: baseUser }
-      }
-    } catch (e) {
-      console.error('Error reading auth data from Redis:', e)
-    }
+    userId = token.replace('user-jwt-token-', '');
+  } else {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
+      statusMessage: 'Invalid token',
+    });
   }
 
-  // 真实项目中应校验 token，并从数据库读取用户信息
-  if (token.startsWith('mock-jwt-token-')) {
-    const baseUser = {
-      id: 1,
-      username: 'admin',
-      name: 'Admin User',
-      role: 'admin',
-      avatar: 'https://avatars.githubusercontent.com/u/1?v=4'
-    }
-
-    // 尝试从 Redis 获取并合并最新资料
-    const redis = useRedis()
-    if (redis) {
-      try {
-        const key = `user:profile:${baseUser.id}`
-        const profileData = await redis.get(key)
-        if (profileData) {
-          const profile = JSON.parse(profileData)
-          if (profile.name) baseUser.name = profile.name
-          if (profile.avatar) baseUser.avatar = profile.avatar
-        }
-      } catch (e) {
-        console.error('Error fetching user profile from Redis:', e)
-      }
-    }
-
-    return {
-      user: baseUser
-    }
+  if (!userId || !ObjectId.isValid(userId)) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid token',
+    });
   }
 
-  throw createError({
-    statusCode: 401,
-    statusMessage: 'Invalid token'
-  })
-})
+  // 从 MongoDB 查找用户
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'User not found',
+    });
+  }
+
+  // 返回部分用户数据，不包含密码
+  return {
+    user: {
+      _id: user._id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+      avatar: user.avatar,
+      language: user.language,
+      timezone: user.timezone,
+      phone: user.phone,
+      createdAt: user.createdAt,
+    },
+  };
+});

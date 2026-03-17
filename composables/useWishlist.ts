@@ -1,4 +1,5 @@
 import type { Product } from '~/modules/product/composables/useProducts'
+import { http } from '~/utils/http'
 
 /**
  * 收藏夹管理组合式函数。
@@ -14,18 +15,33 @@ import type { Product } from '~/modules/product/composables/useProducts'
 export const useWishlist = () => {
   const wishlistItems = useState<Product[]>('wishlist', () => [])
 
-  // 与服务端同步
-  const { data, refresh } = useFetch<Product[]>('/api/wishlist', {
-    key: 'wishlist-data',
-    lazy: true
-  })
+  // 首次调用时从服务端拉取一次收藏夹数据
+  const wishlistInitialized = useState<boolean>('wishlist-fetched', () => false)
 
-  // 监听服务端数据变化
-  watch(data, (newWishlist) => {
-    if (newWishlist) {
-      wishlistItems.value = newWishlist
+  if (!wishlistInitialized.value) {
+    const { data } = useFetch<Product[]>('/api/wishlist', {
+      key: 'wishlist-data',
+      lazy: true,
+      server: false
+    })
+
+    watch(data, (newWishlist) => {
+      if (newWishlist) {
+        wishlistItems.value = newWishlist
+      }
+    }, { immediate: true })
+
+    wishlistInitialized.value = true
+  }
+
+  const refreshWishlist = async () => {
+    try {
+      const fresh = await http.get<Product[]>('/wishlist')
+      wishlistItems.value = fresh
+    } catch {
+      // 刷新收藏夹失败时静默处理
     }
-  }, { immediate: true })
+  }
 
   /**
    * 将当前收藏夹状态持久化到服务端。
@@ -34,10 +50,7 @@ export const useWishlist = () => {
    */
   const saveWishlist = async () => {
     try {
-      await $fetch('/api/wishlist', {
-        method: 'POST',
-        body: wishlistItems.value
-      })
+      await http.post('/wishlist', wishlistItems.value)
     } catch (e) {
       console.error('Failed to save wishlist', e)
     }
@@ -105,6 +118,6 @@ export const useWishlist = () => {
     toggleWishlist,
     isInWishlist,
     resetWishlistLocal,
-    refreshWishlist: refresh
+    refreshWishlist
   }
 }

@@ -1,11 +1,24 @@
 <script setup lang="ts">
-const { data: page } = await useAsyncData('docs', () => {
+import { useI18n } from '~/composables/useI18n'
+
+const { t, locale } = useI18n()
+
+const isEnglish = computed(() => locale.value === 'en-US')
+
+const { data: pageZh } = await useAsyncData('docs-zh', () => {
   return queryCollection('content').path('/').first()
 })
 
+const { data: pageEn } = await useAsyncData('docs-en', () => {
+  return queryCollection('content').path('/index-en').first()
+})
+
+const currentPage = computed(() => (isEnglish.value ? pageEn.value : pageZh.value))
+const tocPage = computed(() => (isEnglish.value ? pageEn.value : pageZh.value))
+
 useSeoMeta({
-  title: '项目文档',
-  description: 'NuxtShop 项目详细文档，包含安装、配置、组件使用等说明。'
+  title: () => t('seo.docs.title'),
+  description: () => t('seo.docs.description')
 })
 
 const scrollToHeading = (id: string) => {
@@ -18,42 +31,46 @@ const scrollToHeading = (id: string) => {
 </script>
 
 <template>
-  <div class="docs-page">
-    <div class="container">
-      <div class="layout-grid">
-        <!-- 主内容 -->
-        <main class="content-wrapper">
-          <ContentRenderer v-if="page" :value="page" class="markdown-body" />
-          <div v-else class="empty-state">
-            文档加载失败或内容为空
-          </div>
-          
-          <div class="navigation">
-            <NuxtLink to="/" class="back-link">返回首页</NuxtLink>
-          </div>
-        </main>
+  <ClientOnly>
+    <div class="docs-page">
+      <div class="container">
+        <div class="layout-grid">
+          <!-- 主内容 -->
+          <main class="content-wrapper">
+            <ContentRenderer v-if="currentPage" :value="currentPage" class="markdown-body" />
+            <div v-else class="empty-state">
+              {{ t('docs.empty') }}
+            </div>
+            
+            <div class="navigation">
+              <NuxtLink to="/" class="back-link">
+                {{ t('docs.backHome') }}
+              </NuxtLink>
+            </div>
+          </main>
 
-        <!-- 右侧 TOC -->
-        <aside v-if="page?.body?.toc?.links?.length" class="toc-sidebar">
-          <div class="toc-wrapper">
-            <h3 class="toc-title">目录</h3>
-            <nav class="toc-nav">
-              <ul>
-                <li v-for="link in page.body.toc.links" :key="link.id">
-                  <a :href="`#${link.id}`" @click.prevent="scrollToHeading(link.id)">{{ link.text }}</a>
-                  <ul v-if="link.children && link.children.length">
-                    <li v-for="child in link.children" :key="child.id">
-                      <a :href="`#${child.id}`" @click.prevent="scrollToHeading(child.id)">{{ child.text }}</a>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </aside>
+          <!-- 右侧 TOC（根据当前语言使用对应文档的 TOC） -->
+          <aside v-if="tocPage?.body?.toc?.links?.length" class="toc-sidebar">
+            <div class="toc-wrapper">
+              <h3 class="toc-title">{{ t('docs.tocTitle') }}</h3>
+              <nav class="toc-nav">
+                <ul>
+                  <li v-for="link in tocPage.body.toc.links" :key="link.id">
+                    <a :href="`#${link.id}`" @click.prevent="scrollToHeading(link.id)">{{ link.text }}</a>
+                    <ul v-if="link.children && link.children.length">
+                      <li v-for="child in link.children" :key="child.id">
+                        <a :href="`#${child.id}`" @click.prevent="scrollToHeading(child.id)">{{ child.text }}</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
-  </div>
+  </ClientOnly>
 </template>
 
 <style scoped>

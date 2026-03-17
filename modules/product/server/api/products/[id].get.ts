@@ -1,7 +1,7 @@
-import { products } from '~/server/data/products'
+import { findProductById } from '~/server/utils/product'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const id = Number(event.context.params?.id)
   if (!Number.isFinite(id)) return null
-  return products.find(p => p.id === id) || null
+  return await findProductById(id)
 })

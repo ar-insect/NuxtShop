@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { http } from '~/utils/http'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -144,15 +145,11 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       useHead({ style: [{ innerHTML: systemCss }] })
     },
 
-    // 从服务端加载配置
-    async fetchTheme(userId?: string) {
-      if (!userId) return
-
+    // 从服务端加载配置（使用同域 cookie 进行鉴权，无需显式传 token）
+    async fetchTheme() {
       this.isLoading = true
       try {
-        const data = await $fetch<ThemeConfig>('/api/theme', {
-          params: { userId }
-        })
+        const data = await http.get<ThemeConfig | Record<string, never>>('/theme')
         
         if (data) {
           this.theme = { ...DEFAULT_THEME, ...data }
@@ -166,8 +163,8 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       }
     },
 
-    // 更新并保存配置
-    async updateTheme(newConfig: Partial<ThemeConfig>, userId?: string) {
+    // 更新并保存配置（使用同域 cookie 进行鉴权，无需显式传 token）
+    async updateTheme(newConfig: Partial<ThemeConfig>) {
       const nextTheme: ThemeConfig = { ...this.theme, ...newConfig }
       if (newConfig.mode) {
         const colors = resolveColors(newConfig.mode)
@@ -178,35 +175,19 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       this.applyTheme()
       this.syncSystemModeListener()
 
-      if (userId) {
-        try {
-          await $fetch('/api/theme', {
-            method: 'POST',
-            body: {
-              userId,
-              config: this.theme
-            }
-          })
-        } catch (e) {
-          console.error('Failed to save theme:', e)
-        }
+      try {
+        await http.post('/theme', { config: this.theme })
+      } catch (e) {
+        console.error('Failed to save theme:', e)
       }
     },
 
-    resetTheme(userId?: string) {
+    resetTheme() {
       this.theme = { ...DEFAULT_THEME }
       this.applyTheme()
       this.syncSystemModeListener()
 
-      if (userId) {
-        $fetch('/api/theme', {
-          method: 'POST',
-          body: {
-            userId,
-            config: this.theme
-          }
-        }).catch(() => {})
-      }
+      http.post('/theme', { config: this.theme }).catch(() => {})
     },
 
     syncSystemModeListener() {

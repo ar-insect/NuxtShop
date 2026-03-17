@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-[var(--text-color)]">个人中心</h1>
+      <h1 class="text-2xl font-bold text-[var(--text-color)]">{{ t('profile.title') }}</h1>
     </div>
     <div class="lg:grid lg:grid-cols-12 lg:gap-x-8">
       <!-- Sidebar -->
@@ -14,11 +14,11 @@
               :href="item.href"
               :class="[
                 'group px-3 py-4 flex items-center text-sm font-medium transition-colors duration-200 cursor-pointer -mx-4 -my-1 border-l-4',
-                item.current
+                item.id === currentTab
                   ? ''
                   : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-color)]',
               ]"
-              :style="item.current ? {
+              :style="item.id === currentTab ? {
                   backgroundColor: 'color-mix(in srgb, var(--primary-color), transparent 90%)',
                   borderColor: 'var(--primary-color)',
                   color: 'var(--primary-color)'
@@ -29,9 +29,9 @@
                 :is="item.icon"
                 :class="[
                   'flex-shrink-0 -ml-1 mr-3 h-6 w-6 transition-colors duration-200',
-                   item.current ? '' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)]'
+                   item.id === currentTab ? '' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)]'
                 ]"
-                :style="item.current ? { color: 'var(--primary-color)' } : {}"
+                :style="item.id === currentTab ? { color: 'var(--primary-color)' } : {}"
                 aria-hidden="true"
               />
               <span class="truncate">{{ item.name }}</span>
@@ -40,18 +40,18 @@
         </BaseCard>
         
         <BaseCard>
-             <BaseButton
-                block
-                variant="danger"
-                class="flex items-center justify-center"
-                @click="logout"
-              >
-                <ArrowRightOnRectangleIcon
-                  class="flex-shrink-0 mr-2 h-5 w-5"
-                  aria-hidden="true"
-                />
-                退出登录
-              </BaseButton>
+          <BaseButton
+            block
+            variant="danger"
+            class="flex items-center justify-center"
+            @click="handleLogout"
+          >
+            <ArrowRightOnRectangleIcon
+              class="flex-shrink-0 mr-2 h-5 w-5"
+              aria-hidden="true"
+            />
+            {{ t('profile.logoutConfirm') }}
+          </BaseButton>
         </BaseCard>
       </aside>
 
@@ -72,8 +72,10 @@
             <div class="mx-auto h-12 w-12 text-[var(--text-secondary)] flex justify-center">
                 <component :is="navigation.find(i => i.id === currentTab)?.icon" class="h-12 w-12" />
             </div>
-            <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">功能开发中</h3>
-            <p class="mt-1 text-sm text-[var(--text-secondary)]">此模块尚未完成，敬请期待。</p>
+            <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">
+              {{ t('profile.placeholderTitle') }}
+            </h3>
+            <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('profile.placeholderDesc') }}</p>
         </BaseCard>
       </div>
     </div>
@@ -95,6 +97,7 @@ import ProfileAddress from '~/components/profile/ProfileAddress.vue'
 import ProfileSecurity from '~/components/profile/ProfileSecurity.vue'
 import ProfilePreferences from '~/components/profile/ProfilePreferences.vue'
 import ProfileNotifications from '~/components/profile/ProfileNotifications.vue'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   middleware: 'auth',
@@ -102,31 +105,42 @@ definePageMeta({
 })
 
 const { logout } = useAuth()
+const { confirm } = useConfirm()
+const { t } = useI18n()
 
 useSeoMeta({
-  title: '个人中心',
-  description: '管理您的个人资料和账户设置。'
+  title: t('profile.seoTitle'),
+  description: t('profile.seoDesc')
 })
 
 // Navigation
 const currentTab = ref('account')
-const navigation = reactive([
-  { id: 'account', name: '账号信息', href: '#', icon: UserCircleIcon, current: true },
-  { id: 'orders', name: '我的订单', href: '#', icon: ShoppingBagIcon, current: false },
-  { id: 'address', name: '收货地址', href: '#', icon: MapPinIcon, current: false },
-  { id: 'security', name: '安全设置', href: '#', icon: ShieldCheckIcon, current: false },
-  { id: 'preference', name: '偏好设置', href: '#', icon: Cog6ToothIcon, current: false },
-  { id: 'notification', name: '接收设置', href: '#', icon: BellIcon, current: false },
-])
+const navigation = computed(() => ([
+  { id: 'account', name: t('profile.nav.account'), href: '#', icon: UserCircleIcon },
+  { id: 'orders', name: t('profile.nav.orders'), href: '#', icon: ShoppingBagIcon },
+  { id: 'address', name: t('profile.nav.address'), href: '#', icon: MapPinIcon },
+  { id: 'security', name: t('profile.nav.security'), href: '#', icon: ShieldCheckIcon },
+  { id: 'preference', name: t('profile.nav.preference'), href: '#', icon: Cog6ToothIcon },
+  { id: 'notification', name: t('profile.nav.notification'), href: '#', icon: BellIcon },
+]))
 
 const router = useRouter()
 
-// 根据当前选中项更新导航状态
-watch(currentTab, (val) => {
-  navigation.forEach(item => {
-    item.current = item.id === val
+const handleLogout = async () => {
+  const ok = await confirm({
+    title: t('profile.logoutTitle'),
+    message: t('profile.logoutMessage'),
+    type: 'danger',
+    confirmText: t('profile.logoutConfirm'),
+    cancelText: t('profile.logoutCancel')
   })
-  
+
+  if (ok) {
+    logout()
+  }
+}
+
+watch(currentTab, (val) => {
   if (val === 'orders') {
     router.push('/orders')
   }

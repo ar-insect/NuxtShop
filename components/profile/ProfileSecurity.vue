@@ -1,33 +1,35 @@
 <template>
-  <BaseCard title="安全设置">
+  <BaseCard :title="t('profile.security.title')">
     <div class="py-2 space-y-8">
       <!-- Change Password -->
       <div>
-        <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">修改密码</h4>
+        <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+          {{ t('profile.security.changePasswordTitle') }}
+        </h4>
         <form class="max-w-md space-y-4" @submit.prevent="updatePassword">
           <BaseInput
             v-model="passwordForm.current"
             type="password"
-            label="当前密码"
-            placeholder="请输入当前密码"
+            :label="t('profile.security.currentPasswordLabel')"
+            :placeholder="t('profile.security.currentPasswordPlaceholder')"
           />
           <BaseInput
             v-model="passwordForm.new"
             type="password"
-            label="新密码"
-            placeholder="请输入新密码"
-            hint="密码长度至少 8 位，包含字母和数字"
+            :label="t('profile.security.newPasswordLabel')"
+            :placeholder="t('profile.security.newPasswordPlaceholder')"
+            :hint="t('profile.security.newPasswordHint')"
           />
           <BaseInput
             v-model="passwordForm.confirm"
             type="password"
-            label="确认新密码"
-            placeholder="请再次输入新密码"
-            :error="passwordForm.new !== passwordForm.confirm && passwordForm.confirm ? '两次输入的密码不一致' : ''"
+            :label="t('profile.security.confirmPasswordLabel')"
+            :placeholder="t('profile.security.confirmPasswordPlaceholder')"
+            :error="passwordForm.new !== passwordForm.confirm && passwordForm.confirm ? t('profile.security.confirmPasswordError') : ''"
           />
           <div class="pt-2">
             <BaseButton type="submit" :loading="updatingPassword" :disabled="!isPasswordValid">
-              更新密码
+              {{ t('profile.security.updatePasswordButton') }}
             </BaseButton>
           </div>
         </form>
@@ -37,9 +39,11 @@
       <div class="pt-8 border-t border-[var(--border-color)]">
         <div class="flex items-center justify-between">
           <div>
-            <h4 class="text-sm font-medium text-[var(--text-color)]">两步验证 (2FA)</h4>
+            <h4 class="text-sm font-medium text-[var(--text-color)]">
+              {{ t('profile.security.twoFactorTitle') }}
+            </h4>
             <p class="mt-1 text-sm text-[var(--text-secondary)]">
-              开启后，登录时需要输入手机验证码，提高账户安全性。
+              {{ t('profile.security.twoFactorDesc') }}
             </p>
           </div>
           <div class="flex items-center">
@@ -63,15 +67,25 @@
 
       <!-- Login History -->
       <div class="pt-8 border-t border-[var(--border-color)]">
-        <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">最近登录记录</h4>
+        <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
+          {{ t('profile.security.loginHistoryTitle') }}
+        </h4>
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
           <table class="min-w-full divide-y divide-[var(--border-color)]">
             <thead class="bg-[var(--muted-bg)]">
               <tr>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[var(--text-color)] sm:pl-6">设备</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">IP 地址</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">时间</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">状态</th>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[var(--text-color)] sm:pl-6">
+                  {{ t('profile.security.loginHistoryDevice') }}
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
+                  {{ t('profile.security.loginHistoryIp') }}
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
+                  {{ t('profile.security.loginHistoryTime') }}
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
+                  {{ t('profile.security.loginHistoryStatus') }}
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--border-color)] bg-[var(--card-bg)]">
@@ -82,7 +96,9 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-[var(--text-secondary)]">{{ log.ip }}</td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-[var(--text-secondary)]">{{ log.time }}</td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">成功</span>
+                  <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                    {{ t('profile.security.loginHistoryStatusSuccess') }}
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -95,8 +111,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 
 const toast = useToast()
+const { t } = useI18n()
 
 const passwordForm = reactive({
   current: '',
@@ -126,11 +144,11 @@ const updatePassword = async () => {
   passwordForm.current = ''
   passwordForm.new = ''
   passwordForm.confirm = ''
-  toast.success('密码修改成功')
+  toast.success(t('profile.security.updatePasswordSuccess'))
 }
 
 const toggle2FA = () => {
   twoFactorEnabled.value = !twoFactorEnabled.value
-  toast.success(twoFactorEnabled.value ? '两步验证已开启' : '两步验证已关闭')
+  toast.success(twoFactorEnabled.value ? t('profile.security.twoFactorOn') : t('profile.security.twoFactorOff'))
 }
 </script>

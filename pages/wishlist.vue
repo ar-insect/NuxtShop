@@ -88,6 +88,7 @@
 import { useWishlist } from '~/composables/useWishlist'
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useToast } from '~/composables/useToast'
+import type { AdsResponse } from '~/types/api'
 import { useConfirm } from '~/composables/useConfirm'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
@@ -98,10 +99,20 @@ const toast = useToast()
 const { confirm } = useConfirm()
 const { t } = useI18n()
 
-const ads = [
-  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: t('pages.wishlist.adAltElectronics') },
-  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: t('pages.wishlist.adAltJewelery') }
-]
+const { data: adsData } = await useAsyncData('ads-wishlist', () =>
+  $fetch<AdsResponse>('/api/ads', {
+    query: { position: 'wishlist' }
+  })
+)
+
+const ads = computed(() =>
+  (adsData.value?.items || []).map((item) => ({
+    id: item.id,
+    image: item.image,
+    link: item.link,
+    alt: t(item.altKey)
+  }))
+)
 
 useSeoMeta({
   title: () => t('seo.wishlist.title'),

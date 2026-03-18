@@ -2,39 +2,19 @@
 import { updateAddress, setDefaultAddress } from '~/server/utils/address';
 import type { Address } from '~/types/address';
 import { ObjectId } from 'mongodb';
+import { createApiError } from '~/server/utils/api-error';
+import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth-token');
-
-  if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    });
-  }
-
-  let userId: string | null = null;
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '');
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
-
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
+  const userId = requireUserId(event);
 
   const addressId = event.context.params?.id;
   if (!addressId || !ObjectId.isValid(addressId)) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: 'Invalid address ID',
+      code: 'ADDRESS_INVALID_ID',
+      message: 'Invalid address ID',
+      details: null
     });
   }
 
@@ -42,9 +22,11 @@ export default defineEventHandler(async (event) => {
   const { name, phone, region, detail, isDefault } = body;
 
   if (!name || !phone || !region || !detail) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '缺少必要参数',
+      code: 'ADDRESS_MISSING_FIELDS',
+      message: '缺少必要参数',
+      details: null
     });
   }
 
@@ -60,9 +42,11 @@ export default defineEventHandler(async (event) => {
     const updatedAddress = await updateAddress(addressId, updates);
 
     if (!updatedAddress) {
-      throw createError({
+      throw createApiError({
         statusCode: 404,
-        statusMessage: '地址未找到',
+        code: 'ADDRESS_NOT_FOUND',
+        message: '地址未找到',
+        details: null
       });
     }
 
@@ -78,9 +62,11 @@ export default defineEventHandler(async (event) => {
     };
   } catch (error) {
     console.error('Error updating address:', error);
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '更新地址失败',
+      code: 'ADDRESS_UPDATE_FAILED',
+      message: '更新地址失败',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });

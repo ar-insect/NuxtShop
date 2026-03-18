@@ -1,5 +1,9 @@
 # NuxtShop 全栈电商实战模板
 
+[![CI](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml/badge.svg)](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml)
+  ![Node](https://img.shields.io/badge/node-%3E%3D22.14.0-339933?logo=node.js&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ar-insect/NuxtShop/blob/main/LICENSE)
+
 本项目是一个基于 Nuxt 3 的全栈电商演示应用，采用现代化的模块化架构。它不仅集成了 MongoDB 数据持久化、Playwright 自动化测试 (E2E/BDD) 和 Docker 部署方案，还包含了服务端渲染 (SSR)、增量静态再生 (ISR) 等企业级特性，旨在提供一个功能完备、可阅读、可二次开发的电商最佳实践参考。
 
 > 项目定位：**学习 / 内部脚手架级别的示例电商应用**  
@@ -52,13 +56,17 @@ docker run -d --name nuxtshop-redis -p 6379:6379 redis:7
 
 ### 3) 配置环境变量
 
-复制示例配置并按需修改：
+开发和生产建议使用不同的环境变量配置文件：
 
 ```bash
-cp .env.example .env
+# 开发环境（本地）
+cp .env.development.example .env
+
+# 生产环境（服务器）
+cp .env.production.example .env.production
 ```
 
-`.env` 中至少需要：
+开发环境的 `.env` 至少需要：
 
 - `MONGODB_URI`：MongoDB 连接字符串（例如：`mongodb://localhost:27017`）
 - `MONGODB_DB_NAME`：数据库名称（例如：`nuxtshop`）
@@ -257,6 +265,178 @@ npm run test:unit # 单元测试（Vitest）
 
 - 日志会退化为控制台输出；
 - 与 Redis 相关的缓存策略会自动降级为实时查询。
+
+### 日志查看位置
+
+- **控制台 (Console)**  
+  - 本地开发时，所有服务端错误、Mongo/Redis 连接日志、缓存清理等信息会输出到启动 Nuxt 的终端中。  
+  - `server/plugins/mongodb.ts`、`server/utils/redis.ts`、各 API 中的 `console.error` 主要用于开发调试。
+
+- **Redis 日志列表 (app:logs)**  
+  - `server/api/log.post.ts` 提供了一个简单的服务端日志收集接口，会将前端或服务端上报的日志写入 Redis：  
+    - Key：`app:logs`（List）  
+    - 每条日志是一个 JSON 字符串，包含原始 body、服务器时间戳与 IP。  
+  - 可以通过 `redis-cli` 查看最近日志，例如：  
+
+    ```bash
+    redis-cli LRANGE app:logs 0 20
+    ```
+
+- **MongoDB**  
+  - MongoDB 目前主要用于业务数据存储（商品、用户、订单、广告配置等），不直接存储应用日志。  
+  - 如需在生产环境中将日志落盘到 MongoDB，可以在参考 `server/api/log.post.ts` 的基础上扩展一个 Mongo 日志写入逻辑。
+
+---
+
+## 🏗 架构总览
+
+从宏观上看，NuxtShop 是一个标准的「前后端一体化」电商应用，数据流大致如下：
+
+```text
+浏览器 (pages / components / layouts)
+        │
+        ▼
+Nuxt 服务端渲染层 (server/api + modules/*/server/api)
+        │
+        ├── MongoDB：商品 / 用户 / 购物车 / 订单 / 收藏 / 评价 / 地址 / 广告配置
+        └── Redis：日志缓存 / 页面与接口缓存 (配合 ISR)
+```
+
+### 核心模块职责
+
+- **Auth / User（认证 & 用户）**
+  - 位置：`composables/useAuth.ts`、`server/api/auth/*`、`modules/user`  
+  - 职责：登录 / 注册、`auth-token` Cookie 管理、当前用户状态注入、用户偏好（语言 / 时区）持久化。
+  - 服务端统一通过 `server/utils/auth.ts` 解析与校验 token（目前是 `user-jwt-token-<id>` 的简化实现），在未来切换为真实 JWT / OAuth 时，只需替换这一处实现即可。
+
+- **Product（商品）**
+  - 位置：`modules/product`  
+  - 职责：商品列表、搜索、分类筛选、详情页、评价列表、浏览历史记录等。
+
+- **Cart（购物车）**
+  - 位置：`modules/cart`  
+  - 职责：本地购物车状态管理、数量增减、删除商品、推荐商品、结算页（收货地址 / 支付方式 / 下单）。
+
+- **Order（订单）**
+  - 位置：`modules/order`  
+  - 职责：创建订单、订单列表、订单详情、订单状态（待付款 / 处理中 / 已发货 / 已完成 / 已取消）展示。
+
+  - 订单类型与 API 约定：
+
+    | 场景           | 类型                     | 说明                                       |
+    |----------------|--------------------------|--------------------------------------------|
+    | 列表 API       | `OrderSummary[]`         | `/api/orders` 返回的订单列表摘要           |
+    | 详情 API       | `OrderDetail`            | `/api/orders/:id` 返回的订单详情           |
+    | 服务端存储结构 | `OrderDocument extends OrderDetail` | `server/utils/order.ts` 中 MongoDB 文档结构，额外包含 `userId`、`createdAt`、`updatedAt` 等服务端字段 |
+
+- **Profile（个人中心）**
+  - 位置：`pages/profile.vue`、`components/profile/*`、`modules/user`  
+  - 职责：基础信息、头像与昵称、收货地址、密码修改、2FA 示例、登录历史、主题与语言 / 时区偏好等。
+
+- **Ads（广告与配置内容）**
+  - 位置：`server/api/ads.get.ts`、`pages/index.vue`、`pages/wishlist.vue`、`components/ui/BaseAdCarousel.vue`  
+  - 职责：统一从 MongoDB 读取广告配置（图片 / 跳转链接 / 文案 key），用于首页 Banner 下方广告位、收藏页广告位；支持按 `position` 扩展更多广告位。
+  - 架构设计说明：
+    - 广告信息（图片 / 链接 / 文案 key）以配置的形式存入 MongoDB 的 `ads` 集合，通过 `/api/ads?position=home|wishlist|...` 读取，不再硬编码在页面中；
+    - 这样一方面便于在不同环境（开发 / 测试 / 生产）使用不同广告配置，另一方面也为后续「运营后台 / CMS」预留扩展空间；
+    - 默认情况下首次访问某个 `position` 时会自动写入一批示例广告，方便开箱即用，生产环境可直接在 MongoDB 中替换为真实广告数据。
+
+通过这一层次划分，读者可以很容易地找到对应领域的代码，并在此基础上扩展新的业务模块（如优惠券、促销、运营位等）。
+
+---
+
+## 👨‍💻 开发者指南
+
+本节面向希望在 NuxtShop 上二次开发或贡献代码的开发者，给出推荐的开发流程。
+
+### 开发环境要求
+
+- Node.js：`>=22.14.0`  
+- 包管理器：npm / pnpm / yarn 均可（本仓库脚本以 npm 为示例）  
+- MongoDB：版本 6 或以上  
+- 可选：Redis 7+（用于日志与缓存）
+
+### 本地开发流程
+
+1. 克隆并安装依赖（参考「快速开始」）。  
+2. 配置 `.env`，保证能连接到本地 MongoDB（以及可选的 Redis）。  
+3. 启动开发服务器：
+
+   ```bash
+   npm run dev
+   ```
+
+4. 在浏览器中打开 `http://localhost:3000`，确认首页、登录、商品、购物车和个人中心功能正常。  
+5. 修改代码时，建议保持以下节奏：
+   - 调整组件 / 页面 → 及时查看浏览器效果；  
+   - 涉及服务端逻辑（`server/api/*` 或 `modules/*/server/api/*`）时，注意观察终端日志以及网络请求返回；  
+   - 功能完成后运行：
+
+     ```bash
+     npm run lint
+     npm run test:unit
+     ```
+
+### 代码风格与约定
+
+- 使用 TypeScript，尽量为公共 API 和复杂函数补充类型。  
+- 统一使用 ESLint 做静态检查，规则配置见根目录配置文件。  
+- Vue 组件优先使用 `<script setup>` + Composition API。  
+- 在模块内部，保持「UI / composables / server/api」三层结构，避免在页面中写过多业务逻辑。
+
+### 推荐的贡献流程（可选）
+
+如果你打算在公开仓库上提交 PR，可以参考：
+
+1. 从 `main` 分支拉取最新代码。  
+2. 新建特性分支，例如：`feat/profile-timezone` 或 `fix/cart-discount-calc`。  
+3. 在本地完成开发与自测：`npm run lint && npm run test:unit`。  
+4. 提交时使用有意义的 commit message，例如：`feat: add timezone preference to profile`。  
+5. 发起 Pull Request，简要说明改动背景与测试结果。
+
+---
+
+## 🤝 贡献指南
+
+欢迎 Issue / PR！如果你希望为 NuxtShop 贡献代码、文档或测试，可以参考：
+
+- 推荐工作流：Fork 仓库 → 创建特性分支 → 本地开发与自测（`npm run lint && npm run test:unit`）→ 提交 PR  
+- 代码风格：遵循现有模块划分（UI / composables / server/api），并保持 TypeScript 类型与 API 契约同步更新  
+- 更多细节请参见根目录的 [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+---
+
+## ⚙ 环境变量说明
+
+下面汇总了项目中常用的环境变量。多数变量已经在 `.env.example` 中给出示例值。
+
+### 核心连接配置
+
+| 变量名            | 必填 | 默认值                 | 说明                                     |
+| ----------------- | ---- | ---------------------- | ---------------------------------------- |
+| `MONGODB_URI`     | 是   | `mongodb://localhost`  | MongoDB 连接串                           |
+| `MONGODB_DB_NAME` | 是   | `nuxtshop`             | MongoDB 数据库名称                       |
+| `REDIS_HOST`      | 否   | `localhost`            | Redis 主机名                             |
+| `REDIS_PORT`      | 否   | `6379`                 | Redis 端口                               |
+| `REDIS_PASSWORD`  | 否   | 空字符串               | Redis 密码（如无可留空）                 |
+| `REDIS_DB`        | 否   | `0`                    | Redis 数据库编号                         |
+
+> 提示：即使未配置 Redis，核心业务也能正常运行，相关缓存与日志会自动降级。
+
+### 运行时行为开关
+
+| 变量名                         | 必填 | 默认值                                 | 说明                                                                 |
+| ------------------------------ | ---- | -------------------------------------- |---------------------------------------------------------------------- |
+| `NUXT_PUBLIC_DISABLE_CAPTCHA` | 否   | dev/test：`1`；prod：`0`（可被覆盖） | 设为 `1` 时在前端禁用验证码组件；未显式配置时开发/测试环境默认关闭，生产环境默认开启 |
+
+### Node / Nuxt 默认变量（常见）
+
+| 变量名     | 说明                                         |
+| ---------- | -------------------------------------------- |
+| `NODE_ENV` | `development` / `production` / `test` 等环境 |
+| `PORT`     | Nuxt 监听端口（默认 3000）                   |
+
+在实际项目中，你可以根据需要扩展更多环境变量（如日志级别、第三方支付/存储配置等），并通过 `runtimeConfig` 或 `process.env` 读取，建议同时更新 `.env.example` 与 README 以保持一致。
 
 ### 8. 数据持久化 (MongoDB Integration)
 本项目集成了 MongoDB 作为核心数据存储，用于持久化所有电商相关业务数据。

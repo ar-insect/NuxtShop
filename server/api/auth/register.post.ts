@@ -1,39 +1,48 @@
 // server/api/auth/register.post.ts
 import { findUserByUsername, createUser } from '~/server/utils/user';
 import type { User } from '~/types/user';
+import { createApiError } from '~/server/utils/api-error';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { username, password, confirmPassword } = body;
 
   if (!username || !password || !confirmPassword) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '请输入用户名和密码',
+      code: 'AUTH_REGISTER_MISSING_FIELDS',
+      message: '请输入用户名和密码',
+      details: null
     });
   }
 
   if (password !== confirmPassword) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '两次输入的密码不一致',
+      code: 'AUTH_REGISTER_PASSWORD_MISMATCH',
+      message: '两次输入的密码不一致',
+      details: null
     });
   }
 
   // 基础密码强度校验
   if (password.length < 6) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '密码长度至少需要6位',
+      code: 'AUTH_REGISTER_PASSWORD_WEAK',
+      message: '密码长度至少需要6位',
+      details: null
     });
   }
 
   // 检查用户是否已存在
   const existingUser = await findUserByUsername(username);
   if (existingUser) {
-    throw createError({
+    throw createApiError({
       statusCode: 409,
-      statusMessage: '用户名已存在',
+      code: 'AUTH_REGISTER_USERNAME_EXISTS',
+      message: '用户名已存在',
+      details: null
     });
   }
 

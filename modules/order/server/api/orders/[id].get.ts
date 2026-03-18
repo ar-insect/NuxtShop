@@ -1,7 +1,8 @@
 import redis from '~/server/utils/redis'
 import { getSessionId } from '~/server/utils/session'
+import type { OrderDetail } from '~/types/api'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<OrderDetail> => {
   const id = event.context.params?.id
   const userId = getSessionId(event)
 
@@ -21,8 +22,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const orders = JSON.parse(ordersStr)
-  const order = orders.find((o: any) => o.id === id)
+  const orders = JSON.parse(ordersStr) as OrderDetail[]
+  const order = orders.find((o) => o.id === id)
 
   if (!order) {
     throw createError({

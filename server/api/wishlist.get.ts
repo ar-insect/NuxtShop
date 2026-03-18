@@ -1,17 +1,13 @@
 import { ObjectId } from 'mongodb'
 import { findWishlistByUserId } from '~/server/utils/wishlist'
+import { getAuthToken, parseUserIdFromToken } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth-token')
+  const token = getAuthToken(event)
+  const userId = parseUserIdFromToken(token)
 
-  if (!token || !token.startsWith('user-jwt-token-')) {
+  if (!userId) {
     // 未登录用户当前不支持服务端收藏夹
-    return []
-  }
-
-  const userId = token.replace('user-jwt-token-', '')
-
-  if (!ObjectId.isValid(userId)) {
     return []
   }
 

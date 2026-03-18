@@ -9,7 +9,19 @@ const enUS = {
     profile: 'Profile',
     orders: 'My Orders',
     login: 'Login',
-    register: 'Register'
+    register: 'Register',
+    demoMenu: {
+      ui: 'UI components',
+      pinia: 'State management (Pinia)',
+      http: 'HTTP requests',
+      ssr: 'SSR rendering',
+      plugins: 'Plugin system',
+      utils: 'Utility functions',
+      types: 'TypeScript types',
+      tsx: 'TSX support',
+      styled: 'Styled Components',
+      bdd: 'BDD testing demo'
+    }
   },
   auth: {
     backHome: 'Back to Home',
@@ -357,6 +369,10 @@ const enUS = {
     wishlist: {
       title: 'My wishlist - NuxtShop',
       description: 'View products that you have added to your wishlist.'
+    },
+    error: {
+      title: 'Error - NuxtShop',
+      description: 'An error occurred while processing your request.'
     }
   },
   validation: {
@@ -375,11 +391,57 @@ const enUS = {
     reviewSubmitted: 'Review submitted, the list has been refreshed with newest on top.',
     cartAdded: 'Added to cart. Click the cart icon in the header to view.',
     profileUpdated: 'Profile updated successfully!',
+    profileUpdateFailed: 'Failed to update profile.',
+    registerSuccess: 'Registration successful, you are now signed in.',
     languageUpdateFailed: 'Failed to update language setting',
     timezoneUpdateFailed: 'Failed to update timezone',
     cartItemRemoved: 'Item removed from cart',
     orderReorderInfo: '“Buy again” is a demo placeholder. You can implement one-click re-add here.',
     orderDeleted: 'Order deleted'
+  },
+  error: {
+    title: 'Something went wrong',
+    title404: 'Page not found',
+    title500: 'Internal server error',
+    statusLabel: 'Status code',
+    description404: 'Sorry, the page you are looking for does not exist or has been moved.',
+    description500: 'Sorry, the server encountered an error while processing your request. Please try again later.',
+    descriptionDefault: 'An unexpected error occurred. Please check your network connection or try again later.',
+    homeButton: 'Back to Home',
+    refreshButton: 'Reload page',
+    codes: {
+      AUTH_MISSING_CREDENTIALS: 'Please enter username and password.',
+      AUTH_INVALID_CREDENTIALS: 'Invalid credentials, please try again.',
+      AUTH_REGISTER_MISSING_FIELDS: 'Please enter username and password.',
+      AUTH_REGISTER_PASSWORD_MISMATCH: 'The two passwords do not match.',
+      AUTH_REGISTER_PASSWORD_WEAK: 'Password must be at least 6 characters.',
+      AUTH_REGISTER_USERNAME_EXISTS: 'Username already exists.',
+      AUTH_UNAUTHORIZED: 'You need to sign in to continue.',
+      AUTH_INVALID_TOKEN: 'Your session is invalid, please sign in again.',
+      AUTH_USER_NOT_FOUND: 'User not found.',
+
+      USER_UPDATE_EMPTY: 'No fields to update.',
+      USER_UPDATE_FAILED: 'Failed to update profile.',
+      USER_NOT_FOUND: 'User not found.',
+
+      ADDRESS_MISSING_FIELDS: 'Please fill in all required address fields.',
+      ADDRESS_INVALID_ID: 'Invalid address ID.',
+      ADDRESS_NOT_FOUND: 'Address not found or does not belong to the current user.',
+      ADDRESS_CREATE_FAILED: 'Failed to add address.',
+      ADDRESS_UPDATE_FAILED: 'Failed to update address.',
+      ADDRESS_DELETE_FAILED: 'Failed to delete address.',
+      ADDRESS_SET_DEFAULT_FAILED: 'Failed to set default address.',
+      ADDRESS_FETCH_FAILED: 'Failed to load addresses.',
+
+      REVIEW_MISSING_FIELDS: 'Rating and review content are required.',
+      REVIEW_CREATE_FAILED: 'Failed to submit review, please try again later.',
+
+      THEME_MISSING_CONFIG: 'Missing preference configuration.',
+      THEME_UPDATE_FAILED: 'Failed to update preferences.',
+      THEME_FETCH_FAILED: 'Failed to load user preferences.',
+
+      CART_SAVE_FAILED: 'Failed to save cart.'
+    }
   },
   reviews: {
     title: 'Customer reviews',

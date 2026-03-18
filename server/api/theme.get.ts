@@ -1,37 +1,24 @@
 // server/api/theme.get.ts
 import { findUserById } from '~/server/utils/user';
-import { ObjectId } from 'mongodb';
+import { createApiError } from '~/server/utils/api-error';
+import { getAuthToken, parseUserIdFromToken } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  let token = getCookie(event, 'auth-token');
-
-  // 兼容通过 Authorization 头传递的 token（例如：Bearer xxx）
-  if (!token) {
-    const authHeader = getHeader(event, 'authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.slice(7);
-    }
-  }
+  const token = getAuthToken(event);
 
   // 未登录时直接返回空配置，让前端使用默认主题，而不是抛 401
   if (!token) {
     return {};
   }
 
-  let userId: string | null = null;
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '');
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
+  const userId = parseUserIdFromToken(token);
 
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
+  if (!userId) {
+    throw createApiError({
       statusCode: 401,
-      statusMessage: 'Invalid token',
+      code: 'AUTH_INVALID_TOKEN',
+      message: 'Invalid token',
+      details: null
     });
   }
 
@@ -39,9 +26,11 @@ export default defineEventHandler(async (event) => {
     const user = await findUserById(userId);
 
     if (!user) {
-      throw createError({
+      throw createApiError({
         statusCode: 404,
-        statusMessage: 'User not found',
+        code: 'AUTH_USER_NOT_FOUND',
+        message: 'User not found',
+        details: null
       });
     }
 
@@ -49,9 +38,11 @@ export default defineEventHandler(async (event) => {
     return user.preferences || {};
   } catch (error) {
     console.error('Error fetching user preferences:', error);
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '获取用户偏好设置失败',
+      code: 'THEME_FETCH_FAILED',
+      message: '获取用户偏好设置失败',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });

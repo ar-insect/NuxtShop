@@ -1,42 +1,11 @@
 // server/api/reviews/add.post.ts
-import { ObjectId } from 'mongodb'
-import { findUserById } from '~/server/utils/user'
+import type { ObjectId } from 'mongodb'
 import { insertReview } from '~/server/utils/review'
+import { createApiError } from '~/server/utils/api-error'
+import { requireUser } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth-token')
-
-  if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: '请先登录'
-    })
-  }
-
-  let userId: string | null = null
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '')
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
-  }
-
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
-  }
-
-  const user = await findUserById(userId)
-  if (!user) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: '用户无效'
-    })
-  }
+  const user = await requireUser(event)
 
   const body = await readBody(event)
   const { productId, rating, content } = body
@@ -44,9 +13,11 @@ export default defineEventHandler(async (event) => {
   const numericProductId = Number(productId)
 
   if (!numericProductId || !rating || !content) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '缺少必要参数'
+      code: 'REVIEW_MISSING_FIELDS',
+      message: '缺少必要参数',
+      details: null
     })
   }
 
@@ -76,9 +47,11 @@ export default defineEventHandler(async (event) => {
     }
   } catch (error) {
     console.error('Mongo error adding review:', error)
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '评价提交失败，请稍后重试'
+      code: 'REVIEW_CREATE_FAILED',
+      message: '评价提交失败，请稍后重试',
+      details: error instanceof Error ? error.message : String(error)
     })
   }
 })

@@ -1,33 +1,10 @@
 // server/api/user/addresses.get.ts
 import { findAddressesByUserId } from '~/server/utils/address';
-import { ObjectId } from 'mongodb';
+import { createApiError } from '~/server/utils/api-error';
+import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth-token');
-
-  if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    });
-  }
-
-  let userId: string | null = null;
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '');
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
-
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
+  const userId = requireUserId(event);
 
   try {
     const addresses = await findAddressesByUserId(userId);
@@ -38,9 +15,11 @@ export default defineEventHandler(async (event) => {
     };
   } catch (error) {
     console.error('Error fetching addresses:', error);
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '获取收货地址失败',
+      code: 'ADDRESS_FETCH_FAILED',
+      message: '获取收货地址失败',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });

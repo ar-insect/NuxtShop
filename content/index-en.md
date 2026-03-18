@@ -1,5 +1,9 @@
 # NuxtShop Full‑Stack E‑commerce Starter
 
+[![CI](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml/badge.svg)](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml)
+![Node](https://img.shields.io/badge/node-%3E%3D22.14.0-339933?logo=node.js&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ar-insect/NuxtShop/blob/main/LICENSE)
+
 NuxtShop is a full‑stack e‑commerce demo application built with Nuxt 3 and a modern modular architecture.  
 It integrates MongoDB persistence, Playwright E2E/BDD testing, Docker deployment, SSR and ISR, aiming to provide a realistic, readable and extensible best‑practice reference for building commerce‑style applications with Nuxt.
 
@@ -53,13 +57,17 @@ docker run -d --name nuxtshop-redis -p 6379:6379 redis:7
 
 ### 3) Configure Environment Variables
 
-Create a local env file from the example:
+Use separate env files for development and production:
 
 ```bash
-cp .env.example .env
+# Development (local)
+cp .env.development.example .env
+
+# Production (on server)
+cp .env.production.example .env.production
 ```
 
-At minimum you should configure:
+For development, your `.env` should at least configure:
 
 - `MONGODB_URI`: MongoDB connection string (for example `mongodb://localhost:27017`)
 - `MONGODB_DB_NAME`: database name (for example `nuxtshop`)
@@ -195,6 +203,14 @@ NuxtShop follows a DDD‑inspired modular structure. Each business domain is enc
   - Features: create orders, list orders, order detail, history.
   - Key files: `useOrders.ts` (order logic).
 
+  - Order types & APIs:
+
+    | Scenario              | Type                              | Description                                                                 |
+    |-----------------------|-----------------------------------|-----------------------------------------------------------------------------|
+    | List API              | `OrderSummary[]`                 | `/api/orders` response with lightweight order summaries                     |
+    | Detail API            | `OrderDetail`                    | `/api/orders/:id` response with full order detail                           |
+    | Server storage schema | `OrderDocument extends OrderDetail` | MongoDB document shape in `server/utils/order.ts` with extra `userId`, `createdAt`, `updatedAt` fields |
+
 - **User module**
   - Path: `modules/user`
   - Features: auth middleware, profile center logic.
@@ -257,6 +273,168 @@ MongoDB is the primary data store for all commerce‑related entities.
 - **Configuration**
   - `nuxt.config.ts` uses `runtimeConfig` to read `MONGODB_URI` and `MONGODB_DB_NAME`.
   - `.env` sets these values for local/dev environments.
+
+### Where to inspect logs
+
+- **Console**  
+  - In local development, all server‑side errors, Mongo/Redis connection messages, cache‑clear operations, etc. are printed to the terminal where you run Nuxt.  
+  - Files like `server/plugins/mongodb.ts`, `server/utils/redis.ts` and various APIs use `console.error` / `console.log` for diagnostics.
+
+- **Redis list (`app:logs`)**  
+  - `server/api/log.post.ts` exposes a simple log ingestion endpoint, which writes structured entries into Redis:  
+    - Key: `app:logs` (List).  
+    - Each entry is a JSON string containing the original payload, server timestamp and client IP.  
+  - You can inspect recent logs via `redis-cli`, for example:
+
+    ```bash
+    redis-cli LRANGE app:logs 0 20
+    ```
+
+- **MongoDB**  
+  - MongoDB is currently used for business data only (products, users, orders, ad config, etc.) and does not store application logs directly.  
+  - For production scenarios, you can extend `server/api/log.post.ts` to also persist logs into a dedicated Mongo collection if needed.
+
+---
+
+## 🏗 Architecture Overview
+
+At a high level, NuxtShop follows a classic “full‑stack Nuxt app” flow:
+
+```text
+Browser (pages / components / layouts)
+        │
+        ▼
+Nuxt SSR / API layer (server/api + modules/*/server/api)
+        │
+        ├── MongoDB: products / users / cart / orders / wishlist / reviews / addresses / ads config
+        └── Redis: log cache / page & API cache (with ISR)
+```
+
+### Core domain modules
+
+- **Auth / User**
+  - Location: `composables/useAuth.ts`, `server/api/auth/*`, `modules/user`  
+  - Responsibilities: login & registration, `auth-token` cookie, injecting current user into the app, persisting user preferences (language / timezone).
+  - Server‑side auth logic is centralized in `server/utils/auth.ts`, which parses and validates the current token (currently a simple `user-jwt-token-<id>` scheme). This makes it easy to swap in real JWT / OAuth in the future by changing a single utility instead of touching every API.
+
+- **Product**
+  - Location: `modules/product`  
+  - Responsibilities: product listing and search, category filters, detail pages, review lists, browse history.
+
+- **Cart**
+  - Location: `modules/cart`  
+  - Responsibilities: cart state management, add/remove items, quantity updates, recommendations, checkout page (address / payment / place order).
+
+- **Order**
+  - Location: `modules/order`  
+  - Responsibilities: create orders, list orders, show order details and status (pending / processing / shipped / completed / cancelled).
+
+- **Profile**
+  - Location: `pages/profile.vue`, `components/profile/*`, `modules/user`  
+  - Responsibilities: basic info, avatar & display name, addresses, password change, 2FA demo, login history, theme & language/timezone preferences.
+
+- **Ads**
+  - Location: `server/api/ads.get.ts`, `pages/index.vue`, `pages/wishlist.vue`, `components/ui/BaseAdCarousel.vue`  
+  - Responsibilities: read ad configuration from MongoDB (image / link / i18n key) and render ad slots on the home page and wishlist; easily extensible to more positions via the `position` field.
+  - Architecture rationale:
+    - Ads (image / link / i18n key) are stored as configuration documents in the `ads` Mongo collection and fetched via `/api/ads?position=home|wishlist|...`, rather than being hard‑coded in pages;
+    - This allows different configurations per environment (dev / staging / prod) and paves the way for a future ops/CMS UI without changing frontend code;
+    - On first access for a given `position`, a set of sample ads is seeded automatically for convenience; in real deployments you can replace them directly in MongoDB with production ad data.
+
+---
+
+## 👨‍💻 Developer Guide
+
+This section is aimed at developers who want to extend or contribute to NuxtShop.
+
+### Requirements
+
+- Node.js: 18+ recommended  
+- Package manager: npm / pnpm / yarn (examples use npm)  
+- MongoDB: v6+  
+- Optional: Redis 7+ (for logging & caching)
+
+### Local workflow
+
+1. Clone the repo & install dependencies (see **Getting Started**).  
+2. Create your `.env` from `.env.example` and configure MongoDB (and optionally Redis).  
+3. Start the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open `http://localhost:3000` and verify core flows (home, login, products, cart, profile) work.  
+5. While developing:
+   - For UI changes, watch the browser and devtools;  
+   - For server changes (`server/api/*` or `modules/*/server/api/*`), keep an eye on terminal logs and network responses;  
+   - Before committing, run:
+
+     ```bash
+     npm run lint
+     npm run test:unit
+     ```
+
+### Code style & conventions
+
+- TypeScript‑first – add types for public APIs and non‑trivial functions.  
+- ESLint is used for static checks (see root config files).  
+- Prefer `<script setup>` + Composition API for Vue components.  
+- Inside a module, try to keep the separation of concerns: UI components / composables / server APIs, and avoid putting heavy domain logic directly in pages.
+
+### Suggested contribution flow (optional)
+
+If you plan to open PRs on the public repo:
+
+1. Pull the latest `main`.  
+2. Create a feature branch, e.g. `feat/profile-timezone` or `fix/cart-discount-calc`.  
+3. Develop and self‑test locally: `npm run lint && npm run test:unit`.  
+4. Use meaningful commit messages, e.g. `feat: add timezone preference to profile`.  
+5. Open a pull request with a short description of the change and how you tested it.
+
+---
+
+## 🤝 Contributing
+
+Issues and PRs are very welcome. If you’d like to contribute to NuxtShop:
+
+- Follow the suggested workflow above (fork → feature branch → `npm run lint && npm run test:unit` → PR).  
+- Keep changes consistent with the existing architecture (modules with UI / composables / server APIs) and update types / API contracts where needed.  
+- For more details, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
+## ⚙ Environment Variables
+
+This section summarizes the main environment variables used by the project. See `.env.example` for reference values.
+
+### Core connection settings
+
+| Name              | Required | Default                 | Description                                   |
+| ----------------- | -------- | ----------------------- | --------------------------------------------- |
+| `MONGODB_URI`     | Yes      | `mongodb://localhost`   | MongoDB connection string                     |
+| `MONGODB_DB_NAME` | Yes      | `nuxtshop`              | MongoDB database name                         |
+| `REDIS_HOST`      | No       | `localhost`             | Redis host                                    |
+| `REDIS_PORT`      | No       | `6379`                  | Redis port                                    |
+| `REDIS_PASSWORD`  | No       | empty string            | Redis password (leave empty if not required)  |
+| `REDIS_DB`        | No       | `0`                     | Redis DB index                                |
+
+> Note: even without Redis, the app works – related logging and cache strategies gracefully degrade.
+
+### Runtime feature flags
+
+| Name                          | Required | Default                                 | Description                                                                                 |
+| ----------------------------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `NUXT_PUBLIC_DISABLE_CAPTCHA` | No       | dev/test: `1`; prod: `0` (overridable) | When set to `1`, disables captcha components on the client; defaults to off in dev/test, on in production if not explicitly set |
+
+### Common Node / Nuxt variables
+
+| Name       | Description                                        |
+| ---------- | -------------------------------------------------- |
+| `NODE_ENV` | `development` / `production` / `test`, etc.        |
+| `PORT`     | Port that Nuxt listens on (defaults to `3000`)     |
+
+For real‑world deployments you can introduce additional variables (e.g. log level, third‑party payment/storage config) and read them via `runtimeConfig` or `process.env`. When you do, it’s a good idea to update `.env.example` and this README to keep them in sync.
 
 - **Connection management**
   - `server/utils/mongodb.ts` implements a singleton connection helper.

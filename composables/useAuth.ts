@@ -2,21 +2,12 @@
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useOrders } from '~/modules/order/composables/useOrders'
-import type { User as MongoUser } from '~/types/user'; // 导入 MongoDB 的 User 类型
+import type { UserPublic } from '~/types/api'
 import { http } from '~/utils/http'
+import { useApiErrorHandler } from '~/composables/useApiErrorHandler'
+import { useI18n } from '~/composables/useI18n'
 
-/**
- * 表示已登录用户的接口。
- * @interface User
- * @property {string} _id - 用户唯一标识 (MongoDB ObjectId 的字符串表示)
- * @property {string} username - 登录用户名
- * @property {string} name - 展示名称
- * @property {string} role - 用户角色（如 admin、user）
- * @property {string} avatar - 头像 URL
- */
-export interface User extends Omit<MongoUser, 'password' | 'createdAt' | 'updatedAt' | '_id'> {
-  _id: string; // 确保 _id 存在且为 string
-}
+export type User = UserPublic
 
 type LoginOptions = {
   redirect?: boolean
@@ -45,6 +36,8 @@ export const useAuth = () => {
   const { resetCartLocal, refreshCart } = useCart()
   const { resetWishlistLocal, refreshWishlist } = useWishlist()
   const { resetOrdersLocal, refreshOrders } = useOrders()
+  const { handleError } = useApiErrorHandler()
+  const { t } = useI18n()
 
   /**
    * 使用用户名与密码进行登录认证。
@@ -76,7 +69,7 @@ export const useAuth = () => {
       }
       return true
     } catch (e: any) {
-      toast.error(e.message || '发生错误')
+      handleError(e)
       return false
     }
   }
@@ -99,14 +92,14 @@ export const useAuth = () => {
         confirmPassword,
         phone
       })
-      toast.success('注册成功！请登录。')
+      toast.success(t('toast.registerSuccess'))
       // 注册成功后自动登录
-      token.value = `user-jwt-token-${res.user._id}`; // 使用新用户的 _id 生成 token
-      user.value = res.user;
+      token.value = `user-jwt-token-${res.user._id}` // 使用新用户的 _id 生成 token
+      user.value = res.user
       await login(username, password) // 重新调用 login 确保所有状态正确设置
       return true
     } catch (e: any) {
-      toast.error(e?.data?.statusMessage || e.message || '注册过程中发生错误')
+      handleError(e)
       return false
     }
   }

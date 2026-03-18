@@ -1,50 +1,21 @@
 // server/api/theme.post.ts
 import { updateUser } from '~/server/utils/user';
-import { ObjectId } from 'mongodb';
 import type { ThemeConfig } from '~/stores/theme';
+import { createApiError } from '~/server/utils/api-error';
+import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  let token = getCookie(event, 'auth-token');
-
-  // 兼容通过 Authorization 头传递的 token（例如：Bearer xxx）
-  if (!token) {
-    const authHeader = getHeader(event, 'authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.slice(7);
-    }
-  }
-
-  if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    });
-  }
-
-  let userId: string | null = null;
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '');
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
-
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
+  const userId = requireUserId(event);
 
   const body = await readBody(event);
   const { config } = body; // 期望 body 中包含一个 config 对象，即 ThemeConfig
 
   if (!config) {
-    throw createError({
+    throw createApiError({
       statusCode: 400,
-      statusMessage: '缺少偏好设置配置',
+      code: 'THEME_MISSING_CONFIG',
+      message: '缺少偏好设置配置',
+      details: null
     });
   }
 
@@ -52,9 +23,11 @@ export default defineEventHandler(async (event) => {
     const updatedUser = await updateUser(userId, { preferences: config as ThemeConfig });
 
     if (!updatedUser) {
-      throw createError({
+      throw createApiError({
         statusCode: 404,
-        statusMessage: 'User not found',
+        code: 'USER_NOT_FOUND',
+        message: 'User not found',
+        details: null
       });
     }
 
@@ -65,9 +38,11 @@ export default defineEventHandler(async (event) => {
     };
   } catch (error) {
     console.error('Error updating user preferences:', error);
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '更新用户偏好设置失败',
+      code: 'THEME_UPDATE_FAILED',
+      message: '更新用户偏好设置失败',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });

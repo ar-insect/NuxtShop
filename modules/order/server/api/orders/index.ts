@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { findOrdersByUserId, insertOrder, deleteOrderByUser, clearOrdersByUser } from '~/server/utils/order'
+import type { OrderSummary, OrderDetail } from '~/types/api'
 
 export default defineEventHandler(async (event) => {
   const method = event.method
@@ -26,7 +27,13 @@ export default defineEventHandler(async (event) => {
   if (method === 'GET') {
     try {
       const orders = await findOrdersByUserId(userObjectId)
-      return orders
+      const summaries: OrderSummary[] = orders.map((o) => ({
+        id: o.id,
+        total: o.total,
+        status: o.status,
+        date: o.date
+      }))
+      return summaries
     } catch (e) {
       console.error('Failed to fetch orders from MongoDB:', e)
       throw createError({
@@ -37,7 +44,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    const body = await readBody(event)
+    const body = await readBody<OrderDetail>(event)
 
     try {
       await insertOrder(userObjectId, body)

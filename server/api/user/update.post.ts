@@ -32,7 +32,32 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const updatedUser = await updateUser(userId, { name, avatar, phone, language, timezone });
+    const updates: Record<string, any> = {};
+
+    if (typeof name !== 'undefined') {
+      updates.name = name;
+    }
+    if (typeof avatar !== 'undefined') {
+      updates.avatar = avatar;
+    }
+    if (typeof phone !== 'undefined') {
+      updates.phone = phone;
+    }
+    if (typeof language !== 'undefined') {
+      updates.language = language;
+    }
+    if (typeof timezone !== 'undefined') {
+      updates.timezone = timezone;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: '没有可更新的字段',
+      });
+    }
+
+    const updatedUser = await updateUser(userId, updates);
 
     if (!updatedUser) {
       throw createError({

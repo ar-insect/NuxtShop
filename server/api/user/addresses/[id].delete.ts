@@ -2,10 +2,8 @@
 import { deleteAddress } from '~/server/utils/address';
 import { ObjectId } from 'mongodb';
 import { createApiError } from '~/server/utils/api-error';
-import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const userId = requireUserId(event);
 
   const addressId = event.context.params?.id;
   if (!addressId || !ObjectId.isValid(addressId)) {

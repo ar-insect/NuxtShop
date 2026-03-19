@@ -5,18 +5,15 @@
         <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.wishlist.title') }}</h1>
       </div>
 
-      <div v-if="wishlistItems.length === 0" class="text-center py-12 bg-[var(--card-bg)] rounded-lg border-2 border-dashed border-[var(--border-color)]">
-        <svg class="mx-auto h-12 w-12 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">{{ t('pages.wishlist.emptyTitle') }}</h3>
-        <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.wishlist.emptyDesc') }}</p>
-        <div class="mt-6">
-          <NuxtLink to="/products">
-            <BaseButton variant="primary">{{ t('pages.wishlist.emptyButton') }}</BaseButton>
-          </NuxtLink>
-        </div>
-      </div>
+      <BaseEmpty
+        v-if="wishlistItems.length === 0"
+        :title="t('pages.wishlist.emptyTitle')"
+        :description="t('pages.wishlist.emptyDesc')"
+      >
+        <NuxtLink to="/products">
+          <BaseButton variant="primary">{{ t('pages.wishlist.emptyButton') }}</BaseButton>
+        </NuxtLink>
+      </BaseEmpty>
 
       <div v-else>
         <div class="flex items-center justify-between mb-4">

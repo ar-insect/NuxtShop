@@ -31,6 +31,7 @@
                 :class="link.to === currentPath 
                   ? 'text-[var(--primary-color)] bg-[var(--primary-color)]/10 font-semibold shadow-sm' 
                   : 'hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 text-[var(--text-secondary)]'"
+                :aria-current="link.to === currentPath ? 'page' : undefined"
                 :style="{ borderRadius: 'var(--border-radius)' }"
               >
                 {{ link.text }}
@@ -49,6 +50,7 @@
             class="relative flex flex-col items-center gap-1 px-2 py-1 transition-colors"
             :class="currentPath.startsWith('/wishlist') ? 'text-red-500' : 'hover:text-red-500 text-[var(--text-secondary)]'"
             :title="t('nav.wishlist')"
+            :aria-current="currentPath.startsWith('/wishlist') ? 'page' : undefined"
           >
             <span class="relative inline-flex">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,6 +71,7 @@
             class="relative flex flex-col items-center gap-1 px-2 py-1 transition-colors"
             :class="currentPath.startsWith('/cart') ? 'text-[var(--primary-color)]' : 'hover:text-[var(--primary-color)] text-[var(--text-secondary)]'"
             :title="t('nav.cart')"
+            :aria-current="currentPath.startsWith('/cart') ? 'page' : undefined"
           >
             <span class="relative inline-flex">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,6 +129,7 @@
                 :class="currentPath.startsWith('/profile') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/profile') ? 'page' : undefined"
                 @click="close"
               >
                 {{ t('nav.profile') }}
@@ -136,6 +140,7 @@
                 :class="currentPath.startsWith('/orders') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/orders') ? 'page' : undefined"
                 @click="close"
               >
                 {{ t('nav.orders') }}
@@ -147,6 +152,7 @@
                 :class="currentPath.startsWith('/docs') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/docs') ? 'page' : undefined"
                 @click="close"
               >
                 {{ t('nav.docs') }}
@@ -162,6 +168,7 @@
                 :class="currentPath.startsWith(link.to) 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith(link.to) ? 'page' : undefined"
                 @click="close"
               >
                 {{ link.text }}

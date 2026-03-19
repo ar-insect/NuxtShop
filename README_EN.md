@@ -119,6 +119,23 @@ npm run test:unit # unit tests (Vitest)
 - **Data persistence & caching** – MongoDB for core business data; Redis for logging and partial page/API caching (with ISR).
 - **End‑to‑end flows** – product listing & detail, cart, order management, wishlist, and a rich user profile center.
 
+## 🧪 Demos navigation
+
+NuxtShop also serves as a collection of focused demos. The main example pages live under the `/demos/*` routes:
+
+| Route              | Category  | What it demonstrates                                                                                         |
+|--------------------|-----------|-------------------------------------------------------------------------------------------------------------|
+| `/demos/components` | UI / TSX / Styled | Base UI components (buttons, inputs, selects, pagination, dropdowns, cards), `BaseModal` / `BaseConfirm` / `BaseLoading`, and TSX + styled‑components integration. |
+| `/demos/pinia`      | State (Pinia) | Pinia basics (counter), async actions with `$onAction`, and a user store with login / profile update flows. |
+| `/demos/http`       | HTTP utils | The `utils/http.ts` wrapper: GET/POST requests, file upload/download, and error handling with toasts.      |
+| `/demos/ssr`        | SSR / data fetching | SSR data fetching patterns and how to distinguish server/client logic when debugging.                     |
+| `/demos/plugins`    | Nuxt plugins | Using custom Nuxt plugins (`plugins/test-plugin.ts`, etc.) and accessing provided helpers in templates and scripts. |
+| `/demos/utils`      | Utilities | Practical examples of common utility functions used across the app.                                       |
+| `/demos/types`      | Types / models | How shared types in `types/*` are used across APIs, composables and components.                          |
+| `/demos/tsx`        | TSX       | Authoring TSX components and integrating them with the existing styling system.                            |
+| `/demos/styled`     | Styled Components | Using `vue3-styled-components` in SFCs and TSX components.                                             |
+| `/demos/bdd`        | Testing / BDD | Playwright BDD test console: list `.feature` files, run single/all tests, and display reports and failure screenshots. |
+
 ## 🌐 Internationalization (i18n)
 
 NuxtShop ships with basic bilingual support (Chinese & English) using a lightweight custom i18n setup:

@@ -1,5 +1,7 @@
+import type { ApiErrorCode } from '~/types/api'
+
 export interface ApiErrorPayload {
-  code: string
+  code: ApiErrorCode
   message: string
   details?: any
 }
@@ -21,4 +23,3 @@ export const createApiError = (options: CreateApiErrorOptions) => {
     }
   })
 }
-

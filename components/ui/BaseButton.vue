@@ -11,6 +11,7 @@
     ]"
     :style="rounded ? { borderRadius: 'var(--border-radius)' } : undefined"
     :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
     @click="$emit('click', $event)"
   >
     <svg

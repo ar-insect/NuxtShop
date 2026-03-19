@@ -79,6 +79,18 @@ cp .env.production.example .env.production
 - `REDIS_PASSWORD`（默认空）
 - `REDIS_DB`（默认 `0`）
 
+与安全相关的配置建议：
+
+- **MongoDB**
+  - 本地开发可以使用默认库名（例如 `nuxtshop_dev`），但测试 / 生产应使用独立实例与数据库（如 `nuxtshop_test` / `nuxtshop_prod`）。
+  - 在生产环境中务必启用账号密码与 IP 白名单，避免使用默认用户与弱密码。
+- **Redis**
+  - 开发环境可以使用无密码的本地 Redis 或直接使用内存存储（当前 `nitro.devStorage` 已默认使用内存）。
+  - 生产环境必须配置强密码 `REDIS_PASSWORD`，并将 Redis 部署在内网或私有子网，避免暴露公网端口。
+- **管理员账号**
+  - `ADMIN_USERNAME` / `ADMIN_PASSWORD` 在 demo 中默认为 `admin` / `123456`，仅用于本地体验。
+  - 在生产环境中必须通过 `.env.production` 覆盖为强随机密码，或在初始化后立即修改管理员密码。
+
 ### 4) 启动开发服务器
 
 ```bash
@@ -117,6 +129,23 @@ npm run test:unit # 单元测试（Vitest）
 - **ISR 渲染**: 配置了增量静态再生 (ISR)，支持页面级缓存策略。
 - **数据持久化与缓存**: 使用 MongoDB 存储商品、购物车、订单、收藏夹、浏览历史、评价和用户主题偏好等核心数据，并集成 Redis 用于日志缓存与部分页面/接口缓存（配合 ISR）。
 - **功能演示**: 包含完整的商品列表、详情、购物车、订单管理、收藏夹及用户中心功能。
+
+## 🧪 Demos 导航
+
+NuxtShop 同时也是一个技术栈 Demo 集合，主要的示例页面都收敛在 `/demos/*` 路由下，方便你快速了解各项能力：
+
+| 路由               | 分类             | 说明                                                                                           |
+|--------------------|------------------|------------------------------------------------------------------------------------------------|
+| `/demos/components` | UI / TSX / 样式  | 自研 UI 组件（按钮、输入、选择器、分页、下拉、卡片等），`BaseModal` / `BaseConfirm` / `BaseLoading` 推荐用法，包含 TSX + styled-components 集成示例。 |
+| `/demos/pinia`      | 状态管理 (Pinia) | 展示 Pinia 基础用法（计数器）、异步 action 监听 (`$onAction`)，以及用户 Store 的登录 / 更新资料场景。 |
+| `/demos/http`       | HTTP 工具        | 演示 `utils/http.ts` 封装：GET/POST 请求、文件上传 / 下载，并结合 toast 做错误反馈。          |
+| `/demos/ssr`        | SSR / 数据获取   | 展示 SSR 下的数据获取与调试方式，以及如何在页面中区分服务端 / 客户端逻辑。                    |
+| `/demos/plugins`    | Nuxt 插件        | 演示自定义 Nuxt 插件（如 `plugins/test-plugin.ts`）的注入方式，以及在模板 / 脚本中使用全局提供的工具。 |
+| `/demos/utils`      | 工具函数         | 汇总常用工具函数的使用示例，方便在实际业务中直接复用。                                        |
+| `/demos/types`      | 类型 / 模型      | 演示 `types/*` 中共享类型在 API、组合式与组件之间的协作方式。                                 |
+| `/demos/tsx`        | TSX 组件         | 展示 TSX 组件的编写方式以及与现有样式系统的配合。                                             |
+| `/demos/styled`     | Styled Components | 使用 `vue3-styled-components` 的示例，包括在 SFC 与 TSX 组件中集成 styled-components。      |
+| `/demos/bdd`        | 测试 / BDD       | 基于 Playwright BDD 的测试控制台：动态加载 `.feature` 文件、运行单个或全部用例，并展示测试报告与失败截图。 |
 
 ## 🌐 多语言 (i18n)
 
@@ -246,6 +275,14 @@ npm run test:unit # 单元测试（Vitest）
 - **Tailwind CSS**: 主要样式工具。
 - **Styled Components**: 演示 CSS-in-JS 方案 (`pages/styled-demo.vue`)。
 
+## 🔍 深入阅读
+
+如果你希望将 NuxtShop 用作团队脚手架或进一步理解底层设计，可以参考以下文档：
+
+- `docs/architecture/auth.md`：认证架构说明，包含当前 demo token 流程、`server/utils/auth.ts` 入口以及如何升级为 JWT / 接入 OAuth 的示例思路。
+- `docs/architecture/ads.md`：广告 (Ads) 模块设计，说明广告配置的 MongoDB 模型、`/api/ads` 接口以及如何为不同页面扩展新的 `position`。
+- `docs/architecture/errors.md`：错误码与错误处理架构，涵盖 `ApiErrorCode` 类型、`createApiError` 使用规范，以及前端 `useApiErrorHandler` 的处理流程。
+
 ### 6. 渲染策略 (Rendering)
 本项目混合使用了多种渲染模式以优化性能：
 - **SSR (服务端渲染)**: 默认模式，适用于大多数动态页面。
@@ -258,6 +295,10 @@ npm run test:unit # 单元测试（Vitest）
 
 - **日志 / 监控**:
   - 记录关键操作日志，支持后续扩展为实时监控或仪表盘。
+
+如需了解认证架构与如何从当前 demo token 升级到 JWT/OAuth，可参考：
+
+- `docs/architecture/auth.md`：说明 token 解析流程、`server/utils/auth.ts` 入口以及推荐的 JWT 配置与安全建议。
 - **页面 / 接口缓存**:
   - 与 Nuxt `routeRules` / ISR 配合，对部分页面或接口结果进行短期缓存，减少重复计算。
 

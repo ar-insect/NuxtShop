@@ -1,11 +1,15 @@
 <template>
   <div ref="containerRef" class="relative inline-block text-left">
-    <div class="cursor-pointer" @click="toggleDropdown">
+    <div class="cursor-pointer">
       <slot name="trigger" :is-open="isOpen">
         <button
           type="button"
           class="inline-flex justify-center w-full rounded-md border border-[var(--border-color)] shadow-sm px-4 py-2 bg-[var(--card-bg)] text-sm font-medium text-[var(--text-color)] hover:bg-[var(--hover-bg)] focus:outline-none"
           :class="{ 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]': isOpen }"
+          @click="toggleDropdown"
+          @keydown.enter.prevent="toggleDropdown"
+          @keydown.space.prevent="toggleDropdown"
+          @keydown.escape.prevent="close"
         >
           {{ label }}
           <svg 

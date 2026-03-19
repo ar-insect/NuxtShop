@@ -10,7 +10,17 @@
         disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : '',
         isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]'
       ]"
+      role="button"
+      :aria-haspopup="'listbox'"
+      :aria-expanded="isOpen"
+      :aria-disabled="disabled ? 'true' : undefined"
+      tabindex="0"
       @click="toggleDropdown"
+      @keydown.enter.prevent="handleTriggerKey('enter')"
+      @keydown.space.prevent="handleTriggerKey('space')"
+      @keydown.arrow-down.prevent="handleTriggerKey('down')"
+      @keydown.arrow-up.prevent="handleTriggerKey('up')"
+      @keydown.escape.prevent="handleTriggerKey('escape')"
     >
       <!-- Multi-select Tags -->
       <template v-if="multiple && Array.isArray(modelValue) && modelValue.length > 0">
@@ -67,13 +77,21 @@
     <!-- Dropdown -->
     <div 
       v-if="isOpen" 
+      ref="listboxRef"
       class="absolute z-10 mt-1 w-full bg-[var(--card-bg)] shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black/5 overflow-auto focus:outline-none sm:text-sm border border-gray-200 dark:border-gray-700"
+      role="listbox"
+      tabindex="-1"
     >
       <div 
-        v-for="option in options" 
+        v-for="(option, index) in options" 
         :key="option.value"
         class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[var(--hover-bg)] text-[var(--text-color)]"
-        :class="{ 'bg-[var(--primary-color)]/5 font-medium': isSelected(option.value) }"
+        :class="[
+          isSelected(option.value) ? 'bg-[var(--primary-color)]/5 font-medium' : '',
+          highlightedIndex === index ? 'bg-[var(--hover-bg)]' : ''
+        ]"
+        role="option"
+        :aria-selected="isSelected(option.value)"
         @click="selectOption(option)"
       >
         <span class="block truncate" :class="{ 'font-semibold': isSelected(option.value) }">
@@ -119,6 +137,8 @@ const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 
 const isOpen = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const listboxRef = ref<HTMLElement | null>(null)
+const highlightedIndex = ref<number>(-1)
 
 const isEmpty = computed(() => {
   if (props.multiple) {
@@ -142,6 +162,10 @@ const isSelected = (value: string | number) => {
 const toggleDropdown = () => {
   if (props.disabled) return
   isOpen.value = !isOpen.value
+  if (isOpen.value) {
+    highlightedIndex.value = getInitialHighlightIndex()
+    nextTickAlignHighlight()
+  }
 }
 
 const selectOption = (option: Option) => {
@@ -179,6 +203,59 @@ const clear = () => {
   emit('clear')
 }
 
+const getInitialHighlightIndex = () => {
+  if (!props.options.length) return -1
+  if (!props.multiple && props.modelValue != null && props.modelValue !== '') {
+    const index = props.options.findIndex(opt => opt.value === props.modelValue)
+    if (index !== -1) return index
+  }
+  return 0
+}
+
+const moveHighlight = (direction: 'up' | 'down') => {
+  if (!props.options.length) return
+  if (highlightedIndex.value === -1) {
+    highlightedIndex.value = getInitialHighlightIndex()
+  } else {
+    const max = props.options.length - 1
+    if (direction === 'down') {
+      highlightedIndex.value = highlightedIndex.value >= max ? 0 : highlightedIndex.value + 1
+    } else {
+      highlightedIndex.value = highlightedIndex.value <= 0 ? max : highlightedIndex.value - 1
+    }
+  }
+  nextTickAlignHighlight()
+}
+
+const nextTickAlignHighlight = () => {
+  if (!listboxRef.value || highlightedIndex.value < 0) return
+  const optionEl = listboxRef.value.children.item(highlightedIndex.value) as HTMLElement | null
+  optionEl?.scrollIntoView({ block: 'nearest' })
+}
+
+const handleTriggerKey = (key: 'enter' | 'space' | 'down' | 'up' | 'escape') => {
+  if (props.disabled) return
+  if (key === 'escape') {
+    isOpen.value = false
+    return
+  }
+  if (!isOpen.value && (key === 'enter' || key === 'space' || key === 'down' || key === 'up')) {
+    isOpen.value = true
+    highlightedIndex.value = getInitialHighlightIndex()
+    nextTickAlignHighlight()
+    return
+  }
+  if (isOpen.value) {
+    if (key === 'down' || key === 'up') {
+      moveHighlight(key)
+    } else if (key === 'enter' || key === 'space') {
+      if (highlightedIndex.value >= 0 && highlightedIndex.value < props.options.length) {
+        selectOption(props.options[highlightedIndex.value])
+      }
+    }
+  }
+}
+
 // Click outside to close
 const handleClickOutside = (event: MouseEvent) => {
   if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
@@ -192,5 +269,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+})
+
+defineExpose({
+  toggleDropdown,
+  clear,
+  selectOption
 })
 </script>

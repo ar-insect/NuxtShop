@@ -2,6 +2,40 @@ export type UserRole = 'admin' | 'user'
 
 export type UserLanguage = 'zh-CN' | 'en-US'
 
+export type ApiErrorCode =
+  | 'AUTH_MISSING_CREDENTIALS'
+  | 'AUTH_INVALID_CREDENTIALS'
+  | 'AUTH_REGISTER_MISSING_FIELDS'
+  | 'AUTH_REGISTER_PASSWORD_MISMATCH'
+  | 'AUTH_REGISTER_PASSWORD_WEAK'
+  | 'AUTH_REGISTER_USERNAME_EXISTS'
+  | 'AUTH_UNAUTHORIZED'
+  | 'AUTH_INVALID_TOKEN'
+  | 'AUTH_USER_NOT_FOUND'
+  | 'USER_UPDATE_EMPTY'
+  | 'USER_UPDATE_FAILED'
+  | 'USER_NOT_FOUND'
+  | 'ADDRESS_MISSING_FIELDS'
+  | 'ADDRESS_INVALID_ID'
+  | 'ADDRESS_NOT_FOUND'
+  | 'ADDRESS_CREATE_FAILED'
+  | 'ADDRESS_UPDATE_FAILED'
+  | 'ADDRESS_DELETE_FAILED'
+  | 'ADDRESS_SET_DEFAULT_FAILED'
+  | 'ADDRESS_FETCH_FAILED'
+  | 'REVIEW_MISSING_FIELDS'
+  | 'REVIEW_CREATE_FAILED'
+  | 'THEME_MISSING_CONFIG'
+  | 'THEME_UPDATE_FAILED'
+  | 'THEME_FETCH_FAILED'
+  | 'CART_SAVE_FAILED'
+
+export interface ApiErrorPayload {
+  code: ApiErrorCode
+  message: string
+  details?: any
+}
+
 export interface UserPublic {
   _id: string
   username: string

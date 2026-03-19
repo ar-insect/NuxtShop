@@ -31,47 +31,12 @@
                 :class="link.to === currentPath 
                   ? 'text-[var(--primary-color)] bg-[var(--primary-color)]/10 font-semibold shadow-sm' 
                   : 'hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 text-[var(--text-secondary)]'"
+                :aria-current="link.to === currentPath ? 'page' : undefined"
                 :style="{ borderRadius: 'var(--border-radius)' }"
               >
                 {{ link.text }}
               </NuxtLink>
             </li>
-            
-            <!-- Demos Dropdown -->
-            <li class="relative group">
-              <BaseDropdown :label="t('nav.demos')" :close-on-click="true">
-                <template #trigger="{ isOpen }">
-                  <button
-                    class="flex items-center gap-1 px-3 py-2 text-sm font-medium hover:text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 transition-all duration-200"
-                    :style="{ borderRadius: 'var(--border-radius)', color: 'var(--text-secondary)' }"
-                  >
-                    {{ t('nav.demos') }}
-                    <svg 
-                      class="h-4 w-4 transition-transform duration-200" 
-                      :class="{ 'rotate-180': isOpen }"
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </template>
-                
-                <template #default="{ close }">
-                  <NuxtLink 
-                    v-for="link in demoLinks" 
-                    :key="link.to"
-                    :to="link.to"
-                    class="block px-4 py-2 text-sm hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)]"
-                    active-class="bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium"
-                    :style="{ color: 'var(--text-color)' }"
-                    @click="close"
-                  >
-                    {{ link.text }}
-                  </NuxtLink>
-                </template>
-              </BaseDropdown>
-            </li>
-
           </ul>
         </nav>
       </div>
@@ -79,36 +44,48 @@
       <!-- Right Side: Cart, Wishlist & User Actions -->
       <div class="hidden md:flex items-center gap-4">
         <!-- Cart & Wishlist -->
-        <div v-if="user" class="flex items-center gap-2 border-r pr-4 mr-4" :style="{ borderColor: 'var(--border-color)' }">
+        <div v-if="user" class="flex items-center gap-4 border-r pr-4 mr-4" :style="{ borderColor: 'var(--border-color)' }">
           <NuxtLink
             to="/wishlist"
-            class="relative p-2 transition-colors"
+            class="relative flex flex-col items-center gap-1 px-2 py-1 transition-colors"
             :class="currentPath.startsWith('/wishlist') ? 'text-red-500' : 'hover:text-red-500 text-[var(--text-secondary)]'"
             :title="t('nav.wishlist')"
+            :aria-current="currentPath.startsWith('/wishlist') ? 'page' : undefined"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <ClientOnly>
-              <span v-if="wishlistItems.length > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">
-                {{ wishlistItems.length }}
-              </span>
-            </ClientOnly>
+            <span class="relative inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <ClientOnly>
+                <span v-if="wishlistItems.length > 0" class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                  {{ wishlistItems.length }}
+                </span>
+              </ClientOnly>
+            </span>
+            <span class="text-xs font-medium text-[var(--text-secondary)]">
+              {{ t('nav.wishlist') }}
+            </span>
           </NuxtLink>
           <NuxtLink
             to="/cart"
-            class="relative p-2 transition-colors"
+            class="relative flex flex-col items-center gap-1 px-2 py-1 transition-colors"
             :class="currentPath.startsWith('/cart') ? 'text-[var(--primary-color)]' : 'hover:text-[var(--primary-color)] text-[var(--text-secondary)]'"
             :title="t('nav.cart')"
+            :aria-current="currentPath.startsWith('/cart') ? 'page' : undefined"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            <ClientOnly>
-              <span v-if="cartCount > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-[var(--primary-color)] rounded-full">
-                {{ cartCount }}
-              </span>
-            </ClientOnly>
+            <span class="relative inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <ClientOnly>
+                <span v-if="cartCount > 0" class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-[var(--primary-color)] rounded-full">
+                  {{ cartCount }}
+                </span>
+              </ClientOnly>
+            </span>
+            <span class="text-xs font-medium text-[var(--text-secondary)]">
+              {{ t('nav.cart') }}
+            </span>
           </NuxtLink>
         </div>
 
@@ -152,6 +129,7 @@
                 :class="currentPath.startsWith('/profile') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/profile') ? 'page' : undefined"
                 @click="close"
               >
                 {{ t('nav.profile') }}
@@ -162,9 +140,38 @@
                 :class="currentPath.startsWith('/orders') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/orders') ? 'page' : undefined"
                 @click="close"
               >
                 {{ t('nav.orders') }}
+              </NuxtLink>
+              <div class="my-1 border-t" :style="{ borderColor: 'var(--border-color)' }" />
+              <NuxtLink
+                to="/docs"
+                class="block px-4 py-2 text-sm transition-colors"
+                :class="currentPath.startsWith('/docs') 
+                  ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
+                  : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith('/docs') ? 'page' : undefined"
+                @click="close"
+              >
+                {{ t('nav.docs') }}
+              </NuxtLink>
+              <p class="px-4 pt-2 pb-1 text-xs font-medium tracking-wide text-[var(--text-secondary)]">
+                {{ t('nav.demos') }}
+              </p>
+              <NuxtLink
+                v-for="link in demoLinks"
+                :key="link.to"
+                :to="link.to"
+                class="block px-4 py-1.5 text-sm transition-colors"
+                :class="currentPath.startsWith(link.to) 
+                  ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
+                  : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
+                :aria-current="currentPath.startsWith(link.to) ? 'page' : undefined"
+                @click="close"
+              >
+                {{ link.text }}
               </NuxtLink>
               <button
                 type="button"
@@ -234,21 +241,20 @@ const currentPath = computed(() => route.path)
 const displayName = computed(() => user.value?.name || user.value?.username || '账户')
 const mainLinks = computed(() => [
   { to: '/', text: t('nav.home') },
-  { to: '/products', text: t('nav.products') },
-  { to: '/docs', text: t('nav.docs') }
+  { to: '/products', text: t('nav.products') }
 ])
 
 const demoLinks = computed(() => [
-  { to: '/components-demo', text: 'UI 组件' },
-  { to: '/pinia-demo', text: '状态管理 (Pinia)' },
-  { to: '/http-demo', text: 'HTTP 请求' },
-  { to: '/ssr-demo', text: 'SSR 渲染' },
-  { to: '/plugins-demo', text: '插件机制' },
-  { to: '/utils-demo', text: '工具函数' },
-  { to: '/types-demo', text: 'TypeScript 类型' },
-  { to: '/tsx-demo', text: 'TSX 支持' },
-  { to: '/styled-demo', text: 'Styled Components' },
-  { to: '/bdd-demo', text: 'BDD 测试演示' }
+  { to: '/demos/components', text: t('nav.demoMenu.ui') },
+  { to: '/demos/pinia', text: t('nav.demoMenu.pinia') },
+  { to: '/demos/http', text: t('nav.demoMenu.http') },
+  { to: '/demos/ssr', text: t('nav.demoMenu.ssr') },
+  { to: '/demos/plugins', text: t('nav.demoMenu.plugins') },
+  { to: '/demos/utils', text: t('nav.demoMenu.utils') },
+  { to: '/demos/types', text: t('nav.demoMenu.types') },
+  { to: '/demos/tsx', text: t('nav.demoMenu.tsx') },
+  { to: '/demos/styled', text: t('nav.demoMenu.styled') },
+  { to: '/demos/bdd', text: t('nav.demoMenu.bdd') }
 ])
 </script>
 

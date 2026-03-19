@@ -7,16 +7,15 @@
     </div>
 
     <div class="mt-8">
-      <div v-if="orders.length === 0" class="text-center py-12 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
-        <ShoppingBagIcon class="mx-auto h-12 w-12 text-[var(--text-secondary)]" />
-        <h3 class="mt-2 text-sm font-semibold text-[var(--text-color)]">{{ t('pages.orders.list.emptyTitle') }}</h3>
-        <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.orders.list.emptyDesc') }}</p>
-        <div class="mt-6">
-          <NuxtLink to="/">
-            <BaseButton>{{ t('pages.orders.list.goShopping') }}</BaseButton>
-          </NuxtLink>
-        </div>
-      </div>
+      <BaseEmpty
+        v-if="orders.length === 0"
+        :title="t('pages.orders.list.emptyTitle')"
+        :description="t('pages.orders.list.emptyDesc')"
+      >
+        <NuxtLink to="/">
+          <BaseButton>{{ t('pages.orders.list.goShopping') }}</BaseButton>
+        </NuxtLink>
+      </BaseEmpty>
 
       <div v-else>
         <div class="mb-4 flex flex-wrap gap-2 border-b border-[var(--border-color)] pb-3">
@@ -35,10 +34,13 @@
           </button>
         </div>
 
-        <div v-if="filteredOrders.length === 0" class="text-center py-12 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
-          <h3 class="mt-2 text-sm font-semibold text-[var(--text-color)]">{{ t('pages.orders.list.statusEmptyTitle') }}</h3>
-          <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.orders.list.statusEmptyDesc') }}</p>
-        </div>
+        <BaseEmpty
+          v-if="filteredOrders.length === 0"
+          :title="t('pages.orders.list.statusEmptyTitle')"
+          :description="t('pages.orders.list.statusEmptyDesc')"
+          :status="true"
+          live="polite"
+        />
 
         <BaseCard v-for="order in filteredOrders" v-else :key="order.id" class="mb-6">
           <div class="flex items-center border-b border-[var(--border-color)] p-4 sm:p-6 bg-[var(--bg-color)]/50 rounded-t-lg">
@@ -66,39 +68,6 @@
             </div>
           </div>
 
-          <div class="p-4 sm:p-6">
-            <ul role="list" class="divide-y divide-[var(--border-color)]">
-              <li v-for="item in order.items" :key="item.id" class="flex py-6 sm:py-6">
-                <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-[var(--border-color)] bg-[var(--bg-color)] p-2">
-                  <img :src="item.image" :alt="item.title" class="h-full w-full object-contain object-center" >
-                </div>
-                <div class="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-                  <div class="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
-                    <div>
-                      <div class="flex justify-between">
-                        <h3 class="text-sm">
-                          <NuxtLink :to="`/products/${item.id}`" class="font-medium text-[var(--text-color)] hover:text-[var(--primary-color)]">
-                            {{ item.title }}
-                          </NuxtLink>
-                        </h3>
-                      </div>
-                      <div class="mt-1 flex text-sm">
-                        <p class="text-[var(--text-secondary)]">{{ item.category }}</p>
-                      </div>
-                      <p class="mt-1 text-sm font-medium text-[var(--text-color)]">¥{{ item.price }}</p>
-                    </div>
-
-                    <div class="mt-4 sm:mt-0 sm:pr-9">
-                      <div class="flex items-center justify-end">
-                         <p class="text-sm text-[var(--text-secondary)]">x {{ item.quantity }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-          
           <div class="border-t border-[var(--border-color)] p-4 sm:px-6 bg-[var(--bg-color)]/30 rounded-b-lg flex justify-end gap-3">
              <BaseButton :to="`/orders/${order.id}`" size="sm" variant="outline">{{ t('pages.orders.list.viewDetail') }}</BaseButton>
              <BaseButton size="sm" variant="outline" @click="handleReorder(order)">{{ t('pages.orders.list.reorder') }}</BaseButton>
@@ -119,7 +88,6 @@
 </template>
 
 <script setup lang="ts">
-import { ShoppingBagIcon } from '@heroicons/vue/24/outline'
 import type { Order } from '~/modules/order/composables/useOrders'
 import { useI18n } from '~/composables/useI18n'
 

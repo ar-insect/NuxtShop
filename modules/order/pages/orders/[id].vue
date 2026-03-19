@@ -145,12 +145,14 @@
 </template>
 
 <script setup lang="ts">
+import type { OrderDetail } from '~/types/api'
+
 const route = useRoute()
 const { user } = useAuth()
 const { t } = useI18n()
 const id = route.params.id
 
-const { data: order, pending, error } = await useFetch(`/api/orders/${id}`)
+const { data: order, pending, error } = await useFetch<OrderDetail>(`/api/orders/${id}`)
 
 const getStatusText = (status: string) => {
   const map: Record<string, string> = {

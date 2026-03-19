@@ -2,12 +2,24 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="modelValue" class="modal-mask" @click="handleMaskClick">
-        <div class="modal-container" @click.stop>
+        <div
+          ref="modalRef"
+          class="modal-container"
+          role="dialog"
+          :aria-modal="true"
+        >
           <div class="modal-header">
             <slot name="header">
               <h3>{{ displayTitle }}</h3>
             </slot>
-            <button class="close-btn" @click="close">×</button>
+            <button
+              type="button"
+              class="close-btn"
+              :aria-label="t('ui.modal.cancel')"
+              @click="close"
+            >
+              ×
+            </button>
           </div>
 
           <div class="modal-body">
@@ -33,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useI18n } from '~/composables/useI18n'
 
 const props = defineProps({
@@ -56,6 +68,9 @@ const displayTitle = computed(() => props.title || t('ui.modal.title'))
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 
+const modalRef = ref<HTMLElement | null>(null)
+let previousActiveElement: Element | null = null
+
 const close = () => {
   emit('update:modelValue', false)
   emit('cancel')
@@ -71,6 +86,47 @@ const handleMaskClick = () => {
     close()
   }
 }
+
+const focusFirstElement = () => {
+  if (!modalRef.value) return
+  const focusableSelectors = [
+    'button',
+    'a[href]',
+    'input',
+    'select',
+    'textarea',
+    '[tabindex]:not([tabindex="-1"])'
+  ]
+  const el = modalRef.value.querySelector<HTMLElement>(focusableSelectors.join(','))
+  el?.focus()
+}
+
+watch(
+  () => props.modelValue,
+  async (isOpen) => {
+    if (isOpen) {
+      previousActiveElement = document.activeElement
+      await nextTick()
+      focusFirstElement()
+    } else if (previousActiveElement instanceof HTMLElement) {
+      previousActiveElement.focus()
+      previousActiveElement = null
+    }
+  }
+)
+
+onMounted(() => {
+  if (props.modelValue) {
+    previousActiveElement = document.activeElement
+    focusFirstElement()
+  }
+})
+
+onBeforeUnmount(() => {
+  if (previousActiveElement instanceof HTMLElement) {
+    previousActiveElement.focus()
+  }
+})
 </script>
 
 <style scoped>

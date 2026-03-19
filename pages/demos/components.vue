@@ -653,7 +653,7 @@ const routeDemoPage = computed(() => {
 })
 
 const routeDemoTo = (page: number) => {
-  return { path: '/components-demo', query: { ...route.query, demoPage: page } }
+  return { path: '/demos/components', query: { ...route.query, demoPage: page } }
 }
 
 const selectValues = reactive({

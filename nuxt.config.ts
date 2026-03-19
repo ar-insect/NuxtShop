@@ -135,8 +135,14 @@ export default defineNuxtConfig({
       dbName: process.env.MONGODB_DB_NAME || 'nuxtshop'
     },
     public: {
-      // 客户端公共配置
-      disableCaptcha: process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1' || process.env.NODE_ENV === 'test'
+      // 若显式配置 NUXT_PUBLIC_DISABLE_CAPTCHA，则以环境变量为准；
+      // 否则在 dev/test 默认关闭验证码，在 production 默认启用。
+      disableCaptcha: (() => {
+        if (process.env.NUXT_PUBLIC_DISABLE_CAPTCHA != null) {
+          return process.env.NUXT_PUBLIC_DISABLE_CAPTCHA === '1'
+        }
+        return process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+      })()
     },
     admin: { // 添加 admin 配置
       username: process.env.ADMIN_USERNAME || 'admin',

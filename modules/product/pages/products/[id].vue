@@ -148,10 +148,15 @@
           </ClientOnly>
         </div>
         
-        <div v-else class="mt-10 flex flex-col items-center justify-center p-6 border border-dashed rounded-lg bg-[var(--muted-bg)]" :style="{ borderColor: 'var(--border-color)' }">
-          <p class="text-[var(--text-secondary)] mb-4">{{ t('pages.products.detail.loginHint') }}</p>
+        <BaseEmpty
+          v-else
+          :title="t('pages.products.detail.loginHint')"
+          :description="''"
+          :status="true"
+          live="polite"
+        >
           <BaseButton @click="openLoginModal">{{ t('pages.products.detail.loginButton') }}</BaseButton>
-        </div>
+        </BaseEmpty>
         
         <div class="mt-8 border-t pt-8" :style="{ borderColor: 'var(--border-color)' }">
            <NuxtLink to="/products" class="font-medium flex items-center gap-2" :style="{ color: 'var(--primary-color)' }">

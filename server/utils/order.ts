@@ -1,8 +1,8 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-import type { Order } from '~/modules/order/composables/useOrders'
+import type { OrderDetail } from '~/types/api'
 
-interface OrderDocument extends Order {
+interface OrderDocument extends OrderDetail {
   _id?: ObjectId
   userId: ObjectId
   createdAt: Date
@@ -11,13 +11,13 @@ interface OrderDocument extends Order {
 
 const COLLECTION_NAME = 'user_orders'
 
-export async function findOrdersByUserId(userId: ObjectId): Promise<Order[]> {
+export async function findOrdersByUserId(userId: ObjectId): Promise<OrderDetail[]> {
   const collection = getCollection<OrderDocument>(COLLECTION_NAME)
   const docs = await collection.find({ userId }).sort({ createdAt: -1 }).toArray()
   return docs.map(({ userId: _userId, createdAt: _c, updatedAt: _u, ...rest }) => rest)
 }
 
-export async function insertOrder(userId: ObjectId, order: Order): Promise<void> {
+export async function insertOrder(userId: ObjectId, order: OrderDetail): Promise<void> {
   const collection = getCollection<OrderDocument>(COLLECTION_NAME)
   const now = new Date()
   await collection.insertOne({
@@ -38,4 +38,3 @@ export async function clearOrdersByUser(userId: ObjectId): Promise<void> {
   const collection = getCollection<OrderDocument>(COLLECTION_NAME)
   await collection.deleteMany({ userId })
 }
-

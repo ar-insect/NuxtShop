@@ -193,12 +193,13 @@ import { useProducts, type Product } from '~/modules/product/composables/useProd
 import { http } from '~/utils/http'
 import { validateEmail } from '~/utils/validation'
 import { useI18n } from '~/composables/useI18n'
+import type { AdsResponse } from '~/types/api'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
-import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue' // 引入 BaseAdCarousel
+import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
 import SvgIcon from '~/components/ui/SvgIcon.vue'
 
 const { t } = useI18n()
@@ -211,11 +212,20 @@ useSeoMeta({
   ogImage: '/og-image.png'
 })
 
-const ads = [
-  { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-bd4202213ad2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=electronics', alt: t('pages.home.adElectronics') },
-  { id: 2, image: 'https://images.unsplash.com/photo-1561053720-76ae374061ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=jewelery', alt: t('pages.home.adJewelery') },
-  { id: 3, image: 'https://images.unsplash.com/photo-1523381294911-8d3cead290f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80', link: '/products?category=men%27s%20clothing', alt: t('pages.home.adMen') }
-]
+const { data: adsData } = await useAsyncData('ads-home', () =>
+  $fetch<AdsResponse>('/api/ads', {
+    query: { position: 'home' }
+  })
+)
+
+const ads = computed(() =>
+  (adsData.value?.items || []).map((item) => ({
+    id: item.id,
+    image: item.image,
+    link: item.link,
+    alt: t(item.altKey)
+  }))
+)
 
 const router = useRouter()
 const toast = useToast()

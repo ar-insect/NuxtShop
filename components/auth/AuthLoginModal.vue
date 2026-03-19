@@ -3,6 +3,7 @@
     <form class="space-y-4" @submit.prevent="handleLogin">
       <BaseInput
         id="login-username"
+        ref="usernameInputRef"
         v-model="username"
         :label="t('pages.login.usernameLabel')"
         type="text"
@@ -29,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useLoginModal } from '~/composables/useLoginModal'
 import { useAuth } from '~/composables/useAuth'
 import { validateUsername, validatePassword } from '~/utils/validation'
@@ -43,6 +44,18 @@ const { t } = useI18n()
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
+const usernameInputRef = ref<InstanceType<typeof import('~/components/ui/BaseInput.vue')['default']> | null>(null)
+
+watch(
+  isOpen,
+  async (open) => {
+    if (open) {
+      await nextTick()
+      const el = (usernameInputRef.value as any)?.$el?.querySelector?.('input') as HTMLInputElement | null
+      el?.focus()
+    }
+  }
+)
 
 const handleLogin = async () => {
   const usernameError = validateUsername(username.value)

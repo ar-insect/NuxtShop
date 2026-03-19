@@ -1,43 +1,50 @@
 // server/api/user/update.post.ts
 import { updateUser } from '~/server/utils/user';
-import { ObjectId } from 'mongodb';
+import { createApiError } from '~/server/utils/api-error';
+import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { name, avatar, phone, language, timezone } = body;
 
-  const token = getCookie(event, 'auth-token');
-  if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    });
-  }
-
-  let userId: string | null = null;
-  if (token.startsWith('user-jwt-token-')) {
-    userId = token.replace('user-jwt-token-', '');
-  } else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
-
-  if (!userId || !ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token',
-    });
-  }
+  const userId = requireUserId(event);
 
   try {
-    const updatedUser = await updateUser(userId, { name, avatar, phone, language, timezone });
+    const updates: Record<string, any> = {};
+
+    if (typeof name !== 'undefined') {
+      updates.name = name;
+    }
+    if (typeof avatar !== 'undefined') {
+      updates.avatar = avatar;
+    }
+    if (typeof phone !== 'undefined') {
+      updates.phone = phone;
+    }
+    if (typeof language !== 'undefined') {
+      updates.language = language;
+    }
+    if (typeof timezone !== 'undefined') {
+      updates.timezone = timezone;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      throw createApiError({
+        statusCode: 400,
+        code: 'USER_UPDATE_EMPTY',
+        message: '没有可更新的字段',
+        details: null
+      });
+    }
+
+    const updatedUser = await updateUser(userId, updates);
 
     if (!updatedUser) {
-      throw createError({
+      throw createApiError({
         statusCode: 404,
-        statusMessage: 'User not found',
+        code: 'USER_NOT_FOUND',
+        message: 'User not found',
+        details: null
       });
     }
 
@@ -56,9 +63,11 @@ export default defineEventHandler(async (event) => {
     };
   } catch (error) {
     console.error('Error updating user profile:', error);
-    throw createError({
+    throw createApiError({
       statusCode: 500,
-      statusMessage: '更新个人资料失败',
+      code: 'USER_UPDATE_FAILED',
+      message: '更新个人资料失败',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });

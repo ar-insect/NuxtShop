@@ -9,7 +9,19 @@ const zhCN = {
     profile: '个人中心',
     orders: '我的订单',
     login: '登录',
-    register: '注册'
+    register: '注册',
+    demoMenu: {
+      ui: 'UI 组件',
+      pinia: '状态管理 (Pinia)',
+      http: 'HTTP 请求',
+      ssr: 'SSR 渲染',
+      plugins: '插件机制',
+      utils: '工具函数',
+      types: 'TypeScript 类型',
+      tsx: 'TSX 支持',
+      styled: 'Styled Components',
+      bdd: 'BDD 测试演示'
+    }
   },
   auth: {
     backHome: '返回首页',
@@ -357,6 +369,10 @@ const zhCN = {
     wishlist: {
       title: '我的收藏 - NuxtShop',
       description: '查看您收藏的商品。'
+    },
+    error: {
+      title: '出错了 - NuxtShop',
+      description: '请求处理过程中发生了错误。'
     }
   },
   validation: {
@@ -375,11 +391,57 @@ const zhCN = {
     reviewSubmitted: '评价提交成功，已刷新评价列表，一般会按时间排在前面',
     cartAdded: '已加入购物车，点击右上角购物车查看',
     profileUpdated: '个人资料更新成功！',
+    profileUpdateFailed: '个人资料更新失败',
+    registerSuccess: '注册成功，已为你自动登录',
     languageUpdateFailed: '更新语言设置失败',
     timezoneUpdateFailed: '更新时区失败',
     cartItemRemoved: '商品已移除',
     orderReorderInfo: '再次购买功能为演示占位，可在此实现一键加购逻辑',
     orderDeleted: '订单已删除'
+  },
+  error: {
+    title: '出错了',
+    title404: '页面未找到',
+    title500: '服务器内部错误',
+    statusLabel: '错误代码',
+    description404: '抱歉，您访问的页面不存在或已被移动。',
+    description500: '抱歉，服务器在处理您的请求时遇到了问题，请稍后再试。',
+    descriptionDefault: '请求处理过程中出现了一些问题，请检查网络连接或稍后重试。',
+    homeButton: '返回首页',
+    refreshButton: '刷新页面',
+    codes: {
+      AUTH_MISSING_CREDENTIALS: '请输入用户名和密码',
+      AUTH_INVALID_CREDENTIALS: '用户名或密码错误，请重试',
+      AUTH_REGISTER_MISSING_FIELDS: '请输入用户名和密码',
+      AUTH_REGISTER_PASSWORD_MISMATCH: '两次输入的密码不一致',
+      AUTH_REGISTER_PASSWORD_WEAK: '密码长度至少需要6位',
+      AUTH_REGISTER_USERNAME_EXISTS: '用户名已存在',
+      AUTH_UNAUTHORIZED: '登录状态已过期或尚未登录，请重新登录',
+      AUTH_INVALID_TOKEN: '登录状态无效，请重新登录',
+      AUTH_USER_NOT_FOUND: '用户不存在或已被删除',
+
+      USER_UPDATE_EMPTY: '没有可更新的字段',
+      USER_UPDATE_FAILED: '更新个人资料失败',
+      USER_NOT_FOUND: '用户不存在',
+
+      ADDRESS_MISSING_FIELDS: '请完整填写地址信息',
+      ADDRESS_INVALID_ID: '地址 ID 无效',
+      ADDRESS_NOT_FOUND: '地址未找到或不属于当前用户',
+      ADDRESS_CREATE_FAILED: '添加地址失败',
+      ADDRESS_UPDATE_FAILED: '更新地址失败',
+      ADDRESS_DELETE_FAILED: '删除地址失败',
+      ADDRESS_SET_DEFAULT_FAILED: '设置默认地址失败',
+      ADDRESS_FETCH_FAILED: '获取收货地址失败',
+
+      REVIEW_MISSING_FIELDS: '请填写评分和评价内容',
+      REVIEW_CREATE_FAILED: '评价提交失败，请稍后重试',
+
+      THEME_MISSING_CONFIG: '缺少偏好设置配置',
+      THEME_UPDATE_FAILED: '更新用户偏好设置失败',
+      THEME_FETCH_FAILED: '获取用户偏好设置失败',
+
+      CART_SAVE_FAILED: '保存购物车失败'
+    }
   },
   reviews: {
     title: '顾客评价',

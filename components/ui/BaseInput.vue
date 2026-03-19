@@ -28,6 +28,8 @@
         }"
         :placeholder="placeholder"
         :disabled="disabled"
+        :aria-invalid="error ? 'true' : undefined"
+        :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-description` : undefined"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       >
       <div v-if="$slots.suffix || (clearable && modelValue)" class="absolute inset-y-0 right-0 pr-3 flex items-center">

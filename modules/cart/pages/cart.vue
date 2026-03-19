@@ -5,18 +5,15 @@
       <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.cart.title') }}</h1>
     </div>
 
-    <div v-if="cartItems.length === 0" class="text-center py-12 bg-[var(--card-bg)] rounded-lg border-2 border-dashed border-[var(--border-color)]">
-      <svg class="mx-auto h-12 w-12 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>
-      <h3 class="mt-2 text-sm font-medium text-[var(--text-color)]">{{ t('pages.cart.emptyTitle') }}</h3>
-      <p class="mt-1 text-sm text-[var(--text-secondary)]">{{ t('pages.cart.emptyDesc') }}</p>
-      <div class="mt-6">
-        <NuxtLink to="/products">
-          <BaseButton variant="primary">{{ t('pages.cart.continueShopping') }}</BaseButton>
-        </NuxtLink>
-      </div>
-    </div>
+    <BaseEmpty
+      v-if="cartItems.length === 0"
+      :title="t('pages.cart.emptyTitle')"
+      :description="t('pages.cart.emptyDesc')"
+    >
+      <NuxtLink to="/products">
+        <BaseButton variant="primary">{{ t('pages.cart.continueShopping') }}</BaseButton>
+      </NuxtLink>
+    </BaseEmpty>
 
     <div v-else class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start xl:gap-x-16">
       <section aria-labelledby="cart-heading" class="lg:col-span-7">

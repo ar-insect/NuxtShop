@@ -41,24 +41,24 @@ class Http {
     const finalUrl = `${this.baseUrl}${url}`
 
     const defaultOptions: FetchOptions<any> = {
-      // 请求拦截器
-      onRequest() {
-        // 说明：
-        // - 项目内部 API 统一依赖服务端通过 Cookie（auth-token）做鉴权
-        // - 因此这里默认不在客户端自动附加 Authorization 头
-        // - 若将来需要调用第三方接口，可在此处按需添加 token
-      },
-      // 响应拦截器
+      onRequest() {},
       onResponse({ response }) {
         if (!response.ok) {
-          // 处理 HTTP 错误
-          throw new Error(`HTTP Error: ${response.status}`)
+          const data = (response as any)._data
+          const err: any = new Error(
+            (data && data.message) || response.statusText || `HTTP Error: ${response.status}`
+          )
+          err.statusCode = response.status
+          if (data && typeof data === 'object') {
+            err.data = data
+            if (data.code) {
+              err.code = data.code
+            }
+          }
+          throw err
         }
-        // 如有需要，可在此处处理后端业务错误码
-        // if (response._data.code !== 200) { ... }
       },
       onResponseError({ response }) {
-        // 处理响应错误
         console.error('Response Error:', response.statusText)
       }
     }

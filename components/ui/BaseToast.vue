@@ -1,6 +1,11 @@
 <template>
   <Teleport to="body">
-    <div class="toast-container">
+    <div
+      class="toast-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <TransitionGroup name="toast">
         <div
           v-for="toast in toasts"
@@ -8,8 +13,10 @@
           class="toast-item"
           :class="`toast-${toast.type}`"
         >
-          <span class="icon">{{ getIcon(toast.type) }}</span>
-          <span class="message">{{ toast.message }}</span>
+          <span class="icon" aria-hidden="true">{{ getIcon(toast.type) }}</span>
+          <span class="message">
+            {{ toast.message }}
+          </span>
         </div>
       </TransitionGroup>
     </div>

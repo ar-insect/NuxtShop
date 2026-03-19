@@ -294,9 +294,9 @@ const saveProfile = async () => {
       user.value.avatar = response.data.avatar;
       user.value.phone = response.data.phone;
     }
-    toast.success('个人资料更新成功！');
+    toast.success(t('toast.profileUpdated'));
   } catch (error: any) {
-    toast.error(error.statusMessage || '个人资料更新失败');
+    toast.error(error.statusMessage || t('toast.profileUpdateFailed'));
     console.error('Error saving profile:', error);
   } finally {
     saving.value = false;

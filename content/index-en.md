@@ -118,339 +118,60 @@ npm run test:unit # unit tests (Vitest)
 - **ISR** – incremental static regeneration via `routeRules` for selected routes.
 - **Data persistence & caching** – MongoDB for core business data; Redis for logging and partial page/API caching (with ISR).
 - **End‑to‑end flows** – product listing & detail, cart, order management, wishlist, and a rich user profile center.
+- **Internationalization** – built‑in Chinese & English (see `docs/architecture/i18n.en.md`).
 
-## 🌐 Internationalization (i18n)
+## 🧪 Demos navigation
 
-NuxtShop ships with basic bilingual support (Chinese & English) using a lightweight custom i18n setup:
+NuxtShop also serves as a collection of focused demos. The main example pages live under the `/demos/*` routes:
 
-- **Message files**
-  - `locales/zh-CN.ts`: Chinese strings  
-  - `locales/en-US.ts`: English strings  
-  - Organized by namespaces such as `ui.*`, `pages.*`, `profile.*`, `demo.*`, etc.
+| Route              | Category  | What it demonstrates                                                                                         |
+|--------------------|-----------|-------------------------------------------------------------------------------------------------------------|
+| `/demos/components` | UI / TSX / Styled | Base UI components (buttons, inputs, selects, pagination, dropdowns, cards), `BaseModal` / `BaseConfirm` / `BaseLoading`, and TSX + styled‑components integration. |
+| `/demos/pinia`      | State (Pinia) | Pinia basics (counter), async actions with `$onAction`, and a user store with login / profile update flows. |
+| `/demos/http`       | HTTP utils | The `utils/http.ts` wrapper: GET/POST requests, file upload/download, and error handling with toasts.      |
+| `/demos/ssr`        | SSR / data fetching | SSR data fetching patterns and how to distinguish server/client logic when debugging.                     |
+| `/demos/plugins`    | Nuxt plugins | Using custom Nuxt plugins (`plugins/test-plugin.ts`, etc.) and accessing provided helpers in templates and scripts. |
+| `/demos/utils`      | Utilities | Practical examples of common utility functions used across the app.                                       |
+| `/demos/types`      | Types / models | How shared types in `types/*` are used across APIs, composables and components.                          |
+| `/demos/tsx`        | TSX       | Authoring TSX components and integrating them with the existing styling system.                            |
+| `/demos/styled`     | Styled Components | Using `vue3-styled-components` in SFCs and TSX components.                                             |
+| `/demos/bdd`        | Testing / BDD | Playwright BDD test console: list `.feature` files, run single/all tests, and display reports and failure screenshots. |
 
-- **Runtime store & composable**
-  - `stores/i18n.ts`: manages current `locale` and persistence (localStorage).  
-  - `composables/useI18n.ts`: exposes `t(key, params?)` and `setLocale`, with placeholder support (e.g. `{count}`).
+## 🧱 Architecture overview
 
-- **Default language & persistence**
-  - SSR uses a default language (currently Chinese) for the initial HTML to avoid hydration mismatches.  
-  - On the client, language is restored from `nuxtshop-locale` (localStorage) or inferred from the browser.  
-  - Logged‑in users’ language preference is stored on the user document (`language`), so you can later drive SSR by user settings.
+If you want to use NuxtShop as a team scaffold or better understand the underlying design, you can dive into these docs:
 
-- **Language switch entry**
-  - In the user Profile → **Preferences** section, users can choose between Simplified Chinese and English. This:
-    - Updates the i18n Pinia store `locale`;
-    - Writes `nuxtshop-locale` into localStorage;
-    - If logged in, persists `language` via `/api/user/update`.
+| Domain             | Doc file                         | Description                                                              |
+|--------------------|----------------------------------|--------------------------------------------------------------------------|
+| Auth & Security    | `docs/architecture/auth.en.md`      | Current demo token flow, `server/utils/auth.ts` entry, and how to upgrade to JWT / integrate OAuth. |
+| Ads & Configuration| `docs/architecture/ads.en.md`       | MongoDB model for ads, `/api/ads` behavior, and how to extend positions. |
+| Errors & Handling  | `docs/architecture/errors.en.md`    | `ApiErrorCode` list, `createApiError` conventions, and `useApiErrorHandler` flow. |
+| Product            | `docs/architecture/product.en.md`   | Product data sources, `useProducts` structure, list/detail pages, history & reviews. |
+| Cart               | `docs/architecture/cart.en.md`      | Local cart state + persistence API, recommendations, checkout and place‑order flow. |
+| Order              | `docs/architecture/order.en.md`     | Order creation, status transitions, list/detail pages and `user_orders` Mongo schema. |
 
-- **Coverage examples**
-  - Header navigation and dashboard layout (Home / Profile / Cart / Wishlist, etc.).
-  - Login / Register / Home / product cards / review components.
-  - User center: account info, addresses, security settings, preferences, sign out.
-  - Core UI components: `BaseModal`, `BaseConfirm`, `BaseLoading`, `BasePagination`, slider and puzzle captchas, etc.
-  - `components-demo` page: all section titles, descriptions and buttons are fully bilingual.
+## 📂 Directory Structure (high‑level)
 
-To add new localized copy, extend the appropriate namespace in `locales/*` and use `useI18n().t('namespace.key')` in your components.
+- `components/`: global UI and layout‑level components  
+- `modules/`: domain modules (product / cart / order / user)  
+- `server/`: global APIs and server‑side utilities  
+- `tests/`: Playwright E2E/BDD and Vitest unit tests  
+- `docs/`: architecture docs and references  
 
-## 📂 Directory Structure
+For a full tree and module‑level explanation, see `docs/reference/project-structure.en.md`.
 
-```bash
-├── .vscode/            # VS Code debug config
-├── assets/             # Static assets (CSS, images)
-├── components/         # Global components (BaseButton, HomeHero, etc.)
-├── composables/        # Global composables (useAuth, useToast, useConfirm, etc.)
-├── content/            # Nuxt Content files
-├── layouts/            # Page layouts
-├── middleware/         # Global route middleware
-├── modules/            # Business modules (Domain Driven Design)
-│   ├── cart/           # Cart module
-│   ├── order/          # Order module
-│   ├── product/        # Product module
-│   └── user/           # User module
-├── pages/              # Top‑level pages (index.vue, login.vue, etc.)
-├── plugins/            # Nuxt plugins
-├── public/             # Static files
-├── scripts/            # Automation scripts
-├── server/             # Global server code
-│   ├── api/            # Shared APIs
-│   └── utils/          # Server utilities (mongodb, redis, session, etc.)
-├── tests/              # Tests (E2E/BDD/units)
-├── types/              # Global type definitions
-├── utils/              # Client utilities
-├── app.vue             # App entry
-├── nuxt.config.ts      # Nuxt config
-└── package.json        # Dependencies & scripts
-```
+### 6. Rendering & caching / logging
 
-## 🛠️ Modular Architecture
+- Uses SSR by default for most dynamic pages;
+- Configures ISR via `routeRules` for routes like `/docs` and `/products/**`;
+- Redis is used for log storage and selected page/API caching, and gracefully degrades when Redis is not available.
 
-NuxtShop follows a DDD‑inspired modular structure. Each business domain is encapsulated in its own module, with its own components, composables, pages and server APIs.
-
-### 1. Business Modules
-
-- **Product module**
-  - Path: `modules/product`
-  - Features: product listing & search, detail pages, category filtering.
-  - Key files: `useProducts.ts` (data fetching), `useCategoryMapper.ts` (category mapping).
-
-- **Cart module**
-  - Path: `modules/cart`
-  - Features: cart state management, add/remove items, quantity updates, checkout flow.
-  - Key files: `useCart.ts` (state), `checkout.vue` (checkout page).
-
-- **Order module**
-  - Path: `modules/order`
-  - Features: create orders, list orders, order detail, history.
-  - Key files: `useOrders.ts` (order logic).
-
-  - Order types & APIs:
-
-    | Scenario              | Type                              | Description                                                                 |
-    |-----------------------|-----------------------------------|-----------------------------------------------------------------------------|
-    | List API              | `OrderSummary[]`                 | `/api/orders` response with lightweight order summaries                     |
-    | Detail API            | `OrderDetail`                    | `/api/orders/:id` response with full order detail                           |
-    | Server storage schema | `OrderDocument extends OrderDetail` | MongoDB document shape in `server/utils/order.ts` with extra `userId`, `createdAt`, `updatedAt` fields |
-
-- **User module**
-  - Path: `modules/user`
-  - Features: auth middleware, profile center logic.
-
-### 2. Server API Conventions
-
-To avoid route conflicts, each module exposes namespaced APIs:
-
-- Cart: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`
-- Order: `modules/order/server/api/orders/index.ts` → `/api/orders`
-- Product: `modules/product/server/api/products/index.get.ts` → `/api/products`
-
-### 3. Shared Global Resources
-
-Some utilities remain global for reuse across modules:
-
-- **Components**: `components/ui/` (base UI), `components/home/` (home page sections).
-- **Composables**: `useAuth` (auth), `useToast` (toasts), `useConfirm` (confirm dialog), etc.
-- **Client utils**: e.g. `http.ts`, `format.ts`.
-- **Server utils**: `server/utils/mongodb.ts`, `server/utils/redis.ts`, `server/utils/session.ts`.
-
-### 4. Layouts
-
-- `default`: main layout with header and footer.
-- `auth`: minimal centered layout for auth pages.
-- `dashboard`: sidebar layout for profile/management‑style pages.
-
-### 5. Styling
-
-- Tailwind CSS as the primary styling tool.
-- `vue3-styled-components` for CSS‑in‑JS (see `pages/styled-demo.vue`).
-
-### 6. Rendering Strategy
-
-NuxtShop uses a mix of rendering strategies for performance:
-
-- **SSR** – default mode for most dynamic pages.
-- **ISR** – configured via `routeRules`, e.g.:
-  - `/docs`: SWR (stale‑while‑revalidate) style caching.
-  - `/products/**`: cached for 1 hour (3600 seconds) for product pages.
-
-### 7. Caching & Logging (Redis)
-
-All core business data lives in MongoDB; Redis is used for:
-
-- **Logging / monitoring**
-  - Centralized log cache, with room for future dashboards or alerting.
-- **Page / API caching**
-  - Works together with `routeRules` / ISR to cache hot pages or API responses and reduce repeated computation.
-
-If Redis is not running, the app still functions:
-
-- Logs fall back to console output;
-- Redis‑backed cache strategies degrade to real‑time queries.
-
-### 8. MongoDB Integration
-
-MongoDB is the primary data store for all commerce‑related entities.
-
-- **Configuration**
-  - `nuxt.config.ts` uses `runtimeConfig` to read `MONGODB_URI` and `MONGODB_DB_NAME`.
-  - `.env` sets these values for local/dev environments.
-
-### Where to inspect logs
-
-- **Console**  
-  - In local development, all server‑side errors, Mongo/Redis connection messages, cache‑clear operations, etc. are printed to the terminal where you run Nuxt.  
-  - Files like `server/plugins/mongodb.ts`, `server/utils/redis.ts` and various APIs use `console.error` / `console.log` for diagnostics.
-
-- **Redis list (`app:logs`)**  
-  - `server/api/log.post.ts` exposes a simple log ingestion endpoint, which writes structured entries into Redis:  
-    - Key: `app:logs` (List).  
-    - Each entry is a JSON string containing the original payload, server timestamp and client IP.  
-  - You can inspect recent logs via `redis-cli`, for example:
-
-    ```bash
-    redis-cli LRANGE app:logs 0 20
-    ```
-
-- **MongoDB**  
-  - MongoDB is currently used for business data only (products, users, orders, ad config, etc.) and does not store application logs directly.  
-  - For production scenarios, you can extend `server/api/log.post.ts` to also persist logs into a dedicated Mongo collection if needed.
+See `docs/architecture/rendering-and-caching.en.md` for details.
 
 ---
 
-## 🏗 Architecture Overview
+For more on domain responsibilities, architecture details and developer workflow, see:
 
-At a high level, NuxtShop follows a classic “full‑stack Nuxt app” flow:
-
-```text
-Browser (pages / components / layouts)
-        │
-        ▼
-Nuxt SSR / API layer (server/api + modules/*/server/api)
-        │
-        ├── MongoDB: products / users / cart / orders / wishlist / reviews / addresses / ads config
-        └── Redis: log cache / page & API cache (with ISR)
-```
-
-### Core domain modules
-
-- **Auth / User**
-  - Location: `composables/useAuth.ts`, `server/api/auth/*`, `modules/user`  
-  - Responsibilities: login & registration, `auth-token` cookie, injecting current user into the app, persisting user preferences (language / timezone).
-  - Server‑side auth logic is centralized in `server/utils/auth.ts`, which parses and validates the current token (currently a simple `user-jwt-token-<id>` scheme). This makes it easy to swap in real JWT / OAuth in the future by changing a single utility instead of touching every API.
-
-- **Product**
-  - Location: `modules/product`  
-  - Responsibilities: product listing and search, category filters, detail pages, review lists, browse history.
-
-- **Cart**
-  - Location: `modules/cart`  
-  - Responsibilities: cart state management, add/remove items, quantity updates, recommendations, checkout page (address / payment / place order).
-
-- **Order**
-  - Location: `modules/order`  
-  - Responsibilities: create orders, list orders, show order details and status (pending / processing / shipped / completed / cancelled).
-
-- **Profile**
-  - Location: `pages/profile.vue`, `components/profile/*`, `modules/user`  
-  - Responsibilities: basic info, avatar & display name, addresses, password change, 2FA demo, login history, theme & language/timezone preferences.
-
-- **Ads**
-  - Location: `server/api/ads.get.ts`, `pages/index.vue`, `pages/wishlist.vue`, `components/ui/BaseAdCarousel.vue`  
-  - Responsibilities: read ad configuration from MongoDB (image / link / i18n key) and render ad slots on the home page and wishlist; easily extensible to more positions via the `position` field.
-  - Architecture rationale:
-    - Ads (image / link / i18n key) are stored as configuration documents in the `ads` Mongo collection and fetched via `/api/ads?position=home|wishlist|...`, rather than being hard‑coded in pages;
-    - This allows different configurations per environment (dev / staging / prod) and paves the way for a future ops/CMS UI without changing frontend code;
-    - On first access for a given `position`, a set of sample ads is seeded automatically for convenience; in real deployments you can replace them directly in MongoDB with production ad data.
-
----
-
-## 👨‍💻 Developer Guide
-
-This section is aimed at developers who want to extend or contribute to NuxtShop.
-
-### Requirements
-
-- Node.js: 18+ recommended  
-- Package manager: npm / pnpm / yarn (examples use npm)  
-- MongoDB: v6+  
-- Optional: Redis 7+ (for logging & caching)
-
-### Local workflow
-
-1. Clone the repo & install dependencies (see **Getting Started**).  
-2. Create your `.env` from `.env.example` and configure MongoDB (and optionally Redis).  
-3. Start the dev server:
-
-   ```bash
-   npm run dev
-   ```
-
-4. Open `http://localhost:3000` and verify core flows (home, login, products, cart, profile) work.  
-5. While developing:
-   - For UI changes, watch the browser and devtools;  
-   - For server changes (`server/api/*` or `modules/*/server/api/*`), keep an eye on terminal logs and network responses;  
-   - Before committing, run:
-
-     ```bash
-     npm run lint
-     npm run test:unit
-     ```
-
-### Code style & conventions
-
-- TypeScript‑first – add types for public APIs and non‑trivial functions.  
-- ESLint is used for static checks (see root config files).  
-- Prefer `<script setup>` + Composition API for Vue components.  
-- Inside a module, try to keep the separation of concerns: UI components / composables / server APIs, and avoid putting heavy domain logic directly in pages.
-
-### Suggested contribution flow (optional)
-
-If you plan to open PRs on the public repo:
-
-1. Pull the latest `main`.  
-2. Create a feature branch, e.g. `feat/profile-timezone` or `fix/cart-discount-calc`.  
-3. Develop and self‑test locally: `npm run lint && npm run test:unit`.  
-4. Use meaningful commit messages, e.g. `feat: add timezone preference to profile`.  
-5. Open a pull request with a short description of the change and how you tested it.
-
----
-
-## 🤝 Contributing
-
-Issues and PRs are very welcome. If you’d like to contribute to NuxtShop:
-
-- Follow the suggested workflow above (fork → feature branch → `npm run lint && npm run test:unit` → PR).  
-- Keep changes consistent with the existing architecture (modules with UI / composables / server APIs) and update types / API contracts where needed.  
-- For more details, see [CONTRIBUTING.md](./CONTRIBUTING.md).
-
----
-
-## ⚙ Environment Variables
-
-This section summarizes the main environment variables used by the project. See `.env.example` for reference values.
-
-### Core connection settings
-
-| Name              | Required | Default                 | Description                                   |
-| ----------------- | -------- | ----------------------- | --------------------------------------------- |
-| `MONGODB_URI`     | Yes      | `mongodb://localhost`   | MongoDB connection string                     |
-| `MONGODB_DB_NAME` | Yes      | `nuxtshop`              | MongoDB database name                         |
-| `REDIS_HOST`      | No       | `localhost`             | Redis host                                    |
-| `REDIS_PORT`      | No       | `6379`                  | Redis port                                    |
-| `REDIS_PASSWORD`  | No       | empty string            | Redis password (leave empty if not required)  |
-| `REDIS_DB`        | No       | `0`                     | Redis DB index                                |
-
-> Note: even without Redis, the app works – related logging and cache strategies gracefully degrade.
-
-### Runtime feature flags
-
-| Name                          | Required | Default                                 | Description                                                                                 |
-| ----------------------------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `NUXT_PUBLIC_DISABLE_CAPTCHA` | No       | dev/test: `1`; prod: `0` (overridable) | When set to `1`, disables captcha components on the client; defaults to off in dev/test, on in production if not explicitly set |
-
-### Common Node / Nuxt variables
-
-| Name       | Description                                        |
-| ---------- | -------------------------------------------------- |
-| `NODE_ENV` | `development` / `production` / `test`, etc.        |
-| `PORT`     | Port that Nuxt listens on (defaults to `3000`)     |
-
-For real‑world deployments you can introduce additional variables (e.g. log level, third‑party payment/storage config) and read them via `runtimeConfig` or `process.env`. When you do, it’s a good idea to update `.env.example` and this README to keep them in sync.
-
-- **Connection management**
-  - `server/utils/mongodb.ts` implements a singleton connection helper.
-  - `server/plugins/mongodb.ts` (if present) connects on Nitro startup and tears down on shutdown.
-
-- **CRUD helper functions**
-  - `server/utils/mongodb.ts` exposes `find`, `findOne`, `insertOne`, `updateOne`, `deleteOne`, etc., for server APIs.
-
-- **Core collections (examples)**
-  - `shop_products_app`: products (see `server/utils/product.ts`, `modules/product/server/api/products/*.ts`)
-  - `user_carts`: carts (see `server/utils/cart.ts`, `modules/cart/server/api/cart/*.ts`)
-  - `user_orders`: orders (see `server/utils/order.ts`, `modules/order/server/api/orders/index.ts`)
-  - `user_wishlists`: wishlists (see `server/utils/wishlist.ts`, `server/api/wishlist*.ts`)
-  - `browse_history`: browse history (see `server/utils/history.ts`, `server/api/history/*.ts`)
-  - Additional collections for reviews, addresses, preferences, etc.
-
----
-
-Feel free to fork NuxtShop, change the branding, plug in your own APIs, or use it as a scaffold for your own Nuxt 3 commerce‑style projects.***
+- `docs/architecture/*.en.md` – domain‑level architecture docs  
+- `docs/reference/project-structure.en.md` – project structure and module responsibilities  
+- `CONTRIBUTING.md` – contribution guide and recommended dev flow

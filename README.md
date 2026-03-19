@@ -1,5 +1,7 @@
 # NuxtShop 全栈电商实战模板
 
+[English](./README_EN.md) · 简体中文
+
 [![CI](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml/badge.svg)](https://github.com/ar-insect/NuxtShop/actions/workflows/deploy.yml)
 ![Node](https://img.shields.io/badge/node-%3E%3D22.14.0-339933?logo=node.js&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ar-insect/NuxtShop/blob/main/LICENSE)

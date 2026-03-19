@@ -97,7 +97,7 @@ cp .env.production.example .env.production
 npm run dev
 ```
 
-默认打开：<http://localhost:3000>\
+默认打开：<http://localhost:4000>\
 首次启动会自动进行种子数据初始化，并在 MongoDB 中创建商品、用户等基础数据。
 
 ### 5) 常用脚本

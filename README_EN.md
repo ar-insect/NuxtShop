@@ -88,7 +88,7 @@ If you enable Redis, you can also configure (defaults shown in parentheses):
 npm run dev
 ```
 
-By default the app runs at: http://localhost:3000  
+By default the app runs at: http://localhost:4000  
 On first start, seed data will be inserted into MongoDB (products, demo users, etc.).
 
 ### 5) Common Scripts

@@ -58,7 +58,7 @@
         :total="totalOrders"
         server-side
         @update:page="handlePageChange"
-        @update:pageSize="handlePageSizeChange"
+        @update:page-size="handlePageSizeChange"
       >
         <template #cell-status="{ value }">
           <AdminTag :label="statusLabel(value)" :status="statusColor(value)" size="sm" />

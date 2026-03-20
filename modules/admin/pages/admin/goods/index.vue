@@ -68,7 +68,7 @@
         :total="totalProducts"
         server-side
         @update:page="handlePageChange"
-        @update:pageSize="handlePageSizeChange"
+        @update:page-size="handlePageSizeChange"
       >
         <template #cell-title="{ row }">
           <NuxtLink

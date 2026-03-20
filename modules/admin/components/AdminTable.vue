@@ -95,7 +95,7 @@
       :page-size="pageSizeComputed"
       :total="totalComputed"
       @update:page="updatePage"
-      @update:pageSize="updatePageSize"
+      @update:page-size="updatePageSize"
     />
   </div>
 </template>

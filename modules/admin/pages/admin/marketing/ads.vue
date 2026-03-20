@@ -76,7 +76,7 @@
         :total="totalAds"
         server-side
         @update:page="handlePageChange"
-        @update:pageSize="handlePageSizeChange"
+        @update:page-size="handlePageSizeChange"
       >
         <template #cell-position="{ value }">
           <AdminTag :label="value" status="primary" size="sm" />
@@ -166,7 +166,7 @@
         />
         <div class="flex items-center gap-2 md:col-span-2">
           <label class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-            <input v-model="form.active" type="checkbox" class="rounded border-[var(--border-color)]" />
+            <input v-model="form.active" type="checkbox" class="rounded border-[var(--border-color)]" >
             启用
           </label>
         </div>

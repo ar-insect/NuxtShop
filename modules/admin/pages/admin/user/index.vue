@@ -61,7 +61,7 @@
         :total="totalUsers"
         server-side
         @update:page="handlePageChange"
-        @update:pageSize="handlePageSizeChange"
+        @update:page-size="handlePageSizeChange"
       >
         <template #cell-role="{ value }">
           <AdminTag :label="value === 'admin' ? '管理员' : '用户'" :status="value === 'admin' ? 'primary' : 'muted'" size="sm" />

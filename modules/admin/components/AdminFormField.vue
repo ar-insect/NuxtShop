@@ -165,7 +165,7 @@ const runValidation = () => {
         // 允许以 / 开头的相对路径，其他情况按绝对 URL 校验
         if (!v.startsWith('/')) {
           try {
-            // eslint-disable-next-line no-new
+             
             new URL(v)
           } catch {
             result.push(rule.message || '请输入合法的 URL')

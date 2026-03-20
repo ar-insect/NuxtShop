@@ -227,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { UserCircleIcon, ClipboardDocumentListIcon, ShieldCheckIcon, BookOpenIcon, BeakerIcon } from '@heroicons/vue/24/outline'
+import { UserCircleIcon, ClipboardDocumentListIcon, BookOpenIcon, BeakerIcon } from '@heroicons/vue/24/outline'
 import BaseDropdown from '~/components/ui/BaseDropdown.vue'
 import { useI18n } from '~/composables/useI18n'
 

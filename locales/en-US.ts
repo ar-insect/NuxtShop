@@ -419,6 +419,7 @@ const enUS = {
       AUTH_UNAUTHORIZED: 'You need to sign in to continue.',
       AUTH_INVALID_TOKEN: 'Your session is invalid, please sign in again.',
       AUTH_USER_NOT_FOUND: 'User not found.',
+      AUTH_FORBIDDEN: 'You do not have permission to access this resource.',
 
       USER_UPDATE_EMPTY: 'No fields to update.',
       USER_UPDATE_FAILED: 'Failed to update profile.',

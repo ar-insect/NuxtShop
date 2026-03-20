@@ -419,6 +419,7 @@ const zhCN = {
       AUTH_UNAUTHORIZED: '登录状态已过期或尚未登录，请重新登录',
       AUTH_INVALID_TOKEN: '登录状态无效，请重新登录',
       AUTH_USER_NOT_FOUND: '用户不存在或已被删除',
+      AUTH_FORBIDDEN: '当前账号无权访问此资源',
 
       USER_UPDATE_EMPTY: '没有可更新的字段',
       USER_UPDATE_FAILED: '更新个人资料失败',

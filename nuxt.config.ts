@@ -74,7 +74,8 @@ export default defineNuxtConfig({
     './modules/user',
     './modules/product',
     './modules/cart',
-    './modules/order'
+    './modules/order',
+    './modules/admin'
   ],
   modules: [
     '@pinia/nuxt',

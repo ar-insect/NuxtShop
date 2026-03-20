@@ -76,3 +76,18 @@ export const requireUser = async (event: H3Event) => {
 
   return user
 }
+
+export const requireAdmin = async (event: H3Event) => {
+  const user = await requireUser(event)
+
+  if (user.role !== 'admin') {
+    throw createApiError({
+      statusCode: 403,
+      code: 'AUTH_FORBIDDEN',
+      message: 'Forbidden',
+      details: null
+    })
+  }
+
+  return user
+}

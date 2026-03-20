@@ -35,6 +35,7 @@ export type ApiErrorCode =
   | 'AUTH_UNAUTHORIZED'
   | 'AUTH_INVALID_TOKEN'
   | 'AUTH_USER_NOT_FOUND'
+  | 'AUTH_FORBIDDEN'
   | 'USER_UPDATE_EMPTY'
   | 'USER_UPDATE_FAILED'
   | 'USER_NOT_FOUND'
@@ -272,4 +273,3 @@ UI 层
 - 错误码在全局范围内具有可读性与一致性；
 - 前后端对错误语义有统一约定，便于排查问题和改造逻辑；
 - 文案可以通过 i18n 灵活切换，而不会影响错误码的稳定性。
-

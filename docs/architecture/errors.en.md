@@ -48,6 +48,7 @@ export type ApiErrorCode =
   | 'AUTH_UNAUTHORIZED'
   | 'AUTH_INVALID_TOKEN'
   | 'AUTH_USER_NOT_FOUND'
+  | 'AUTH_FORBIDDEN'
   | 'USER_UPDATE_EMPTY'
   | 'USER_UPDATE_FAILED'
   | 'USER_NOT_FOUND'
@@ -286,4 +287,3 @@ When introducing a new API, follow these steps:
 
 Following this pattern keeps error handling predictable, localized and
 type‑safe across the entire project.
-

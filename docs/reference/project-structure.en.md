@@ -17,7 +17,8 @@ modules are organized, to help you quickly locate code.
 │   ├── cart/           # Cart module
 │   ├── order/          # Order module
 │   ├── product/        # Product module
-│   └── user/           # User module
+│   ├── user/           # User module
+│   └── admin/          # Admin module (reserved/back‑office)
 ├── pages/              # Top‑level pages (index.vue, login.vue, etc.)
 ├── plugins/            # Nuxt plugins
 ├── public/             # Static files
@@ -85,6 +86,13 @@ Each module typically contains:
   - Server utilities in `server/utils/order.ts`
 
 ### 2.4 User module
+
+- Path: `modules/admin`
+- Responsibilities:
+  - Entry point for back‑office/admin features
+  - Currently exposes a placeholder `/admin` page restricted to admin users only
+
+---
 
 - Path: `modules/user`
 - Responsibilities:

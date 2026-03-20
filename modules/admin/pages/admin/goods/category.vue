@@ -241,6 +241,17 @@ const reload = async () => {
   ;(data.value as any) = res
 }
 
+onMounted(async () => {
+  if (!items.value.length && !pending.value) {
+    try {
+      listLoading.value = true
+      await reload()
+    } finally {
+      listLoading.value = false
+    }
+  }
+})
+
 watch(statusFilter, async () => {
   try {
     page.value = 1

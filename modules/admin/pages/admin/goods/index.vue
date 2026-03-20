@@ -223,7 +223,7 @@ const sortOptions = [
 ]
 
 const { data: categoryData } = await useAsyncData(
-  'admin-product-categories',
+  'admin-goods-filter-categories',
   () => http.get<{ key: string; label: string }[]>('/products/categories'),
   {
     default: () => [] as { key: string; label: string }[]
@@ -234,10 +234,19 @@ const categoryFilterOptions = computed(() => {
   const options: { label: string; value: string | 'ALL' }[] = [
     { label: '全部分类', value: 'ALL' }
   ]
-  const items = (categoryData.value || []).map((c) => ({
+
+  const raw = categoryData.value as any
+  const list: { key: string; label: string }[] = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw?.data)
+      ? raw.data
+      : []
+
+  const items = list.map((c) => ({
     label: categoryLabels[c.key] || c.label || c.key,
     value: c.key
   }))
+
   return options.concat(items)
 })
 
@@ -277,6 +286,17 @@ const reloadProducts = async () => {
   )
   ;(data.value as any) = res
 }
+
+onMounted(async () => {
+  if (!products.value.length && !pending.value) {
+    try {
+      listLoading.value = true
+      await reloadProducts()
+    } finally {
+      listLoading.value = false
+    }
+  }
+})
 
 const handlePageChange = async (value: number) => {
   page.value = value

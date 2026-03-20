@@ -123,55 +123,62 @@
             </template>
 
             <template #default="{ close }">
+              <div class="px-4 pt-2 pb-1 text-xs font-semibold tracking-wide text-[var(--text-secondary)]">
+                {{ t('nav.profile') }}
+              </div>
               <NuxtLink
                 to="/profile"
-                class="block px-4 py-2 text-sm transition-colors"
+                class="flex items-center gap-2 px-4 py-2 text-sm transition-colors"
                 :class="currentPath.startsWith('/profile') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
                 :aria-current="currentPath.startsWith('/profile') ? 'page' : undefined"
                 @click="close"
               >
-                {{ t('nav.profile') }}
+                <UserCircleIcon class="h-4 w-4" />
+                <span>{{ t('nav.profile') }}</span>
               </NuxtLink>
               <NuxtLink
                 to="/orders"
-                class="block px-4 py-2 text-sm transition-colors"
+                class="flex items-center gap-2 px-4 py-2 text-sm transition-colors"
                 :class="currentPath.startsWith('/orders') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
                 :aria-current="currentPath.startsWith('/orders') ? 'page' : undefined"
                 @click="close"
               >
-                {{ t('nav.orders') }}
+                <ClipboardDocumentListIcon class="h-4 w-4" />
+                <span>{{ t('nav.orders') }}</span>
               </NuxtLink>
               <div class="my-1 border-t" :style="{ borderColor: 'var(--border-color)' }" />
+              <div class="px-4 pt-2 pb-1 text-xs font-semibold tracking-wide text-[var(--text-secondary)]">
+                {{ t('nav.docs') }} & {{ t('nav.demos') }}
+              </div>
               <NuxtLink
                 to="/docs"
-                class="block px-4 py-2 text-sm transition-colors"
+                class="flex items-center gap-2 px-4 py-2 text-sm transition-colors"
                 :class="currentPath.startsWith('/docs') 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
                 :aria-current="currentPath.startsWith('/docs') ? 'page' : undefined"
                 @click="close"
               >
-                {{ t('nav.docs') }}
+                <BookOpenIcon class="h-4 w-4" />
+                <span>{{ t('nav.docs') }}</span>
               </NuxtLink>
-              <p class="px-4 pt-2 pb-1 text-xs font-medium tracking-wide text-[var(--text-secondary)]">
-                {{ t('nav.demos') }}
-              </p>
               <NuxtLink
                 v-for="link in demoLinks"
                 :key="link.to"
                 :to="link.to"
-                class="block px-4 py-1.5 text-sm transition-colors"
+                class="flex items-center gap-2 px-4 py-1.5 text-sm transition-colors"
                 :class="currentPath.startsWith(link.to) 
                   ? 'bg-[var(--primary-color)]/10 text-[var(--primary-color)] font-medium' 
                   : 'hover:bg-[var(--primary-color)]/10 hover:text-[var(--primary-color)] text-[var(--text-color)]'"
                 :aria-current="currentPath.startsWith(link.to) ? 'page' : undefined"
                 @click="close"
               >
-                {{ link.text }}
+                <BeakerIcon class="h-4 w-4" />
+                <span>{{ link.text }}</span>
               </NuxtLink>
               <button
                 type="button"
@@ -220,6 +227,7 @@
 </template>
 
 <script setup lang="ts">
+import { UserCircleIcon, ClipboardDocumentListIcon, ShieldCheckIcon, BookOpenIcon, BeakerIcon } from '@heroicons/vue/24/outline'
 import BaseDropdown from '~/components/ui/BaseDropdown.vue'
 import { useI18n } from '~/composables/useI18n'
 

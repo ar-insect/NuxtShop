@@ -89,15 +89,27 @@
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useI18n } from '~/composables/useI18n'
+import { useAuth } from '~/composables/useAuth'
 
 const { cartCount } = useCart()
 const { wishlistItems } = useWishlist()
 const { t } = useI18n()
 
-const dashboardLinks = computed(() => ([
-  { to: '/', label: t('nav.home'), icon: 'home' },
-  { to: '/profile', label: t('nav.profile'), icon: 'user' },
-  { to: '/cart', label: t('nav.cart'), icon: 'shopping-cart' },
-  { to: '/wishlist', label: t('nav.wishlist'), icon: 'heart' }
-]))
+const { user } = useAuth()
+
+const dashboardLinks = computed(() => {
+  const links = [
+    { to: '/', label: t('nav.home'), icon: 'home' },
+    { to: '/profile', label: t('nav.profile'), icon: 'user' },
+    { to: '/cart', label: t('nav.cart'), icon: 'shopping-cart' },
+    { to: '/wishlist', label: t('nav.wishlist'), icon: 'heart' }
+  ]
+
+  // 仅管理员在个人中心头部菜单中显示后台管理入口
+  if (user.value?.role === 'admin') {
+    links.push({ to: '/admin', label: t('nav.admin'), icon: 'shield-check' })
+  }
+
+  return links
+})
 </script>

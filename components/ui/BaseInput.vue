@@ -2,6 +2,7 @@
   <div class="w-full">
     <label v-if="label" :for="inputId" class="block text-sm font-medium mb-1" :style="{ color: 'var(--text-color)' }">
       {{ label }}
+      <span v-if="required" class="ml-0.5 text-red-500">*</span>
     </label>
     <div class="relative shadow-sm" :style="{ borderRadius: 'var(--border-radius)' }">
       <div v-if="$slots.prefix" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -76,6 +77,7 @@ interface Props {
   hint?: string
   disabled?: boolean
   clearable?: boolean
+   required?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -87,7 +89,8 @@ const props = withDefaults(defineProps<Props>(), {
   error: '',
   hint: '',
   disabled: false,
-  clearable: false
+  clearable: false,
+  required: false
 })
 
 const { t } = useI18n()

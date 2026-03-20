@@ -7,6 +7,7 @@ const zhCN = {
     wishlist: '收藏夹',
     cart: '购物车',
     profile: '个人中心',
+    admin: '后台管理',
     orders: '我的订单',
     login: '登录',
     register: '注册',

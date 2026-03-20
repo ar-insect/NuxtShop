@@ -22,6 +22,7 @@
 definePageMeta({
   name: 'AdminDashboardPage',
   middleware: ['auth', 'admin' as never],
-  layout: 'dashboard'
+  layout: 'admin'
 })
 </script>
+

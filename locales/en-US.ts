@@ -7,6 +7,7 @@ const enUS = {
     wishlist: 'Wishlist',
     cart: 'Cart',
     profile: 'Profile',
+    admin: 'Admin',
     orders: 'My Orders',
     login: 'Login',
     register: 'Register',

@@ -133,7 +133,7 @@ export default defineNuxtConfig({
     },
     mongodb: {
       uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
-      dbName: process.env.MONGODB_DB_NAME || 'nuxtshop'
+      dbName: process.env.MONGODB_DB_NAME || 'NuxtShop'
     },
     public: {
       // 若显式配置 NUXT_PUBLIC_DISABLE_CAPTCHA，则以环境变量为准；

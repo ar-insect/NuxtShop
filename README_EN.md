@@ -37,6 +37,7 @@ npm install
 
 ### 2) Prepare MongoDB
 
+- Recommended MongoDB version: 6.x or later (this project has been tested with MongoDB 6)
 - Use a local MongoDB installation, or start one via Docker:
 
 ```bash
@@ -51,7 +52,7 @@ If Redis is not running, all core business features (products / cart / orders, e
 - Logging falls back to console output;
 - Cache strategies that rely on Redis gracefully degrade to real‑time computation.
 
-To experience the full stack locally, start Redis:
+To experience the full stack locally, start Redis (recommended version: 7.x or later; this project has been tested with Redis 7):
 
 ```bash
 docker run -d --name nuxtshop-redis -p 6379:6379 redis:7
@@ -90,6 +91,19 @@ npm run dev
 
 By default the app runs at: http://localhost:4000  
 On first start, seed data will be inserted into MongoDB (products, demo users, etc.).
+
+If you prefer to **manually initialize MongoDB (admin user + default ads)** before running the app, you can use the provided script:
+
+```bash
+MONGODB_URI="mongodb://admin:your-password@localhost:27017/admin?authSource=admin" \
+MONGODB_DB_NAME="NuxtShop" \
+node scripts/seed-mongodb.mjs
+```
+
+> Notes:
+> - Replace `MONGODB_URI` with your own Mongo connection string (including username, password and `authSource` if needed);
+> - `MONGODB_DB_NAME` defaults to `NuxtShop`, but you can change it if necessary;
+> - The script is **idempotent**: if an admin user with the same username already exists or the `ads` collection already has data, it will not insert duplicates.
 
 ### 5) Common Scripts
 

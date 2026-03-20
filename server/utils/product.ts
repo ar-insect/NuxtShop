@@ -149,3 +149,42 @@ export async function findAllCategories(): Promise<string[]> {
   const categories = await collection.distinct('category')
   return categories.filter((c): c is string => typeof c === 'string')
 }
+
+export async function createProduct(payload: Omit<SeedProduct, 'id' | 'rating'> & Partial<Pick<SeedProduct, 'rating'>>): Promise<DbProduct> {
+  await ensureProductsSeeded()
+  const collection = getCollection<DbProduct>(COLLECTION_NAME)
+
+  const last = await collection.find({}).sort({ id: -1 }).limit(1).toArray()
+  const nextId = (last[0]?.id || 0) + 1
+
+  const rating = payload.rating || { rate: 0, count: 0 }
+
+  const doc: DbProduct = {
+    ...payload,
+    id: nextId,
+    rating
+  }
+
+  await collection.insertOne(doc)
+  return doc
+}
+
+export async function updateProduct(id: number, patch: Partial<SeedProduct>): Promise<DbProduct | null> {
+  await ensureProductsSeeded()
+  const collection = getCollection<DbProduct>(COLLECTION_NAME)
+
+  const result = await collection.findOneAndUpdate(
+    { id },
+    { $set: patch },
+    { returnDocument: 'after' }
+  )
+
+  return result.value || null
+}
+
+export async function deleteProduct(id: number): Promise<boolean> {
+  await ensureProductsSeeded()
+  const collection = getCollection<DbProduct>(COLLECTION_NAME)
+  const result = await collection.deleteOne({ id })
+  return result.deletedCount === 1
+}

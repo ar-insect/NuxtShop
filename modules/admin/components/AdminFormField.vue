@@ -116,7 +116,8 @@ const inputProps = computed(() => ({
   placeholder: props.placeholder,
   type: props.type || 'text',
   hint: !firstError.value ? props.hint : '',
-  required: !!props.required
+  required: !!props.required,
+  disabled: props.disabled
 }))
 
 const firstError = computed(() => errors.value[0] || '')

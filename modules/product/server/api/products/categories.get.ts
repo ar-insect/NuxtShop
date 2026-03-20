@@ -1,17 +1,16 @@
+import { findActiveCategoriesPublic } from '~/server/utils/product-category'
 import { findAllCategories } from '~/server/utils/product'
 
-const categoryLabels: Record<string, string> = {
-  "men's clothing": '男装',
-  jewelery: '珠宝配饰',
-  electronics: '电子产品',
-  "women's clothing": '女装'
-}
-
 export default defineEventHandler(async () => {
+  const categories = await findActiveCategoriesPublic()
+
+  if (categories.length > 0) {
+    return categories
+  }
+
   const keys = await findAllCategories()
   return keys.map((key) => ({
     key,
-    label: categoryLabels[key] || key
+    label: key
   }))
 })
-

@@ -13,6 +13,9 @@
           <p class="text-sm text-[var(--text-secondary)]">
             共 {{ totalProducts }} 个商品
           </p>
+          <BaseButton size="sm" variant="primary" @click="goCreate">
+            新增商品
+          </BaseButton>
         </div>
 
         <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
@@ -26,12 +29,19 @@
             </div>
             <div class="md:col-span-1">
               <BaseSelect
+                v-model="sortMode"
+                :options="sortOptions"
+                placeholder="排序方式"
+              />
+            </div>
+            <div class="md:col-span-1">
+              <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
                 placeholder="搜索字段"
               />
             </div>
-            <div class="md:col-span-3">
+            <div class="md:col-span-2">
               <BaseInput
                 v-model="searchKeywordInput"
                 placeholder="请输入搜索关键字"
@@ -60,6 +70,16 @@
         @update:page="handlePageChange"
         @update:pageSize="handlePageSizeChange"
       >
+        <template #cell-title="{ row }">
+          <NuxtLink
+            :to="`/products/${row.id}`"
+            target="_blank"
+            rel="noreferrer"
+            class="text-[var(--primary-color)] hover:underline"
+          >
+            {{ row.title }}
+          </NuxtLink>
+        </template>
         <template #cell-category="{ value }">
           <AdminTag :label="categoryLabels[value] || value" status="muted" size="sm" />
         </template>
@@ -75,58 +95,25 @@
         </template>
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openDetail(row)">
-              查看详情
+            <BaseButton
+              size="xs"
+              variant="outline"
+              @click.stop="goEdit(row)"
+            >
+              编辑
+            </BaseButton>
+            <BaseButton
+              size="xs"
+              variant="outline"
+              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              @click.stop="handleDelete(row)"
+            >
+              删除
             </BaseButton>
           </div>
         </template>
       </AdminTable>
     </BaseCard>
-
-    <BaseModal
-      v-model="detailOpen"
-      :title="currentProduct ? `商品详情：${currentProduct.title}` : '商品详情'"
-      :close-on-mask="true"
-      draggable
-      enable-fullscreen
-    >
-      <div v-if="currentProduct" class="space-y-4">
-        <div class="flex gap-4">
-          <img
-            :src="currentProduct.image"
-            alt=""
-            class="w-32 h-32 rounded-md border border-[var(--border-color)] object-cover"
-          >
-          <div class="flex-1 space-y-1">
-            <p class="text-lg font-semibold text-[var(--text-color)]">
-              {{ currentProduct.title }}
-            </p>
-            <p class="text-sm text-[var(--text-secondary)]">
-              分类：{{ categoryLabels[currentProduct.category] || currentProduct.category }}
-            </p>
-            <p class="text-sm text-[var(--text-secondary)]">
-              价格：￥{{ currentProduct.price.toFixed(2) }}
-            </p>
-            <p class="text-sm text-[var(--text-secondary)]">
-              评分：{{ currentProduct.rating?.rate ?? '-' }} 分 / {{ currentProduct.rating?.count ?? 0 }} 评
-            </p>
-          </div>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-[var(--text-color)] mb-1">
-            商品描述
-          </p>
-          <p class="text-sm text-[var(--text-secondary)] whitespace-pre-line">
-            {{ currentProduct.description }}
-          </p>
-        </div>
-      </div>
-      <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="detailOpen = false">
-          关闭
-        </BaseButton>
-      </template>
-    </BaseModal>
   </div>
 </template>
 
@@ -138,6 +125,9 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { http } from '~/utils/http'
+import { useToast } from '~/composables/useToast'
+import { useConfirm } from '~/composables/useConfirm'
+import { useRouter } from '#imports'
 
 definePageMeta({
   name: 'AdminGoodsListPage',
@@ -150,6 +140,10 @@ type AdminProduct = Product
 const { categoryLabels } = useCategoryMapper()
 const { products: sharedProducts } = useProducts()
 
+const router = useRouter()
+const toast = useToast()
+const { confirm } = useConfirm()
+
 const page = ref(1)
 const pageSize = ref(10)
 const filterCategory = ref<'ALL' | string>('ALL')
@@ -161,6 +155,7 @@ const buildFilterParams = () => {
   }
   params.page = page.value
   params.limit = pageSize.value
+   params.sort = sortMode.value
   return params
 }
 
@@ -174,8 +169,26 @@ const { data, pending } = await useAsyncData(
   { server: false }
 )
 
-const products = computed<AdminProduct[]>(() => data.value?.data.items || [])
-const totalProducts = computed(() => data.value?.data.total || 0)
+const products = computed<AdminProduct[]>(() => {
+  const raw = data.value as any
+  const items: AdminProduct[] = Array.isArray(raw?.data?.items)
+    ? raw.data.items
+    : Array.isArray(raw?.items)
+      ? raw.items
+      : []
+  return items
+})
+
+const totalProducts = computed(() => {
+  const raw = data.value as any
+  const total =
+    typeof raw?.data?.total === 'number'
+      ? raw.data.total
+      : typeof raw?.total === 'number'
+        ? raw.total
+        : 0
+  return total
+})
 
 watch(
   products,
@@ -198,6 +211,15 @@ const searchFieldOptions = [
   { label: '名称', value: 'title' },
   { label: '描述', value: 'description' },
   { label: 'ID', value: 'id' }
+]
+
+const sortMode = ref<'default' | 'price-asc' | 'price-desc' | 'rating-desc'>('default')
+
+const sortOptions = [
+  { label: '默认排序', value: 'default' },
+  { label: '价格从低到高', value: 'price-asc' },
+  { label: '价格从高到低', value: 'price-desc' },
+  { label: '评分优先', value: 'rating-desc' }
 ]
 
 const { data: categoryData } = await useAsyncData(
@@ -239,6 +261,7 @@ const clearSearch = async () => {
   searchKeywordInput.value = ''
   searchKeyword.value = ''
   filterCategory.value = 'ALL'
+  sortMode.value = 'default'
   page.value = 1
   await reloadProducts()
 }
@@ -286,12 +309,36 @@ watch(filterCategory, async () => {
   }
 })
 
-const detailOpen = ref(false)
-const currentProduct = ref<AdminProduct | null>(null)
+watch(sortMode, async () => {
+  try {
+    page.value = 1
+    listLoading.value = true
+    await reloadProducts()
+  } finally {
+    listLoading.value = false
+  }
+})
 
-const openDetail = (row: AdminProduct) => {
-  currentProduct.value = row
-  detailOpen.value = true
+const goCreate = () => {
+  router.push('/admin/goods/create')
+}
+
+const goEdit = (row: AdminProduct) => {
+  router.push(`/admin/goods/${row.id}`)
+}
+
+const handleDelete = async (row: AdminProduct) => {
+  const ok = await confirm('确定要删除该商品吗？')
+  if (!ok) return
+
+  try {
+    listLoading.value = true
+    await http.delete(`/admin/products/${row.id}`)
+    toast.success(`商品已删除：${row.title}`)
+    await reloadProducts()
+  } finally {
+    listLoading.value = false
+  }
 }
 
 const columns = [

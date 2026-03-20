@@ -36,6 +36,7 @@ npm install
 
 ### 2) 准备 MongoDB
 
+- 推荐使用 MongoDB 6.x 或更高版本（本项目已在 MongoDB 6 上验证）
 - 本地已安装 MongoDB，或使用 Docker：
 
 ```bash
@@ -50,7 +51,7 @@ docker run -d --name nuxtshop-mongo -p 27017:27017 mongo:6
 - 日志写入会退化为控制台输出；
 - 部分依赖 Redis 的缓存策略会自动降级为实时计算。
 
-建议在本地也启动一个 Redis，体验完整功能：
+建议在本地也启动一个 Redis，体验完整功能（推荐 Redis 7.x 或更高版本，本项目已在 Redis 7 上验证）：
 
 ```bash
 docker run -d --name nuxtshop-redis -p 6379:6379 redis:7
@@ -101,6 +102,19 @@ npm run dev
 
 默认打开：<http://localhost:4000>\
 首次启动会自动进行种子数据初始化，并在 MongoDB 中创建商品、用户等基础数据。
+
+如果你希望在启动前**手动初始化 MongoDB（创建管理员账号与默认广告数据）**，可以使用提供的脚本：
+
+```bash
+MONGODB_URI="mongodb://admin:你的密码@localhost:27017/admin?authSource=admin" \
+MONGODB_DB_NAME="NuxtShop" \
+node scripts/seed-mongodb.mjs
+```
+
+> 说明：
+> - 请将 `MONGODB_URI` 替换为你自己的 Mongo 连接串（包含用户名、密码、authSource 等）；
+> - `MONGODB_DB_NAME` 默认为 `NuxtShop`，可按需修改；
+> - 脚本具有**幂等性**：如果已存在同名管理员或 `ads` 集合已有数据，将不会重复插入。
 
 ### 5) 常用脚本
 

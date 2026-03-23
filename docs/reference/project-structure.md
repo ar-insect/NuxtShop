@@ -70,11 +70,21 @@ NuxtShop 采用领域驱动设计 (DDD) 的思想，将核心业务逻辑拆分�
 
 - **User (用户模块)**  
   - 路径: `modules/user`  
-  - 功能: 用户认证中间件、个人中心逻辑。
+  - 功能: 用户认证中间件、个人中心逻辑（账号信息、地址、偏好设置、安全设置等）。
 
-- **Admin（后台管理模块，预留）**
+- **Admin（后台管理模块）**
   - 路径: `modules/admin`
-  - 功能: 仅管理员可访问的后台管理入口与后续管理页（当前仅有 `/admin` 占位页）。
+  - 功能: 仅管理员可访问的运营后台，包含商品 / 分类 / 订单 / 用户 / 营销 / 系统配置等管理页面。
+  - 主要子模块（页面与 API）：
+    - `pages/admin/index.vue`：Dashboard 概览（今日 KPI、趋势、Top 商品/品类、待办）。
+    - `pages/admin/goods/*.vue`：商品与分类管理。
+    - `pages/admin/order/*.vue`：订单列表、详情、状态管理。
+    - `pages/admin/user/index.vue`：用户列表、订单数与消费总额统计。
+    - `pages/admin/marketing/*.vue`：优惠券、广告位管理。
+    - `pages/admin/system/*.vue`：运费、支付方式、管理员账号等设置。
+  - 服务端接口：
+    - 模块内：`modules/admin/server/api/**` → `/api/admin/**`（如 `/api/admin/orders`、`/api/admin/products`）。
+    - 全局：`server/api/admin/**` 用于与前台共享的管理能力（如统计、公共配置）。 
 
 ### 2.2 服务端 API 规范
 
@@ -82,7 +92,8 @@ NuxtShop 采用领域驱动设计 (DDD) 的思想，将核心业务逻辑拆分�
 
 - Cart API: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`；
 - Order API: `modules/order/server/api/orders/index.ts` → `/api/orders`；
-- Product API: `modules/product/server/api/products/index.get.ts` → `/api/products`。
+- Product API: `modules/product/server/api/products/index.get.ts` → `/api/products`；
+- Admin API: `modules/admin/server/api/admin/**` → `/api/admin/**`（后台各业务管理接口）。
 
 ### 2.3 全局共享资源
 

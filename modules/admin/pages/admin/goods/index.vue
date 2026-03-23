@@ -61,7 +61,7 @@
       </div>
 
       <AdminTable
-        :columns="columns"
+        :columns="columns as any"
         :rows="filteredProducts"
         :loading="tableLoading"
         :page-size="pageSize"
@@ -322,7 +322,7 @@ const handleDelete = async (row: AdminProduct) => {
 }
 
 const columns = computed(() => [
-  { key: 'id', label: t('admin.goods.list.columnId'), sortable: true, width: 80 },
+  { key: 'id', label: t('admin.goods.list.columnId'), sortable: true, width: 80, fixed: 'left' },
   { key: 'title', label: t('admin.goods.list.columnTitle'), sortable: true, width: 260 },
   { key: 'category', label: t('admin.goods.list.columnCategory'), sortable: true, width: 160 },
   { key: 'price', label: t('admin.goods.list.columnPrice'), sortable: true, width: 120 },

@@ -21,7 +21,9 @@
               :key="column.key"
               :class="[
                 'py-2 pr-4 relative select-none',
-                colIndex === 0 && !selectable ? 'pl-4' : ''
+                colIndex === 0 && !selectable ? 'pl-4' : '',
+                column.fixed === 'left' ? 'sticky left-0 z-20 bg-[var(--muted-bg)]' : '',
+                column.fixed === 'right' ? 'sticky right-0 z-20 bg-[var(--muted-bg)]' : ''
               ]"
               :style="{ width: widthStyle(column.key) }"
             >
@@ -46,7 +48,10 @@
                 @mousedown.prevent="startResize($event, column.key)"
               />
             </th>
-            <th v-if="$slots.actions" class="py-2 pr-4">
+            <th
+              v-if="$slots.actions"
+              class="py-2 pr-4 sticky right-0 z-30 bg-[var(--muted-bg)]"
+            >
               操作
             </th>
           </tr>
@@ -77,7 +82,9 @@
               :key="column.key"
               :class="[
                 'py-2 pr-4 align-middle',
-                colIndex === 0 && !selectable ? 'pl-4' : ''
+                colIndex === 0 && !selectable ? 'pl-4' : '',
+                column.fixed === 'left' ? 'sticky left-0 z-10 bg-[var(--card-bg)]' : '',
+                column.fixed === 'right' ? 'sticky right-0 z-10 bg-[var(--card-bg)]' : ''
               ]"
             >
               <slot
@@ -90,7 +97,10 @@
                 {{ (row as any)[column.key] }}
               </slot>
             </td>
-            <td v-if="$slots.actions" class="py-2 pr-4 align-middle">
+            <td
+              v-if="$slots.actions"
+              class="py-2 pr-4 align-middle sticky right-0 z-30 bg-[var(--card-bg)]"
+            >
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>
           </tr>
@@ -142,6 +152,7 @@ interface AdminTableColumn {
   label: string
   sortable?: boolean
   width?: number
+  fixed?: 'left' | 'right'
 }
 
 const props = defineProps<{

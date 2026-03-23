@@ -2,7 +2,7 @@
   <ThemeProvider :theme="styledTheme">
     <div class="app-container">
       <NuxtLayout>
-        <NuxtPage />
+        <NuxtPage keepalive />
       </NuxtLayout>
     </div>
   </ThemeProvider>

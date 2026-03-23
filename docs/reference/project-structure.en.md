@@ -87,20 +87,30 @@ Each module typically contains:
 
 ### 2.4 User module
 
-- Path: `modules/admin`
-- Responsibilities:
-  - Entry point for back‑office/admin features
-  - Currently exposes a placeholder `/admin` page restricted to admin users only
-
----
-
 - Path: `modules/user`
 - Responsibilities:
   - Auth middleware
-  - Profile‑related flows (basic info, security, preferences)
+  - Profile flows (account info, addresses, preferences, security)
 - Works together with:
   - `composables/useAuth.ts`
   - `server/api/auth/*`
+
+### 2.5 Admin module
+
+- Path: `modules/admin`
+- Responsibilities:
+  - Back‑office admin UI, accessible only to admin users
+  - Product/category/order/user/marketing/system configuration management
+- Main sub‑pages:
+  - `pages/admin/index.vue` – dashboard overview (today KPIs, trends, top products/categories, todos)
+  - `pages/admin/goods/*.vue` – product & category management
+  - `pages/admin/order/*.vue` – order list/detail and status management
+  - `pages/admin/user/index.vue` – user list with order count and total spend
+  - `pages/admin/marketing/*.vue` – coupons and ads management
+  - `pages/admin/system/*.vue` – shipping, payment methods, admin accounts
+- Server APIs:
+  - Module‑scoped: `modules/admin/server/api/admin/**` → `/api/admin/**`
+  - Global: `server/api/admin/**` for shared admin‑side endpoints (e.g. dashboard metrics)
 
 ---
 
@@ -109,9 +119,10 @@ Each module typically contains:
 To avoid conflicts and keep things discoverable, each module exposes
 namespaced APIs:
 
-- Cart: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`
-- Order: `modules/order/server/api/orders/index.ts` → `/api/orders`
-- Product: `modules/product/server/api/products/index.get.ts` → `/api/products`
+112→- Cart: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`
+113→- Order: `modules/order/server/api/orders/index.ts` → `/api/orders`
+114→- Product: `modules/product/server/api/products/index.get.ts` → `/api/products`
+115→- Admin: `modules/admin/server/api/admin/**` → `/api/admin/**`
 
 Global APIs that are not tied to a single domain live under `server/api/`,
 for example:

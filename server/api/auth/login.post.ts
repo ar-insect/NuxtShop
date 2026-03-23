@@ -2,6 +2,7 @@
 import { findUserByUsername, verifyPassword } from '~/server/utils/user';
 import { createApiError } from '~/server/utils/api-error';
 import type { LoginResponse, UserPublic } from '~/types/api';
+import { useRuntimeConfig } from '#imports';
 
 export default defineEventHandler(async (event): Promise<LoginResponse> => {
   const body = await readBody(event);
@@ -43,6 +44,9 @@ export default defineEventHandler(async (event): Promise<LoginResponse> => {
   // 生成一个简单的 token (真实项目中应使用 JWT 等)
   const token = `user-jwt-token-${user._id}`;
 
+  const config = useRuntimeConfig()
+  const isSuperAdmin = user.role === 'admin' && user.username === config.admin.username
+
   const userPayload: UserPublic = {
     _id: String(user._id),
     username: user.username,
@@ -51,7 +55,8 @@ export default defineEventHandler(async (event): Promise<LoginResponse> => {
     avatar: user.avatar,
     phone: user.phone,
     language: user.language,
-    timezone: user.timezone
+    timezone: user.timezone,
+    isSuperAdmin
   }
 
   return {

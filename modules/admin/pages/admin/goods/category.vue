@@ -2,16 +2,16 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <h1 class="text-2xl font-bold text-[var(--text-color)]">
-      商品分类管理
+      {{ t('admin.goods.category.title') }}
     </h1>
 
     <BaseCard class="p-4 space-y-4">
       <div class="flex items-center justify-between">
         <p class="text-sm text-[var(--text-secondary)]">
-          共 {{ total }} 个分类
+          {{ t('admin.goods.category.total', { count: total }) }}
         </p>
         <BaseButton size="sm" variant="primary" @click="openCreate">
-          新增分类
+          {{ t('admin.goods.category.createButton') }}
         </BaseButton>
       </div>
 
@@ -20,7 +20,7 @@
           <div class="md:col-span-2">
             <BaseInput
               v-model="searchKeywordInput"
-              placeholder="请输入分类名称或 Key"
+              :placeholder="t('admin.goods.category.searchPlaceholder')"
               @keyup.enter="applySearch"
             />
           </div>
@@ -28,15 +28,15 @@
             <BaseSelect
               v-model="statusFilter"
               :options="statusOptions"
-              placeholder="全部状态"
+              :placeholder="t('admin.goods.category.statusPlaceholder')"
             />
           </div>
           <div class="flex gap-2 justify-end md:col-span-1">
             <BaseButton size="sm" variant="primary" @click="applySearch">
-              搜索
+              {{ t('admin.goods.category.search') }}
             </BaseButton>
             <BaseButton size="sm" variant="secondary" @click="clearSearch">
-              重置
+              {{ t('admin.goods.category.reset') }}
             </BaseButton>
           </div>
         </div>
@@ -58,7 +58,11 @@
           </span>
         </template>
         <template #cell-active="{ value }">
-          <AdminTag :label="value ? '启用' : '停用'" :status="value ? 'success' : 'muted'" size="sm" />
+          <AdminTag
+            :label="value ? t('admin.goods.category.tagEnabled') : t('admin.goods.category.tagDisabled')"
+            :status="value ? 'success' : 'muted'"
+            size="sm"
+          />
         </template>
         <template #cell-order="{ value }">
           <span class="text-xs text-[var(--text-secondary)]">
@@ -68,7 +72,7 @@
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
             <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
-              编辑
+              {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
@@ -76,7 +80,7 @@
               class="text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
-              删除
+              {{ t('admin.common.delete') }}
             </BaseButton>
           </div>
         </template>
@@ -85,7 +89,7 @@
 
     <BaseModal
       v-model="modalOpen"
-      :title="editing ? '编辑分类' : '新增分类'"
+      :title="editing ? t('admin.goods.category.modalTitleEdit') : t('admin.goods.category.modalTitleCreate')"
       :close-on-mask="false"
       draggable
       enable-fullscreen
@@ -95,37 +99,37 @@
           v-model="form.key"
           required
           class="md:col-span-2"
-          label="分类 Key"
-          placeholder="系统自动生成"
+          :label="t('admin.goods.category.fieldKey')"
+          :placeholder="t('admin.goods.category.fieldKeyPlaceholder')"
           :disabled="true"
-          hint="系统根据分类名称自动生成，仅作为内部标识使用"
+          :hint="t('admin.goods.category.fieldKeyHint')"
         />
         <AdminFormField
           v-model="form.label"
           required
           class="md:col-span-2"
-          label="分类名称"
-          placeholder="例如: 电子产品"
+          :label="t('admin.goods.category.fieldLabel')"
+          :placeholder="t('admin.goods.category.fieldLabelPlaceholder')"
         />
         <AdminFormField
           v-model.number="form.order"
-          type="number"
-          label="排序"
-          placeholder="数值越小越靠前"
+          component="number"
+          :label="t('admin.goods.category.fieldOrder')"
+          :placeholder="t('admin.goods.category.fieldOrderPlaceholder')"
         />
         <div class="flex items-center gap-2 md:col-span-2">
           <label class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <input v-model="form.active" type="checkbox" class="rounded border-[var(--border-color)]" >
-            启用
+            {{ t('admin.goods.category.fieldActive') }}
           </label>
         </div>
       </form>
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
-          取消
+          {{ t('admin.goods.category.modalCancel') }}
         </BaseButton>
         <BaseButton variant="primary" size="sm" @click="handleSubmit">
-          {{ editing ? '保存修改' : '创建分类' }}
+          {{ editing ? t('admin.goods.category.modalSubmitEdit') : t('admin.goods.category.modalSubmitCreate') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -136,11 +140,8 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
-import BaseInput from '~/components/ui/BaseInput.vue'
 import { http } from '~/utils/http'
-import { useToast } from '~/composables/useToast'
-import { useConfirm } from '~/composables/useConfirm'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   name: 'AdminGoodsCategoryPage',
@@ -150,6 +151,7 @@ definePageMeta({
 
 const toast = useToast()
 const { confirm } = useConfirm()
+const { t } = useI18n()
 
 interface AdminCategory {
   _id: string
@@ -169,11 +171,11 @@ const statusFilter = ref<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL')
 const searchKeyword = ref('')
 const searchKeywordInput = ref('')
 
-const statusOptions = [
-  { label: '全部状态', value: 'ALL' },
-  { label: '启用', value: 'ACTIVE' },
-  { label: '停用', value: 'INACTIVE' }
-]
+const statusOptions = computed(() => [
+  { label: t('admin.goods.category.statusAll'), value: 'ALL' },
+  { label: t('admin.goods.category.statusActive'), value: 'ACTIVE' },
+  { label: t('admin.goods.category.statusInactive'), value: 'INACTIVE' }
+])
 
 const buildFilterParams = () => {
   const params: Record<string, string | number> = {}
@@ -313,7 +315,7 @@ const openEdit = (row: AdminCategory) => {
 
 const handleSubmit = async () => {
   if (!form.key || !form.label) {
-    toast.error('请填写必填字段')
+    toast.error(t('admin.goods.category.errorRequired'))
     return
   }
 
@@ -329,21 +331,21 @@ const handleSubmit = async () => {
     try {
       if (!editing.value) {
         await http.post('/admin/product-categories', payload)
-        toast.success('分类已创建')
+        toast.success(t('admin.goods.category.createSuccess'))
       } else {
         await http.put(`/admin/product-categories/${editing.value._id}`, {
           label: payload.label,
           order: payload.order,
           active: payload.active
         })
-        toast.success('分类已更新')
+        toast.success(t('admin.goods.category.updateSuccess'))
       }
       modalOpen.value = false
       await reload()
     } catch (error: any) {
       const code = error?.data?.code || error?.code
       if (code === 'PRODUCT_CATEGORY_KEY_EXISTS') {
-        toast.error('分类 Key 已存在，请修改分类名称')
+        toast.error(t('admin.goods.category.errorKeyExists'))
       } else {
         throw error
       }
@@ -354,13 +356,13 @@ const handleSubmit = async () => {
 }
 
 const handleDelete = async (row: AdminCategory) => {
-  const ok = await confirm('确定要删除该分类吗？')
+  const ok = await confirm(t('admin.goods.category.deleteConfirm'))
   if (!ok) return
 
   try {
     listLoading.value = true
     await http.delete(`/admin/product-categories/${row._id}`)
-    toast.success('分类已删除')
+    toast.success(t('admin.goods.category.deleteSuccess'))
     await reload()
   } finally {
     listLoading.value = false
@@ -379,12 +381,12 @@ const applySearch = () => {
   searchKeyword.value = searchKeywordInput.value.trim()
 }
 
-const columns = [
-  { key: 'key', label: 'Key', sortable: true, width: 160 },
-  { key: 'label', label: '名称', sortable: true, width: 200 },
-  { key: 'order', label: '排序', sortable: true, width: 80 },
-  { key: 'active', label: '状态', sortable: true, width: 80 }
-]
+const columns = computed(() => [
+  { key: 'key', label: t('admin.goods.category.columnKey'), sortable: true, width: 160 },
+  { key: 'label', label: t('admin.goods.category.columnLabel'), sortable: true, width: 200 },
+  { key: 'order', label: t('admin.goods.category.columnOrder'), sortable: true, width: 80 },
+  { key: 'active', label: t('admin.goods.category.columnStatus'), sortable: true, width: 80 }
+])
 
 const generateCategoryKey = (label: string) => {
   const base = (label || '')

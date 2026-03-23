@@ -136,11 +136,11 @@
               </div>
               <div class="flex justify-between text-sm text-[var(--text-color)]">
                 <p>{{ t('pages.checkout.shippingLabel') }}</p>
-                <p>¥0.00</p>
+                <p>¥{{ shippingFee.toFixed(2) }}</p>
               </div>
               <div class="flex justify-between text-base font-medium text-[var(--text-color)] pt-4 border-t border-[var(--border-color)]">
                 <p>{{ t('pages.checkout.totalLabel') }}</p>
-                <p>¥{{ cartTotal.toFixed(2) }}</p>
+                <p>¥{{ orderTotal.toFixed(2) }}</p>
               </div>
             </div>
 
@@ -262,11 +262,51 @@ const deleteAddress = async (e: Event, id: string) => {
 }
 
 
-const paymentMethods = [
-  { id: 'alipay', name: t('pages.checkout.paymentMethodAlipay'), icon: QrCodeIcon },
-  { id: 'wechat', name: t('pages.checkout.paymentMethodWechat'), icon: QrCodeIcon },
-  { id: 'credit_card', name: t('pages.checkout.paymentMethodCard'), icon: CreditCardIcon },
-]
+const { data: systemSettings } = await useAsyncData(
+  'system-settings',
+  () => $fetch<{ success: boolean; data: { shipping: { baseFee: number; freeThreshold: number | null }; payments: { alipay: boolean; wechat: boolean; creditCard: boolean } } }>('/api/system/settings'),
+  {
+    default: () => ({
+      success: true,
+      data: {
+        shipping: {
+          baseFee: 0,
+          freeThreshold: null
+        },
+        payments: {
+          alipay: true,
+          wechat: true,
+          creditCard: true
+        }
+      }
+    })
+  }
+)
+
+const paymentMethods = computed(() => {
+  const cfg = systemSettings.value?.data?.payments
+  const list: { id: string; name: string; icon: any }[] = []
+  if (!cfg || cfg.alipay) {
+    list.push({ id: 'alipay', name: t('pages.checkout.paymentMethodAlipay'), icon: QrCodeIcon })
+  }
+  if (!cfg || cfg.wechat) {
+    list.push({ id: 'wechat', name: t('pages.checkout.paymentMethodWechat'), icon: QrCodeIcon })
+  }
+  if (!cfg || cfg.creditCard) {
+    list.push({ id: 'credit_card', name: t('pages.checkout.paymentMethodCard'), icon: CreditCardIcon })
+  }
+  return list
+})
+
+watch(
+  () => paymentMethods.value,
+  (methods) => {
+    if (!methods.find(m => m.id === selectedPayment.value)) {
+      selectedPayment.value = methods[0]?.id || ''
+    }
+  },
+  { immediate: true }
+)
 
 const form = reactive({
   firstName: '',
@@ -293,6 +333,21 @@ const isFormValid = computed(() => {
     isRegionValid.value &&
     isPhoneValid.value
   )
+})
+
+const shippingFee = computed(() => {
+  const cfg = systemSettings.value?.data?.shipping
+  if (!cfg) return 0
+  const base = typeof cfg.baseFee === 'number' ? cfg.baseFee : 0
+  const threshold = cfg.freeThreshold
+  if (typeof threshold === 'number' && threshold > 0 && cartTotal.value >= threshold) {
+    return 0
+  }
+  return base
+})
+
+const orderTotal = computed(() => {
+  return cartTotal.value + shippingFee.value
 })
 
 const handleCheckout = async () => {

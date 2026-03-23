@@ -5,10 +5,11 @@
     </label>
     
     <div 
-      class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors min-h-[38px] cursor-pointer flex items-center flex-wrap gap-1 px-3 py-1.5"
+      class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors cursor-pointer flex items-center flex-wrap gap-1"
       :class="[
         disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : '',
-        isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]'
+        isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]',
+        sizeClass
       ]"
       role="button"
       :aria-haspopup="'listbox'"
@@ -131,6 +132,7 @@ const props = defineProps<{
   disabled?: boolean
   clearable?: boolean
   multiple?: boolean
+  size?: 'sm' | 'md'
 }>()
 
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
@@ -139,6 +141,14 @@ const isOpen = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
 const listboxRef = ref<HTMLElement | null>(null)
 const highlightedIndex = ref<number>(-1)
+
+const sizeClass = computed(() => {
+  const size = props.size || 'md'
+  if (size === 'sm') {
+    return 'min-h-[32px] px-2.5 py-1 text-xs'
+  }
+  return 'min-h-[38px] px-3 py-1.5 text-sm'
+})
 
 const isEmpty = computed(() => {
   if (props.multiple) {

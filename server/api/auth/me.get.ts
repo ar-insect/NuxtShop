@@ -1,6 +1,6 @@
 // server/api/auth/me.get.ts
 import type { MeResponse, UserPublic } from '~/types/api';
-import { requireUser } from '~/server/utils/auth';
+import { isSuperAdminUser, requireUser } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event): Promise<MeResponse> => {
   const user = await requireUser(event);
@@ -13,7 +13,8 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
     avatar: user.avatar,
     language: user.language,
     timezone: user.timezone,
-    phone: user.phone
+    phone: user.phone,
+    isSuperAdmin: isSuperAdminUser(user)
   }
 
   return {

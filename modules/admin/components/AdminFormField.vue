@@ -20,6 +20,14 @@
         {{ hint }}
       </p>
     </template>
+    <template v-else-if="component === 'number'">
+      <BaseInputNumber
+        v-bind="inputProps"
+        :model-value="internalValue"
+        :error="firstError"
+        @update:modelValue="onInput"
+      />
+    </template>
     <template v-else>
       <BaseInput
         v-bind="inputProps"
@@ -34,6 +42,7 @@
 <script setup lang="ts">
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInputNumber from '~/components/ui/BaseInputNumber.vue'
 
 type RuleType = 'required' | 'minLength' | 'maxLength' | 'url' | 'regex' | 'custom'
 
@@ -86,7 +95,7 @@ const props = defineProps<{
   placeholder?: string
   type?: string
   hint?: string
-  component?: 'input' | 'select'
+  component?: 'input' | 'select' | 'number'
   options?: SelectOption[]
   disabled?: boolean
   required?: boolean

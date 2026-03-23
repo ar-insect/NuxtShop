@@ -44,6 +44,12 @@ export type ApiErrorCode =
   | 'PRODUCT_CATEGORY_INVALID_ID'
   | 'PRODUCT_CATEGORY_NOT_FOUND'
   | 'PRODUCT_CATEGORY_OPERATION_FAILED'
+  | 'REVIEW_MISSING_FIELDS'
+  | 'REVIEW_CREATE_FAILED'
+  | 'REVIEW_INVALID_PRODUCT_ID'
+  | 'REVIEW_QUERY_FAILED'
+  | 'REVIEW_NOT_FOUND'
+  | 'SYSTEM_SETTING_OPERATION_FAILED'
 
 export interface ApiErrorPayload {
   code: ApiErrorCode
@@ -60,6 +66,7 @@ export interface UserPublic {
   phone?: string
   language?: UserLanguage
   timezone?: string
+  isSuperAdmin?: boolean
 }
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -107,4 +114,35 @@ export interface MeResponse {
 
 export interface AdsResponse {
   items: AdItem[]
+}
+
+export interface AdminDashboardKpi {
+  todayOrderCount: number
+  todayRevenue: number
+  todayNewUsers: number
+  pendingShipmentCount: number
+  pendingCancelledCount: number
+}
+
+export interface AdminDashboardTrendPoint {
+  date: string
+  orderCount: number
+  revenue: number
+}
+
+export type AdminDashboardTodoType = 'order' | 'review' | 'coupon'
+
+export interface AdminDashboardTodoItem {
+  id: string
+  type: AdminDashboardTodoType
+  title: string
+  description?: string
+  createdAt: string
+  link?: string
+}
+
+export interface AdminDashboardOverview {
+  kpi: AdminDashboardKpi
+  trend: AdminDashboardTrendPoint[]
+  todos: AdminDashboardTodoItem[]
 }

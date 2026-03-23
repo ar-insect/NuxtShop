@@ -22,30 +22,15 @@ const classes = computed(() => {
     ? ['px-3', 'py-0.5', 'text-xs']
     : ['px-3.5', 'py-1', 'text-sm']
 
-  let colorClass: string[]
+  const status = props.status || 'default'
 
-  switch (props.status) {
-    case 'primary':
-      colorClass = ['bg-[var(--primary-color)]/10', 'text-[var(--primary-color)]']
-      break
-    case 'success':
-      colorClass = ['bg-emerald-100', 'text-emerald-700']
-      break
-    case 'warning':
-      colorClass = ['bg-amber-100', 'text-amber-800']
-      break
-    case 'danger':
-      colorClass = ['bg-red-100', 'text-red-700']
-      break
-    case 'muted':
-      colorClass = ['bg-[var(--muted-bg)]', 'text-[var(--text-secondary)]']
-      break
-    default:
-      colorClass = ['bg-[var(--card-bg)]', 'text-[var(--text-secondary)]', 'border', 'border-[var(--border-color)]']
-      break
-  }
+  const colorClass = [
+    'border',
+    `border-[var(--admin-tag-${status}-border)]`,
+    `bg-[var(--admin-tag-${status}-bg)]`,
+    `text-[var(--admin-tag-${status}-fg)]`
+  ]
 
   return [...base, ...sizeClass, ...colorClass].join(' ')
 })
 </script>
-

@@ -1,10 +1,11 @@
 import type { H3Event } from 'h3'
 import { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-import { requireAdmin } from '~/server/utils/auth'
+import { isSuperAdminUser, requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 import type { User } from '~/types/user'
 import type { UserPublic } from '~/types/api'
+import bcrypt from 'bcryptjs'
 
 const COLLECTION_NAME = 'users'
 
@@ -16,7 +17,8 @@ const mapUserToPublic = (user: User): UserPublic => ({
   avatar: user.avatar,
   phone: user.phone,
   language: user.language,
-  timezone: user.timezone
+  timezone: user.timezone,
+  isSuperAdmin: isSuperAdminUser(user)
 })
 
 export default defineEventHandler(async (event: H3Event) => {
@@ -38,9 +40,21 @@ export default defineEventHandler(async (event: H3Event) => {
     phone: string
     language: 'zh-CN' | 'en-US'
     timezone: string
+    password: string
   }>>(event)
 
   const collection = getCollection<User>(COLLECTION_NAME)
+
+  const target = await collection.findOne({ _id: new ObjectId(idParam) })
+
+  if (!target) {
+    throw createApiError({
+      statusCode: 404,
+      code: 'ADMIN_USER_NOT_FOUND',
+      message: '用户不存在',
+      details: { id: idParam }
+    })
+  }
 
   const updates: Partial<User> = {}
   if (body.role && (body.role === 'admin' || body.role === 'user')) {
@@ -51,12 +65,33 @@ export default defineEventHandler(async (event: H3Event) => {
   if (body.language !== undefined) updates.language = body.language
   if (body.timezone !== undefined) updates.timezone = body.timezone
 
+  if (body.password !== undefined) {
+    if (!body.password || body.password.length < 6) {
+      throw createApiError({
+        statusCode: 400,
+        code: 'ADMIN_USER_OPERATION_FAILED',
+        message: '密码长度至少为 6 位',
+        details: null
+      })
+    }
+    updates.password = await bcrypt.hash(body.password, 10)
+  }
+
   if (Object.keys(updates).length === 0) {
     throw createApiError({
       statusCode: 400,
       code: 'ADMIN_USER_OPERATION_FAILED',
       message: '没有可更新的字段',
       details: null
+    })
+  }
+
+  if ((target.role === 'admin' || updates.role === 'admin') && !isSuperAdminUser(adminUser)) {
+    throw createApiError({
+      statusCode: 403,
+      code: 'AUTH_FORBIDDEN',
+      message: '只有超级管理员可以修改管理员账号',
+      details: { id: idParam }
     })
   }
 
@@ -91,4 +126,3 @@ export default defineEventHandler(async (event: H3Event) => {
     data: mapUserToPublic(result.value)
   }
 })
-

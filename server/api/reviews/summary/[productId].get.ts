@@ -1,37 +1,27 @@
+import { createApiError } from '~/server/utils/api-error'
 import { getReviewSummaryByProductId } from '~/server/utils/review'
 
 export default defineEventHandler(async (event) => {
   const productIdParam = event.context.params?.productId
-
-  if (!productIdParam) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Product ID is required'
-    })
-  }
-
   const productId = Number(productIdParam)
 
-  if (!Number.isFinite(productId)) {
-    throw createError({
+  if (!productId || Number.isNaN(productId)) {
+    throw createApiError({
       statusCode: 400,
-      statusMessage: 'Invalid product ID'
+      code: 'REVIEW_INVALID_PRODUCT_ID',
+      message: '无效的商品 ID',
+      details: { productId: productIdParam }
     })
   }
 
-  try {
-    const summary = await getReviewSummaryByProductId(productId)
+  const summary = await getReviewSummaryByProductId(productId)
 
-    return {
-      success: true,
-      data: summary
+  return {
+    success: true,
+    data: {
+      avgRating: summary.avgRating,
+      reviewCount: summary.reviewCount
     }
-  } catch (e) {
-    console.error('Failed to fetch review summary:', e)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch review summary'
-    })
   }
 })
 

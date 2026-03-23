@@ -76,12 +76,12 @@
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>
           </tr>
-          <tr v-if="paginatedRows.length === 0">
+          <tr v-if="!loading && paginatedRows.length === 0">
             <td
               :colspan="columns.length + ($slots.actions ? 1 : 0)"
               class="py-6 text-center text-[var(--text-secondary)]"
             >
-              暂无数据
+              <BaseEmpty title="暂无数据" />
             </td>
           </tr>
         </tbody>
@@ -103,6 +103,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import BaseLoading from '~/components/ui/BaseLoading.vue'
+import BaseEmpty from '~/components/ui/BaseEmpty.vue'
 import AdminPagination from '~/modules/admin/components/AdminPagination.vue'
 
 interface AdminTableColumn {

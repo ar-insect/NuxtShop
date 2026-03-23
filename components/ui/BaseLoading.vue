@@ -1,6 +1,10 @@
 <template>
   <div v-if="loading" class="loading-overlay">
-    <div class="spinner"/>
+    <div class="spinner">
+      <span />
+      <span />
+      <span />
+    </div>
     <p v-if="displayText" class="loading-text">{{ displayText }}</p>
   </div>
 </template>
@@ -42,12 +46,28 @@ const displayText = computed(() => props.text || t('ui.loading'))
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--muted-bg);
-  border-top: 4px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.spinner span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background-color: var(--primary-color);
+  opacity: 0.25;
+  transform: translateY(0);
+  animation: admin-loading-bounce 0.9s infinite ease-in-out;
+}
+
+.spinner span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.spinner span:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 .loading-text {
@@ -56,8 +76,14 @@ const displayText = computed(() => props.text || t('ui.loading'))
   font-size: 0.9rem;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes admin-loading-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 </style>

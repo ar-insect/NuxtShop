@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import { getCollection } from '~/server/utils/mongodb'
-import { requireAdmin } from '~/server/utils/auth'
+import { isSuperAdminUser, requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 import type { User } from '~/types/user'
 import type { UserPublic } from '~/types/api'
@@ -16,11 +16,12 @@ const mapUserToPublic = (user: User): UserPublic => ({
   avatar: user.avatar,
   phone: user.phone,
   language: user.language,
-  timezone: user.timezone
+  timezone: user.timezone,
+  isSuperAdmin: isSuperAdminUser(user)
 })
 
 export default defineEventHandler(async (event: H3Event) => {
-  await requireAdmin(event)
+  const adminUser = await requireAdmin(event)
 
   const body = await readBody<{
     username?: string
@@ -75,6 +76,15 @@ export default defineEventHandler(async (event: H3Event) => {
     phone: body.phone,
     createdAt: now,
     updatedAt: now
+  }
+
+  if (doc.role === 'admin' && !isSuperAdminUser(adminUser)) {
+    throw createApiError({
+      statusCode: 403,
+      code: 'AUTH_FORBIDDEN',
+      message: '只有超级管理员可以创建管理员账号',
+      details: null
+    })
   }
 
   const result = await collection.insertOne(doc)

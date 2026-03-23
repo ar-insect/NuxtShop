@@ -5,7 +5,7 @@
       <span v-if="required" class="ml-0.5 text-red-500">*</span>
     </label>
     <div class="relative shadow-sm" :style="{ borderRadius: 'var(--border-radius)' }">
-      <div v-if="$slots.prefix" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <div v-if="$slots.prefix" class="absolute inset-y-0 left-0 pl-3 flex items-center">
         <slot name="prefix"/>
       </div>
       <input

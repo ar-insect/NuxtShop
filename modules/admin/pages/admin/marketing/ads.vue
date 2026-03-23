@@ -3,7 +3,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
-        广告管理
+        {{ t('admin.marketing.ads.title') }}
       </h1>
     </div>
 
@@ -11,10 +11,10 @@
       <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
-            共 {{ totalAds }} 条广告
+            {{ t('admin.marketing.ads.total', { count: totalAds }) }}
           </p>
           <BaseButton size="sm" variant="primary" @click="openCreate">
-            新增广告
+            {{ t('admin.marketing.ads.createButton') }}
           </BaseButton>
         </div>
 
@@ -24,27 +24,27 @@
               <BaseSelect
                 v-model="filterPosition"
                 :options="positionFilterOptions"
-                placeholder="全部位置"
+                :placeholder="t('admin.marketing.ads.positionPlaceholder')"
               />
             </div>
             <div class="md:col-span-1">
               <BaseSelect
                 v-model="filterStatus"
                 :options="statusFilterOptions"
-                placeholder="全部状态"
+                :placeholder="t('admin.marketing.ads.statusPlaceholder')"
               />
             </div>
             <div class="md:col-span-1">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
-                placeholder="搜索字段"
+                :placeholder="t('admin.marketing.ads.searchFieldPlaceholder')"
               />
             </div>
             <div class="md:col-span-2">
               <BaseInput
                 v-model="searchKeywordInput"
-                placeholder="请输入搜索关键字"
+                :placeholder="t('admin.marketing.ads.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
@@ -54,14 +54,14 @@
                 variant="primary"
                 @click="applySearch"
               >
-                搜索
+                {{ t('admin.marketing.ads.search') }}
               </BaseButton>
               <BaseButton
                 size="sm"
                 variant="secondary"
                 @click="clearSearch"
               >
-                重置
+                {{ t('admin.marketing.ads.reset') }}
               </BaseButton>
             </div>
           </div>
@@ -82,7 +82,11 @@
           <AdminTag :label="value" status="primary" size="sm" />
         </template>
         <template #cell-active="{ value }">
-          <AdminTag :label="value !== false ? '启用' : '停用'" :status="value !== false ? 'success' : 'muted'" size="sm" />
+          <AdminTag
+            :label="value !== false ? t('admin.marketing.ads.tagActive') : t('admin.marketing.ads.tagInactive')"
+            :status="value !== false ? 'success' : 'muted'"
+            size="sm"
+          />
         </template>
         <template #cell-media="{ row }">
           <a
@@ -101,7 +105,7 @@
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
             <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
-              编辑
+              {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
@@ -110,7 +114,7 @@
               :disabled="row.active !== false"
               @click.stop="handleDelete(row)"
             >
-              删除
+              {{ t('admin.common.delete') }}
             </BaseButton>
           </div>
         </template>
@@ -118,7 +122,7 @@
     </BaseCard>
     <BaseModal
       v-model="modalOpen"
-      :title="editing ? '编辑广告' : '新增广告'"
+      :title="editing ? t('admin.marketing.ads.modalTitleEdit') : t('admin.marketing.ads.modalTitleCreate')"
       :close-on-mask="false"
       draggable
       enable-fullscreen
@@ -129,54 +133,54 @@
           required
           component="select"
           :options="positionOptions"
-          label="位置"
-          placeholder="请选择广告位置"
+          :label="t('admin.marketing.ads.fieldPosition')"
+          :placeholder="t('admin.marketing.ads.fieldPositionPlaceholder')"
           class="md:col-span-2"
         />
         <AdminFormField
           v-model.number="form.order"
           required
-          type="number"
-          label="排序"
-          placeholder="1"
+          component="number"
+          :label="t('admin.marketing.ads.fieldOrder')"
+          :placeholder="t('admin.marketing.ads.fieldOrderPlaceholder')"
         />
         <AdminFormField
           v-model="form.image"
           class="md:col-span-2"
           :rules="[
-            { type: 'url', message: '请输入合法的图片地址' }
+            { type: 'url', message: t('admin.marketing.ads.errorImageUrl') }
           ]"
           required
-          label="图片地址"
-          placeholder="https://..."
+          :label="t('admin.marketing.ads.fieldImage')"
+          :placeholder="t('admin.marketing.ads.fieldImagePlaceholder')"
         />
         <AdminFormField
           v-model="form.link"
           class="md:col-span-2"
-          :rules="[{ type: 'url', message: '请输入合法的链接地址' }]"
-          label="跳转链接"
-          placeholder="/products?category=electronics"
+          :rules="[{ type: 'url', message: t('admin.marketing.ads.errorLinkUrl') }]"
+          :label="t('admin.marketing.ads.fieldLink')"
+          :placeholder="t('admin.marketing.ads.fieldLinkPlaceholder')"
         />
         <AdminFormField
           v-model="form.altKey"
           class="md:col-span-2"
           required
-          label="文案"
-          placeholder="pages.home.adElectronics"
+          :label="t('admin.marketing.ads.fieldAltKey')"
+          :placeholder="t('admin.marketing.ads.fieldAltKeyPlaceholder')"
         />
         <div class="flex items-center gap-2 md:col-span-2">
           <label class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <input v-model="form.active" type="checkbox" class="rounded border-[var(--border-color)]" >
-            启用
+            {{ t('admin.marketing.ads.fieldActive') }}
           </label>
         </div>
       </form>
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
-          取消
+          {{ t('admin.marketing.ads.modalCancel') }}
         </BaseButton>
         <BaseButton variant="primary" size="sm" @click="handleSubmit">
-          {{ editing ? '保存修改' : '创建广告' }}
+          {{ editing ? t('admin.marketing.ads.modalSubmitEdit') : t('admin.marketing.ads.modalSubmitCreate') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -187,12 +191,9 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
-import BaseInput from '~/components/ui/BaseInput.vue'
-import { useToast } from '~/composables/useToast'
-import { useConfirm } from '~/composables/useConfirm'
 import { http, type ApiResponse } from '~/utils/http'
 import { watch } from 'vue'
+import { useI18n } from '~/composables/useI18n'
 definePageMeta({
   name: 'AdminAdsPage',
   middleware: ['auth', 'admin' as never],
@@ -212,6 +213,7 @@ interface AdminAd {
 const toast = useToast()
 const { confirm } = useConfirm()
 const modalOpen = ref(false)
+const { t } = useI18n()
 
 const listLoading = ref(false)
 const tableLoading = computed(() => pending.value || listLoading.value)
@@ -220,25 +222,25 @@ const searchField = ref<'altKey' | 'id'>('altKey')
 const searchKeyword = ref('')
 const searchKeywordInput = ref('')
 
-const searchFieldOptions = [
-  { label: '文案', value: 'altKey' },
-  { label: 'ID', value: 'id' }
-]
+const searchFieldOptions = computed(() => [
+  { label: t('admin.marketing.ads.searchFieldAltKey'), value: 'altKey' },
+  { label: t('admin.marketing.ads.searchFieldId'), value: 'id' }
+])
 
 const filterPosition = ref<'ALL' | 'home' | 'wishlist'>('ALL')
 const filterStatus = ref<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL')
 
-const positionFilterOptions = [
-  { label: '全部位置', value: 'ALL' },
-  { label: '首页轮播（home）', value: 'home' },
-  { label: '收藏页轮播（wishlist）', value: 'wishlist' }
-]
+const positionFilterOptions = computed(() => [
+  { label: t('admin.marketing.ads.positionAll'), value: 'ALL' },
+  { label: t('admin.marketing.ads.positionHome'), value: 'home' },
+  { label: t('admin.marketing.ads.positionWishlist'), value: 'wishlist' }
+])
 
-const statusFilterOptions = [
-  { label: '全部状态', value: 'ALL' },
-  { label: '启用', value: 'ACTIVE' },
-  { label: '停用', value: 'INACTIVE' }
-]
+const statusFilterOptions = computed(() => [
+  { label: t('admin.marketing.ads.statusAll'), value: 'ALL' },
+  { label: t('admin.marketing.ads.statusActive'), value: 'ACTIVE' },
+  { label: t('admin.marketing.ads.statusInactive'), value: 'INACTIVE' }
+])
 
 const page = ref(1)
 const pageSize = ref(10)
@@ -297,10 +299,10 @@ const applySearch = () => {
   searchKeyword.value = searchKeywordInput.value.trim()
 }
 
-const positionOptions = [
-  { label: '首页轮播（home）', value: 'home' },
-  { label: '收藏页轮播（wishlist）', value: 'wishlist' }
-]
+const positionOptions = computed(() => [
+  { label: t('admin.marketing.ads.positionHome'), value: 'home' },
+  { label: t('admin.marketing.ads.positionWishlist'), value: 'wishlist' }
+])
 
 const form = reactive<{
   id?: number
@@ -387,7 +389,7 @@ const openEdit = (row: AdminAd) => {
 
 const handleSubmit = async () => {
   if (!form.position || !form.image || !form.altKey) {
-    toast.error('请填写必填字段')
+    toast.error(t('admin.marketing.ads.errorRequired'))
     return
   }
 
@@ -405,7 +407,7 @@ const handleSubmit = async () => {
         link: form.link,
         altKey: form.altKey
       })
-      toast.success(`广告已更新：${label}`)
+      toast.success(t('admin.marketing.ads.updateSuccess', { label }))
     } else {
       await http.post<ApiResponse<AdminAd>>('/admin/ads', {
         position: form.position,
@@ -415,7 +417,7 @@ const handleSubmit = async () => {
         link: form.link,
         altKey: form.altKey
       })
-      toast.success(`广告已创建：${label}`)
+      toast.success(t('admin.marketing.ads.createSuccess', { label }))
     }
 
     await reloadAds()
@@ -439,23 +441,23 @@ watch([filterPosition, filterStatus], async () => {
 
 const handleDelete = async (row: AdminAd) => {
   if (!row.id || typeof row.id !== 'number') {
-    toast.error('广告 ID 无效，无法删除（缺少 id 字段）')
+    toast.error(t('admin.marketing.ads.errorInvalidId'))
     return
   }
 
   if (row.active !== false) {
-    toast.error('启用中的广告不可删除，请先停用')
+    toast.error(t('admin.marketing.ads.errorCannotDeleteActive'))
     return
   }
 
-  const ok = await confirm('确定要删除这条广告吗？')
+  const ok = await confirm(t('admin.marketing.ads.deleteConfirm'))
   if (!ok) return
 
   try {
     listLoading.value = true
 
     await http.delete<ApiResponse<null>>(`/admin/ads/${row.id}`)
-    toast.success(`广告已删除：${row.position} / ${row.altKey}`)
+    toast.success(t('admin.marketing.ads.deleteSuccess', { label: `${row.position} / ${row.altKey}` }))
     await reloadAds()
     if (editing.value && editing.value.id === row.id) {
       editing.value = null
@@ -466,12 +468,12 @@ const handleDelete = async (row: AdminAd) => {
   }
 }
 
-const columns = [
-  { key: 'id', label: 'ID', sortable: true, width: 80 },
-  { key: 'position', label: '位置', sortable: true, width: 120 },
-  { key: 'order', label: '排序', sortable: true, width: 100 },
-  { key: 'active', label: '状态', sortable: true, width: 100 },
-  { key: 'media', label: '图片', sortable: false, width: 260 },
-  { key: 'altKey', label: '文案', sortable: false }
-]
+const columns = computed(() => [
+  { key: 'id', label: t('admin.marketing.ads.columnId'), sortable: true, width: 80 },
+  { key: 'position', label: t('admin.marketing.ads.columnPosition'), sortable: true, width: 120 },
+  { key: 'order', label: t('admin.marketing.ads.columnOrder'), sortable: true, width: 100 },
+  { key: 'active', label: t('admin.marketing.ads.columnStatus'), sortable: true, width: 100 },
+  { key: 'media', label: t('admin.marketing.ads.columnMedia'), sortable: false, width: 260 },
+  { key: 'altKey', label: t('admin.marketing.ads.columnAltKey'), sortable: false }
+])
 </script>

@@ -10,7 +10,7 @@
             <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--primary-color)] text-white text-sm">
               N
             </span>
-            <span>NuxtShop Admin</span>
+            <span>{{ t('nav.admin') }}</span>
           </NuxtLink>
         </div>
         <nav class="flex-1 overflow-y-auto p-3 space-y-1 text-sm">
@@ -79,7 +79,7 @@
           :style="{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }"
         >
           <NuxtLink to="/" class="text-base font-bold" :style="{ color: 'var(--primary-color)' }">
-            NuxtShop Admin
+            {{ t('nav.admin') }}
           </NuxtLink>
         </header>
 
@@ -96,6 +96,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '~/composables/useI18n'
+
+const { t } = useI18n()
+
 const route = useRoute()
 const currentPath = computed(() => route.path)
 
@@ -129,52 +133,52 @@ const adminNav = computed(() => [
     key: 'dashboard',
     type: 'item',
     to: '/admin',
-    label: '概览',
+    label: t('admin.sidebar.dashboard'),
     icon: 'home'
   },
   {
     key: 'goods',
     type: 'group',
-    label: '商品管理',
+    label: t('admin.sidebar.goods'),
     icon: 'squares-2x2',
     children: [
-      { to: '/admin/goods', label: '商品列表' },
-      { to: '/admin/goods/category', label: '商品分类' },
-      { to: '/admin/goods/review', label: '商品评价' }
+      { to: '/admin/goods', label: t('admin.sidebar.goodsList') },
+      { to: '/admin/goods/category', label: t('admin.sidebar.goodsCategory') },
+      { to: '/admin/goods/review', label: t('admin.sidebar.goodsReview') }
     ]
   },
   {
     key: 'order',
     type: 'item',
     to: '/admin/order',
-    label: '订单管理',
+    label: t('admin.sidebar.order'),
     icon: 'receipt-percent'
   },
   {
     key: 'user',
     type: 'item',
     to: '/admin/user',
-    label: '用户管理',
+    label: t('admin.sidebar.user'),
     icon: 'users'
   },
   {
     key: 'marketing',
     type: 'group',
-    label: '营销中心',
+    label: t('admin.sidebar.marketing'),
     icon: 'rectangle-group',
     children: [
-      { to: '/admin/marketing/coupon', label: '优惠券管理' },
-      { to: '/admin/marketing/ads', label: '广告管理' }
+      { to: '/admin/marketing/coupon', label: t('admin.sidebar.coupon') },
+      { to: '/admin/marketing/ads', label: t('admin.sidebar.ads') }
     ]
   },
   {
     key: 'system',
     type: 'group',
-    label: '系统管理',
+    label: t('admin.sidebar.system'),
     icon: 'cog-6-tooth',
     children: [
-      { to: '/admin/system/admin', label: '管理员账号' },
-      { to: '/admin/system/setting', label: '系统配置' }
+      { to: '/admin/system/admin', label: t('admin.sidebar.systemAdmin') },
+      { to: '/admin/system/setting', label: t('admin.sidebar.systemSetting') }
     ]
   }
 ])

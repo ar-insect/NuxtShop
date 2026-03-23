@@ -3,10 +3,10 @@
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
-        编辑商品
+        {{ t('admin.goods.form.editTitle') }}
       </h1>
       <BaseButton variant="ghost" @click="goBack">
-        返回列表
+        {{ t('admin.goods.form.backToList') }}
       </BaseButton>
     </div>
 
@@ -16,52 +16,52 @@
           v-model="form.title"
           required
           class="md:col-span-2"
-          label="商品名称"
-          placeholder="请输入商品名称"
+          :label="t('admin.goods.form.fieldTitle')"
+          :placeholder="t('admin.goods.form.fieldTitlePlaceholder')"
         />
         <AdminFormField
           v-model="form.category"
           required
           component="select"
           :options="categoryOptions"
-          label="分类"
-          placeholder="请选择分类"
+          :label="t('admin.goods.form.fieldCategory')"
+          :placeholder="t('admin.goods.form.fieldCategoryPlaceholder')"
         />
         <AdminFormField
           v-model.number="form.price"
           required
           type="number"
-          label="价格"
-          placeholder="0.00"
+          :label="t('admin.goods.form.fieldPrice')"
+          :placeholder="t('admin.goods.form.fieldPricePlaceholder')"
         />
         <AdminFormField
           v-model="form.image"
           required
           class="md:col-span-2"
-          label="主图地址"
-          placeholder="https://..."
-          :rules="[{ type: 'url', message: '请输入合法的图片地址' }]"
+          :label="t('admin.goods.form.fieldImage')"
+          :placeholder="t('admin.goods.form.fieldImagePlaceholder')"
+          :rules="[{ type: 'url', message: t('admin.goods.form.imageUrlInvalid') }]"
         />
         <AdminFormField
           v-model="form.imagesText"
           class="md:col-span-2"
-          label="其他图片（可选）"
-          placeholder="多个图片地址用逗号分隔"
+          :label="t('admin.goods.form.fieldImages')"
+          :placeholder="t('admin.goods.form.fieldImagesPlaceholder')"
         />
         <AdminFormField
           v-model="form.description"
           class="md:col-span-2"
-          label="商品描述"
-          placeholder="请输入商品描述"
+          :label="t('admin.goods.form.fieldDescription')"
+          :placeholder="t('admin.goods.form.fieldDescriptionPlaceholder')"
         />
       </form>
 
       <div class="flex items-center justify-end pt-2">
         <BaseButton variant="secondary" size="sm" @click="resetForm">
-          重置
+          {{ t('admin.goods.form.reset') }}
         </BaseButton>
         <BaseButton variant="primary" size="sm" :loading="submitting" class="ml-2" @click="handleSubmit">
-          保存修改
+          {{ t('admin.goods.form.submitEdit') }}
         </BaseButton>
       </div>
     </BaseCard>
@@ -69,11 +69,11 @@
 </template>
 
 <script setup lang="ts">
-import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { http } from '~/utils/http'
-import { useToast } from '~/composables/useToast'
+import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import { useRoute, useRouter } from '#imports'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   name: 'AdminGoodsEditPage',
@@ -85,6 +85,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const { categoryLabels } = useCategoryMapper()
+const { t } = useI18n()
 
 const idParam = route.params.id
 const id = Number(idParam)
@@ -161,13 +162,13 @@ const goBack = () => {
 
 const handleSubmit = async () => {
   if (!form.title || !form.category || !form.image || form.price === null || form.price === undefined) {
-    toast.error('请填写必填字段')
+    toast.error(t('admin.goods.form.errorRequired'))
     return
   }
 
   const priceNumber = Number(form.price)
   if (Number.isNaN(priceNumber) || priceNumber < 0) {
-    toast.error('价格不合法')
+    toast.error(t('admin.goods.form.errorPriceInvalid'))
     return
   }
 
@@ -188,7 +189,7 @@ const handleSubmit = async () => {
       images,
       description: form.description
     })
-    toast.success('商品已更新')
+    toast.success(t('admin.goods.form.updateSuccess'))
     router.push('/admin/goods')
   } finally {
     submitting.value = false

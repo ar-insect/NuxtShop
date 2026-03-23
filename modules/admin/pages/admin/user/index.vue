@@ -3,7 +3,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
-        用户管理
+        {{ t('admin.user.list.title') }}
       </h1>
     </div>
 
@@ -11,10 +11,10 @@
       <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
-            共 {{ totalUsers }} 个用户
+            {{ t('admin.user.list.total', { count: totalUsers }) }}
           </p>
           <BaseButton size="sm" variant="primary" @click="openCreate">
-            新增用户
+            {{ t('admin.user.list.createButton') }}
           </BaseButton>
         </div>
 
@@ -24,29 +24,29 @@
               <BaseSelect
                 v-model="filterRole"
                 :options="roleFilterOptions"
-                placeholder="全部角色"
+                :placeholder="t('admin.user.list.rolePlaceholder')"
               />
             </div>
             <div class="md:col-span-1">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
-                placeholder="搜索字段"
+                :placeholder="t('admin.user.list.searchFieldPlaceholder')"
               />
             </div>
             <div class="md:col-span-3">
               <BaseInput
                 v-model="searchKeywordInput"
-                placeholder="请输入搜索关键字"
+                :placeholder="t('admin.user.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
             <div class="flex gap-2 justify-end md:col-span-1">
               <BaseButton size="sm" variant="primary" @click="applySearch">
-                搜索
+                {{ t('admin.common.search') }}
               </BaseButton>
               <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                重置
+                {{ t('admin.common.reset') }}
               </BaseButton>
             </div>
           </div>
@@ -64,7 +64,11 @@
         @update:page-size="handlePageSizeChange"
       >
         <template #cell-role="{ value }">
-          <AdminTag :label="value === 'admin' ? '管理员' : '用户'" :status="value === 'admin' ? 'primary' : 'muted'" size="sm" />
+          <AdminTag
+            :label="value === 'admin' ? t('admin.user.list.roleTagAdmin') : t('admin.user.list.roleTagUser')"
+            :status="value === 'admin' ? 'primary' : 'muted'"
+            size="sm"
+          />
         </template>
         <template #cell-avatar="{ row }">
           <div class="flex items-center gap-2">
@@ -91,7 +95,7 @@
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
             <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
-              编辑
+              {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
@@ -100,7 +104,7 @@
               :disabled="row._id === currentUserId || row.role === 'admin'"
               @click.stop="handleDelete(row)"
             >
-              删除
+              {{ t('admin.common.delete') }}
             </BaseButton>
           </div>
         </template>
@@ -109,7 +113,7 @@
 
     <BaseModal
       v-model="modalOpen"
-      :title="editing ? '编辑用户' : '新增用户'"
+      :title="editing ? t('admin.user.list.modalTitleEdit') : t('admin.user.list.modalTitleCreate')"
       :close-on-mask="false"
       draggable
       enable-fullscreen
@@ -118,24 +122,24 @@
         <AdminFormField
           v-model="form.username"
           required
-          label="用户名"
-          placeholder="请输入用户名"
+          :label="t('admin.user.list.fieldUsername')"
+          :placeholder="t('admin.user.list.fieldUsernamePlaceholder')"
           :disabled="!!editing"
         />
         <AdminFormField
           v-model="form.name"
-          label="姓名"
-          placeholder="请输入姓名"
+          :label="t('admin.user.list.fieldName')"
+          :placeholder="t('admin.user.list.fieldNamePlaceholder')"
         />
         <AdminFormField
           v-model="form.phone"
-          label="手机号"
-          placeholder="请输入手机号"
+          :label="t('admin.user.list.fieldPhone')"
+          :placeholder="t('admin.user.list.fieldPhonePlaceholder')"
         />
         <AdminFormField
           v-model="form.role"
           required
-          label="角色"
+          :label="t('admin.user.list.fieldRole')"
           component="select"
           :options="roleOptions"
         />
@@ -144,16 +148,16 @@
           v-model="form.password"
           required
           type="password"
-          label="密码"
-          placeholder="至少 6 位密码"
+          :label="t('admin.user.list.fieldPassword')"
+          :placeholder="t('admin.user.list.fieldPasswordPlaceholder')"
         />
       </form>
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
-          取消
+          {{ t('admin.user.list.modalCancel') }}
         </BaseButton>
         <BaseButton variant="primary" size="sm" @click="handleSubmit">
-          {{ editing ? '保存修改' : '创建用户' }}
+          {{ editing ? t('admin.user.list.modalSubmitEdit') : t('admin.user.list.modalSubmitCreate') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -164,13 +168,10 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
-import { useToast } from '~/composables/useToast'
-import { useConfirm } from '~/composables/useConfirm'
-import { useAuth } from '~/composables/useAuth'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   name: 'AdminUserListPage',
@@ -184,57 +185,64 @@ interface AdminUser extends UserPublic {
 
 const { user } = useAuth()
 const currentUserId = computed(() => user.value?._id)
+const { t } = useI18n()
 
-const page = ref(1)
-const pageSize = ref(10)
 const filterRole = ref<'ALL' | 'admin' | 'user'>('ALL')
-
-const buildFilterParams = () => {
-  const params: Record<string, string | number> = {}
-  if (filterRole.value !== 'ALL') {
-    params.role = filterRole.value
-  }
-  params.page = page.value
-  params.limit = pageSize.value
-  return params
-}
-
-const { data, pending } = await useAsyncData(
-  'admin-users',
-  () => http.get<{ code: number; message: string; data: { items: AdminUser[]; total: number } }>('/admin/users', buildFilterParams()),
-  { server: false }
-)
-
-const users = computed(() => data.value?.data.items || [])
-const totalUsers = computed(() => data.value?.data.total || 0)
-
-const toast = useToast()
-const { confirm } = useConfirm()
-
-const modalOpen = ref(false)
-const listLoading = ref(false)
-const tableLoading = computed(() => pending.value || listLoading.value)
 
 const searchField = ref<'username' | 'name' | 'phone'>('username')
 const searchKeyword = ref('')
 const searchKeywordInput = ref('')
 
-const searchFieldOptions = [
-  { label: '用户名', value: 'username' },
-  { label: '姓名', value: 'name' },
-  { label: '手机号', value: 'phone' }
-]
+const {
+  page,
+  pageSize,
+  items: users,
+  total: totalUsers,
+  pending,
+  listLoading,
+  tableLoading,
+  reload,
+  handlePageChange,
+  handlePageSizeChange
+} = useAdminTable<AdminUser>({
+  key: 'admin-users',
+  endpoint: '/admin/users',
+  getFilterParams: () => {
+    const params: Record<string, string | number> = {}
+    if (filterRole.value !== 'ALL') {
+      params.role = filterRole.value
+    }
+    if (searchKeyword.value) {
+      const keyword = searchKeyword.value.trim()
+      const field = searchField.value
+      params.keyword = keyword
+      params.field = field
+    }
+    return params
+  }
+})
 
-const roleFilterOptions = [
-  { label: '全部角色', value: 'ALL' },
-  { label: '管理员', value: 'admin' },
-  { label: '普通用户', value: 'user' }
-]
+const toast = useToast()
+const { confirm } = useConfirm()
 
-const roleOptions = [
-  { label: '管理员', value: 'admin' },
-  { label: '普通用户', value: 'user' }
-]
+const modalOpen = ref(false)
+
+const searchFieldOptions = computed(() => [
+  { label: t('admin.user.list.searchFieldUsername'), value: 'username' },
+  { label: t('admin.user.list.searchFieldName'), value: 'name' },
+  { label: t('admin.user.list.searchFieldPhone'), value: 'phone' }
+])
+
+const roleFilterOptions = computed(() => [
+  { label: t('admin.user.list.roleAll'), value: 'ALL' },
+  { label: t('admin.user.list.roleAdmin'), value: 'admin' },
+  { label: t('admin.user.list.roleUser'), value: 'user' }
+])
+
+const roleOptions = computed(() => [
+  { label: t('admin.user.list.roleAdmin'), value: 'admin' },
+  { label: t('admin.user.list.roleUser'), value: 'user' }
+])
 
 const filteredUsers = computed(() => {
   const list = users.value
@@ -257,20 +265,13 @@ const clearSearch = async () => {
   searchKeyword.value = ''
   filterRole.value = 'ALL'
   page.value = 1
-  await reloadUsers()
+  await reload()
 }
-
-watch(filterRole, async () => {
-  try {
-    listLoading.value = true
-    await reloadUsers()
-  } finally {
-    listLoading.value = false
-  }
-})
 
 const applySearch = () => {
   searchKeyword.value = searchKeywordInput.value.trim()
+  page.value = 1
+  reload()
 }
 
 const formatDate = (value?: string) => {
@@ -331,38 +332,9 @@ const openEdit = (row: AdminUser) => {
   modalOpen.value = true
 }
 
-const reloadUsers = async () => {
-  const res = await http.get<{ code: number; message: string; data: { items: AdminUser[]; total: number } }>(
-    '/admin/users',
-    buildFilterParams()
-  )
-  ;(data.value as any) = res
-}
-
-const handlePageChange = async (value: number) => {
-  page.value = value
-  try {
-    listLoading.value = true
-    await reloadUsers()
-  } finally {
-    listLoading.value = false
-  }
-}
-
-const handlePageSizeChange = async (value: number) => {
-  pageSize.value = value
-  page.value = 1
-  try {
-    listLoading.value = true
-    await reloadUsers()
-  } finally {
-    listLoading.value = false
-  }
-}
-
 const handleSubmit = async () => {
   if (!form.username || (!editing.value && !form.password)) {
-    toast.error('请填写必填字段')
+    toast.error(t('admin.user.list.errorRequired'))
     return
   }
 
@@ -382,13 +354,13 @@ const handleSubmit = async () => {
         phone: payload.phone,
         role: payload.role
       })
-      toast.success(`用户已更新：${form.username}`)
+      toast.success(t('admin.user.list.updateSuccess', { username: form.username }))
     } else {
       await http.post('/admin/users', payload)
-      toast.success(`用户已创建：${form.username}`)
+      toast.success(t('admin.user.list.createSuccess', { username: form.username }))
     }
 
-    await reloadUsers()
+    await reload()
     editing.value = null
     resetForm()
     modalOpen.value = false
@@ -399,18 +371,18 @@ const handleSubmit = async () => {
 
 const handleDelete = async (row: AdminUser) => {
   if (row._id === currentUserId.value) {
-    toast.error('不能删除当前登录的管理员')
+    toast.error(t('admin.user.list.errorDeleteSelf'))
     return
   }
 
-  const ok = await confirm('确定要删除该用户吗？')
+  const ok = await confirm(t('admin.user.list.deleteConfirm'))
   if (!ok) return
 
   try {
     listLoading.value = true
     await http.delete('/admin/users/' + row._id)
-    toast.success(`用户已删除：${row.username}`)
-    await reloadUsers()
+    toast.success(t('admin.user.list.deleteSuccess', { username: row.username }))
+    await reload()
   } finally {
     listLoading.value = false
   }
@@ -420,17 +392,17 @@ watch(filterRole, async () => {
   try {
     page.value = 1
     listLoading.value = true
-    await reloadUsers()
+    await reload()
   } finally {
     listLoading.value = false
   }
 })
 
-const columns = [
-  { key: 'username', label: '用户名', sortable: true, width: 160 },
-  { key: 'name', label: '姓名', sortable: true, width: 140 },
-  { key: 'role', label: '角色', sortable: true, width: 120 },
-  { key: 'phone', label: '手机号', sortable: false, width: 160 },
-  { key: 'createdAt', label: '创建时间', sortable: true, width: 200 }
-]
+const columns = computed(() => [
+  { key: 'username', label: t('admin.user.list.tableColumnUsername'), sortable: true, width: 160 },
+  { key: 'name', label: t('admin.user.list.tableColumnName'), sortable: true, width: 140 },
+  { key: 'role', label: t('admin.user.list.tableColumnRole'), sortable: true, width: 120 },
+  { key: 'phone', label: t('admin.user.list.tableColumnPhone'), sortable: false, width: 160 },
+  { key: 'createdAt', label: t('admin.user.list.tableColumnCreatedAt'), sortable: true, width: 200 }
+])
 </script>

@@ -4,6 +4,32 @@
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+:root {
+  --admin-tag-default-bg: var(--card-bg);
+  --admin-tag-default-fg: var(--text-secondary);
+  --admin-tag-default-border: var(--border-color);
+
+  --admin-tag-primary-bg: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  --admin-tag-primary-fg: var(--primary-color);
+  --admin-tag-primary-border: color-mix(in srgb, var(--primary-color) 40%, transparent);
+
+  --admin-tag-success-bg: #d1fae5;
+  --admin-tag-success-fg: #047857;
+  --admin-tag-success-border: #6ee7b7;
+
+  --admin-tag-warning-bg: #fef3c7;
+  --admin-tag-warning-fg: #92400e;
+  --admin-tag-warning-border: #facc15;
+
+  --admin-tag-danger-bg: #fee2e2;
+  --admin-tag-danger-fg: #b91c1c;
+  --admin-tag-danger-border: #fca5a5;
+
+  --admin-tag-muted-bg: var(--muted-bg);
+  --admin-tag-muted-fg: var(--text-secondary);
+  --admin-tag-muted-border: color-mix(in srgb, var(--border-color) 70%, transparent);
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

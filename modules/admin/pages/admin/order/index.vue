@@ -3,7 +3,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
-        订单管理
+        {{ t('admin.order.list.title') }}
       </h1>
     </div>
 
@@ -11,7 +11,7 @@
       <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
-            共 {{ totalOrders }} 个订单
+              {{ t('admin.order.list.total', { count: totalOrders }) }}
           </p>
         </div>
 
@@ -21,29 +21,29 @@
               <BaseSelect
                 v-model="filterStatus"
                 :options="statusFilterOptions"
-                placeholder="全部状态"
+                :placeholder="t('admin.order.list.statusPlaceholder')"
               />
             </div>
             <div class="md:col-span-1">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
-                placeholder="搜索字段"
+                :placeholder="t('admin.order.list.searchFieldPlaceholder')"
               />
             </div>
             <div class="md:col-span-3">
               <BaseInput
                 v-model="searchKeywordInput"
-                placeholder="请输入搜索关键字"
+                :placeholder="t('admin.order.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
             <div class="flex gap-2 justify-end md:col-span-1">
               <BaseButton size="sm" variant="primary" @click="applySearch">
-                搜索
+                {{ t('admin.common.search') }}
               </BaseButton>
               <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                重置
+                {{ t('admin.common.reset') }}
               </BaseButton>
             </div>
           </div>
@@ -76,16 +76,18 @@
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
             <BaseButton size="xs" variant="outline" @click.stop="openDetail(row)">
-              查看详情
+              {{ t('admin.order.list.detailTitleFallback') }}
             </BaseButton>
           </div>
         </template>
       </AdminTable>
     </BaseCard>
 
-    <BaseModal
+      <BaseModal
       v-model="detailOpen"
-      :title="currentOrder ? `订单详情：${currentOrder.id}` : '订单详情'"
+      :title="currentOrder
+        ? t('admin.order.list.detailTitle', { id: currentOrder.id })
+        : t('admin.order.list.detailTitleFallback')"
       :close-on-mask="true"
       draggable
       enable-fullscreen
@@ -93,25 +95,25 @@
       <div v-if="currentOrder" class="space-y-4">
         <div class="flex flex-col gap-2 text-sm text-[var(--text-secondary)]">
           <p>
-            订单号：<span class="font-mono text-[var(--text-color)]">{{ currentOrder.id }}</span>
+            {{ t('admin.order.list.detailId') }}<span class="font-mono text-[var(--text-color)]">{{ currentOrder.id }}</span>
           </p>
           <p>
-            下单时间：{{ formatDate(currentOrder.date) }}
+            {{ t('admin.order.list.detailDate') }}{{ formatDate(currentOrder.date) }}
           </p>
           <p>
-            收货人：{{ currentOrder.shippingAddress.name }} / {{ currentOrder.shippingAddress.phone }}
+            {{ t('admin.order.list.detailReceiver') }}{{ currentOrder.shippingAddress.name }} / {{ currentOrder.shippingAddress.phone }}
           </p>
           <p>
-            收货地址：{{ currentOrder.shippingAddress.address }}
+            {{ t('admin.order.list.detailAddress') }}{{ currentOrder.shippingAddress.address }}
           </p>
           <p>
-            订单金额：￥{{ currentOrder.total.toFixed(2) }}
+            {{ t('admin.order.list.detailTotal') }}￥{{ currentOrder.total.toFixed(2) }}
           </p>
         </div>
 
         <div class="space-y-2">
           <p class="text-sm font-medium text-[var(--text-color)]">
-            订单状态
+            {{ t('admin.order.list.statusSectionTitle') }}
           </p>
           <div class="flex items-center gap-3">
             <BaseSelect
@@ -125,16 +127,16 @@
 
         <div>
           <p class="text-sm font-medium text-[var(--text-color)] mb-2">
-            商品明细
+            {{ t('admin.order.list.itemsSectionTitle') }}
           </p>
           <div class="border rounded-md overflow-hidden">
             <table class="min-w-full text-xs">
               <thead class="bg-[var(--muted-bg)]/60 text-[var(--text-secondary)]">
                 <tr>
-                  <th class="px-3 py-2 text-left font-medium">商品</th>
-                  <th class="px-3 py-2 text-right font-medium">单价</th>
-                  <th class="px-3 py-2 text-right font-medium">数量</th>
-                  <th class="px-3 py-2 text-right font-medium">小计</th>
+                  <th class="px-3 py-2 text-left font-medium">{{ t('admin.order.list.itemsColumnTitle') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnPrice') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnQuantity') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnSubtotal') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -173,7 +175,7 @@
 
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="detailOpen = false">
-          关闭
+          {{ t('admin.order.list.close') }}
         </BaseButton>
         <BaseButton
           variant="primary"
@@ -181,7 +183,7 @@
           :disabled="!currentOrder || statusEdit === currentOrder.status"
           @click="updateStatus"
         >
-          更新状态
+          {{ t('admin.order.list.updateStatus') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -191,11 +193,10 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { OrderDetail, OrderStatus } from '~/types/api'
-import { useToast } from '~/composables/useToast'
+import { useI18n } from '~/composables/useI18n'
 
 definePageMeta({
   name: 'AdminOrderListPage',
@@ -210,55 +211,61 @@ interface AdminOrder extends OrderDetail {
 }
 
 const toast = useToast()
-
-const page = ref(1)
-const pageSize = ref(10)
-const filterStatus = ref<'ALL' | OrderStatus>('ALL')
-
-const buildFilterParams = () => {
-  const params: Record<string, string | number> = {}
-  if (filterStatus.value !== 'ALL') {
-    params.status = filterStatus.value
-  }
-  params.page = page.value
-  params.limit = pageSize.value
-  return params
-}
-
-const { data, pending } = await useAsyncData(
-  'admin-orders',
-  () =>
-    http.get<{ code: number; message: string; data: { items: AdminOrder[]; total: number } }>(
-      '/admin/orders',
-      buildFilterParams()
-    ),
-  { server: false }
-)
-
-const orders = computed<AdminOrder[]>(() => data.value?.data.items || [])
-const totalOrders = computed(() => data.value?.data.total || 0)
-
-const listLoading = ref(false)
-const tableLoading = computed(() => pending.value || listLoading.value)
+const { t } = useI18n()
 
 const searchField = ref<'id' | 'name' | 'phone'>('id')
 const searchKeyword = ref('')
 const searchKeywordInput = ref('')
+const filterStatus = ref<'ALL' | OrderStatus>('ALL')
 
-const searchFieldOptions = [
-  { label: '订单号', value: 'id' },
-  { label: '收货人', value: 'name' },
-  { label: '手机号', value: 'phone' }
-]
+const {
+  page,
+  pageSize,
+  items: orders,
+  total: totalOrders,
+  pending,
+  listLoading,
+  tableLoading,
+  reload,
+  handlePageChange,
+  handlePageSizeChange
+} = useAdminTable<AdminOrder>({
+  key: 'admin-orders',
+  endpoint: '/admin/orders',
+  getFilterParams: () => {
+    const params: Record<string, string | number> = {}
+    if (filterStatus.value !== 'ALL') {
+      params.status = filterStatus.value
+    }
+    if (searchKeyword.value) {
+      const keyword = searchKeyword.value.trim()
+      const field = searchField.value
+      if (field === 'id') {
+        params.id = keyword
+      } else if (field === 'name') {
+        params.name = keyword
+      } else {
+        params.phone = keyword
+      }
+    }
+    return params
+  }
+})
 
-const statusFilterOptions = [
-  { label: '全部状态', value: 'ALL' },
-  { label: '待处理', value: 'pending' },
-  { label: '处理中', value: 'processing' },
-  { label: '已发货', value: 'shipped' },
-  { label: '已送达', value: 'delivered' },
-  { label: '已取消', value: 'cancelled' }
-]
+const searchFieldOptions = computed(() => [
+  { label: t('admin.order.list.searchFieldId'), value: 'id' },
+  { label: t('admin.order.list.searchFieldName'), value: 'name' },
+  { label: t('admin.order.list.searchFieldPhone'), value: 'phone' }
+])
+
+const statusFilterOptions = computed(() => [
+  { label: t('admin.order.list.statusAll'), value: 'ALL' },
+  { label: t('admin.order.list.statusPending'), value: 'pending' },
+  { label: t('admin.order.list.statusProcessing'), value: 'processing' },
+  { label: t('admin.order.list.statusShipped'), value: 'shipped' },
+  { label: t('admin.order.list.statusDelivered'), value: 'delivered' },
+  { label: t('admin.order.list.statusCancelled'), value: 'cancelled' }
+])
 
 const filteredOrders = computed(() => {
   const list = orders.value
@@ -286,47 +293,21 @@ const clearSearch = async () => {
   searchKeywordInput.value = ''
   searchKeyword.value = ''
   filterStatus.value = 'ALL'
-  await reloadOrders()
+  page.value = 1
+  await reload()
 }
 
 const applySearch = () => {
   searchKeyword.value = searchKeywordInput.value.trim()
-}
-
-const reloadOrders = async () => {
-  const res = await http.get<{ code: number; message: string; data: { items: AdminOrder[]; total: number } }>(
-    '/admin/orders',
-    buildFilterParams()
-  )
-  ;(data.value as any) = res
-}
-
-const handlePageChange = async (value: number) => {
-  page.value = value
-  try {
-    listLoading.value = true
-    await reloadOrders()
-  } finally {
-    listLoading.value = false
-  }
-}
-
-const handlePageSizeChange = async (value: number) => {
-  pageSize.value = value
   page.value = 1
-  try {
-    listLoading.value = true
-    await reloadOrders()
-  } finally {
-    listLoading.value = false
-  }
+  reload()
 }
 
 watch(filterStatus, async () => {
   try {
     page.value = 1
     listLoading.value = true
-    await reloadOrders()
+    await reload()
   } finally {
     listLoading.value = false
   }
@@ -345,15 +326,15 @@ const formatDate = (value?: string) => {
 const statusLabel = (status: OrderStatus): string => {
   switch (status) {
     case 'pending':
-      return '待处理'
+      return t('admin.order.list.statusPending')
     case 'processing':
-      return '处理中'
+      return t('admin.order.list.statusProcessing')
     case 'shipped':
-      return '已发货'
+      return t('admin.order.list.statusShipped')
     case 'delivered':
-      return '已送达'
+      return t('admin.order.list.statusDelivered')
     case 'cancelled':
-      return '已取消'
+      return t('admin.order.list.statusCancelled')
     default:
       return status
   }
@@ -380,13 +361,13 @@ const detailOpen = ref(false)
 const currentOrder = ref<AdminOrder | null>(null)
 const statusEdit = ref<OrderStatus>('pending')
 
-const statusEditOptions = [
-  { label: '待处理', value: 'pending' },
-  { label: '处理中', value: 'processing' },
-  { label: '已发货', value: 'shipped' },
-  { label: '已送达', value: 'delivered' },
-  { label: '已取消', value: 'cancelled' }
-]
+const statusEditOptions = computed(() => [
+  { label: t('admin.order.list.statusPending'), value: 'pending' },
+  { label: t('admin.order.list.statusProcessing'), value: 'processing' },
+  { label: t('admin.order.list.statusShipped'), value: 'shipped' },
+  { label: t('admin.order.list.statusDelivered'), value: 'delivered' },
+  { label: t('admin.order.list.statusCancelled'), value: 'cancelled' }
+])
 
 const openDetail = (row: AdminOrder) => {
   currentOrder.value = row
@@ -403,8 +384,8 @@ const updateStatus = async () => {
     await http.put(`/admin/orders/${currentOrder.value.id}`, {
       status: statusEdit.value
     })
-    toast.success(`订单状态已更新：${currentOrder.value.id}`)
-    await reloadOrders()
+    toast.success(t('admin.order.list.statusUpdated', { id: currentOrder.value.id }))
+    await reload()
     const updated = orders.value.find(o => o.id === currentOrder.value?.id)
     if (updated) {
       currentOrder.value = updated
@@ -414,10 +395,10 @@ const updateStatus = async () => {
   }
 }
 
-const columns = [
-  { key: 'id', label: '订单号', sortable: true, width: 200 },
-  { key: 'total', label: '金额', sortable: true, width: 120 },
-  { key: 'status', label: '状态', sortable: true, width: 120 },
-  { key: 'date', label: '下单时间', sortable: true, width: 200 }
-]
+const columns = computed(() => [
+  { key: 'id', label: t('admin.order.list.columnId'), sortable: true, width: 200 },
+  { key: 'total', label: t('admin.order.list.columnTotal'), sortable: true, width: 120 },
+  { key: 'status', label: t('admin.order.list.columnStatus'), sortable: true, width: 120 },
+  { key: 'date', label: t('admin.order.list.columnDate'), sortable: true, width: 200 }
+])
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="overflow-hidden shadow divide-y transition-colors duration-200" 
+    class="shadow divide-y transition-colors duration-200" 
     :style="{ 
       borderRadius: 'var(--border-radius)',
       backgroundColor: 'var(--card-bg)',

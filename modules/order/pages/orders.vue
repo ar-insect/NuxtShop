@@ -51,7 +51,9 @@
               </div>
               <div class="hidden sm:block">
                 <dt class="font-medium text-[var(--text-color)]">{{ t('pages.orders.list.labelOrderDate') }}</dt>
-                <dd class="mt-1 text-[var(--text-secondary)]">{{ new Date(order.date).toLocaleDateString() }}</dd>
+                <dd class="mt-1 text-[var(--text-secondary)]">
+                  {{ formatDateTime(order.date, { year: 'numeric', month: '2-digit', day: '2-digit' }) }}
+                </dd>
               </div>
               <div>
                 <dt class="font-medium text-[var(--text-color)]">{{ t('pages.orders.list.labelOrderTotal') }}</dt>
@@ -90,6 +92,7 @@
 <script setup lang="ts">
 import type { Order } from '~/modules/order/composables/useOrders'
 import { useI18n } from '~/composables/useI18n'
+import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
 
 definePageMeta({
   middleware: 'auth'
@@ -99,6 +102,7 @@ const { orders, deleteOrder } = useOrders()
 const toast = useToast()
 const { confirm } = useConfirm()
 const { t } = useI18n()
+const { formatDateTime } = useLocaleFormatter()
 
 const statusFilter = ref<'all' | Order['status']>('all')
 

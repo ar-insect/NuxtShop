@@ -2,15 +2,18 @@ import { findActiveCategoriesPublic } from '~/server/utils/product-category'
 import { findAllCategories } from '~/server/utils/product'
 
 export default defineEventHandler(async () => {
-  const categories = await findActiveCategoriesPublic()
+  const [activeCategories, keys] = await Promise.all([
+    findActiveCategoriesPublic(),
+    findAllCategories()
+  ])
 
-  if (categories.length > 0) {
-    return categories
+  const labelByKey = new Map<string, string>()
+  for (const cat of activeCategories) {
+    labelByKey.set(cat.key, cat.label)
   }
 
-  const keys = await findAllCategories()
   return keys.map((key) => ({
     key,
-    label: key
+    label: labelByKey.get(key) || key
   }))
 })

@@ -1,11 +1,13 @@
 import type { H3Event } from 'h3'
 import { getQuery } from 'h3'
+import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
 import { isSuperAdminUser, requireAdmin } from '~/server/utils/auth'
 import type { User } from '~/types/user'
-import type { UserPublic } from '~/types/api'
+import type { OrderDetail, UserPublic } from '~/types/api'
 
 const COLLECTION_NAME = 'users'
+const ORDER_COLLECTION_NAME = 'user_orders'
 
 const mapUserToPublic = (user: User): UserPublic => ({
   _id: String(user._id),
@@ -19,8 +21,15 @@ const mapUserToPublic = (user: User): UserPublic => ({
   isSuperAdmin: isSuperAdminUser(user)
 })
 
+interface OrderDocument extends OrderDetail {
+  _id?: ObjectId
+  userId: ObjectId
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface AdminUsersListResponse {
-  items: (UserPublic & { createdAt?: string })[]
+  items: (UserPublic & { createdAt?: string; orderCount?: number; totalSpent?: number })[]
   total: number
 }
 
@@ -68,11 +77,43 @@ export default defineEventHandler(async (event: H3Event) => {
     collection.countDocuments(filter)
   ])
 
+  const userIds = docs
+    .map(user => user._id)
+    .filter((id): id is ObjectId => !!id)
+
+  const orderStatsMap = new Map<string, { orderCount: number; totalSpent: number }>()
+
+  if (userIds.length > 0) {
+    const orderCollection = getCollection<OrderDocument>(ORDER_COLLECTION_NAME)
+    const stats = await orderCollection
+      .aggregate<{ _id: ObjectId; orderCount: number; totalSpent: number }>([
+        { $match: { userId: { $in: userIds } } },
+        {
+          $group: {
+            _id: '$userId',
+            orderCount: { $sum: 1 },
+            totalSpent: { $sum: '$total' }
+          }
+        }
+      ])
+      .toArray()
+
+    for (const stat of stats) {
+      orderStatsMap.set(stat._id.toHexString(), {
+        orderCount: stat.orderCount,
+        totalSpent: stat.totalSpent
+      })
+    }
+  }
+
   const items = docs.map((user) => {
     const base = mapUserToPublic(user)
+    const stats = user._id ? orderStatsMap.get(user._id.toHexString()) : undefined
     return {
       ...base,
-      createdAt: user.createdAt ? user.createdAt.toISOString() : undefined
+      createdAt: user.createdAt ? user.createdAt.toISOString() : undefined,
+      orderCount: stats?.orderCount ?? 0,
+      totalSpent: stats?.totalSpent ?? 0
     }
   })
 

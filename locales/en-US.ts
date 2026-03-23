@@ -197,7 +197,8 @@ const enUS = {
       subtotalLabel: 'Subtotal',
       discountLabel: 'Estimated discount',
       totalLabel: 'Order total',
-      summaryHint: 'Demo environment only. You can plug in coupons or discount rules here.',
+      summaryHint: 'The system automatically evaluates available discounts based on your cart subtotal.',
+      summaryHintApplied: 'The best available discount has been applied. Final total will be confirmed at checkout.',
       buttonEmpty: 'Please add items first',
       buttonCheckout: 'Proceed to checkout',
       recommendedTitle: 'Recommended products',
@@ -235,6 +236,7 @@ const enUS = {
       quantityLabel: 'Quantity',
       itemsSubtotalLabel: 'Items subtotal',
       shippingLabel: 'Shipping',
+      couponDiscountLabel: 'Coupon discount',
       totalLabel: 'Order total',
       processingButton: 'Processing...',
       payButton: 'Confirm payment',
@@ -289,6 +291,7 @@ const enUS = {
         timelineTitle: 'Order timeline',
         timelineCreated: 'Order created',
         timelinePaid: 'Payment successful',
+        timezoneHint: 'Times are shown in {timezone}',
         priceSummaryTitle: 'Price summary',
         priceItemsTotal: 'Items total',
         priceShipping: 'Shipping',
@@ -513,6 +516,7 @@ const enUS = {
       phoneLabel: 'Phone number:',
       phoneUnset: 'Phone not set',
       walletTitle: 'My wallet',
+      timezoneHint: 'Time display is based on {timezone}',
       balanceLabel: 'Balance:',
       balanceDesc: 'Available balance that can be used directly at checkout.',
       recharge: 'Top up',
@@ -813,6 +817,10 @@ const enUS = {
         pendingCancelled: 'Cancelled'
       },
       trendTitle: 'Orders trend (last 7 days)',
+      userTrendTitle: 'New users (last 7 days)',
+      userTrendEmpty: 'No new users in the last 7 days',
+      topProductsTitle: 'Top 5 products',
+      topCategoriesTitle: 'Top 5 categories',
       trendEmpty: 'No order data for the last 7 days',
       todosTitle: 'Todo list',
       todosEmpty: 'No pending items'
@@ -823,7 +831,8 @@ const enUS = {
       save: 'Save',
       cancel: 'Cancel',
       edit: 'Edit',
-      delete: 'Delete'
+      delete: 'Delete',
+      selected: '{count} selected'
     },
     goods: {
       list: {
@@ -986,6 +995,8 @@ const enUS = {
         errorTimeRange: 'Start time cannot be later than end time',
         deleteConfirm: 'Are you sure you want to delete this coupon?',
         deleteSuccess: 'Coupon deleted',
+        deleteBatchConfirm: 'Are you sure you want to delete the selected {count} coupons?',
+        deleteBatchSuccess: 'Selected coupons have been deleted',
         createSuccess: 'Coupon created',
         updateSuccess: 'Coupon updated',
         noLimit: 'No limit'
@@ -1063,6 +1074,7 @@ const enUS = {
         columnTotal: 'Total',
         columnStatus: 'Status',
         columnDate: 'Created at',
+        columnReceiver: 'Recipient',
         detailTitle: 'Order details: {id}',
         detailTitleFallback: 'Order details',
         detailId: 'Order ID:',
@@ -1078,7 +1090,9 @@ const enUS = {
         itemsColumnSubtotal: 'Subtotal',
         close: 'Close',
         updateStatus: 'Update status',
-        statusUpdated: 'Order status updated: {id}'
+        statusUpdated: 'Order status updated: {id}',
+        deleteConfirm: 'Are you sure you want to delete the selected {count} orders?',
+        deleteBatchSuccess: 'Selected orders have been deleted'
       }
     },
     system: {
@@ -1175,6 +1189,8 @@ const enUS = {
         tableColumnName: 'Name',
         tableColumnRole: 'Role',
         tableColumnPhone: 'Phone',
+        tableColumnOrderCount: 'Orders',
+        tableColumnTotalSpent: 'Total spent',
         tableColumnCreatedAt: 'Created at',
         errorRequired: 'Please fill in required fields',
         errorDeleteSelf: 'Cannot delete current logged-in admin',

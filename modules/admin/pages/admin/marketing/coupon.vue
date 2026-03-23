@@ -15,6 +15,20 @@
         <p class="text-sm text-[var(--text-secondary)]">
           {{ t('admin.marketing.coupon.total', { count: total }) }}
         </p>
+        <div v-if="selectedCouponIds.length" class="flex items-center gap-2">
+          <span class="text-xs text-[var(--text-secondary)]">
+            {{ t('admin.common.selected', { count: selectedCouponIds.length }) }}
+          </span>
+          <BaseButton
+            size="xs"
+            variant="outline"
+            class="text-red-600 hover:bg-red-50 hover:border-red-200"
+            :disabled="tableLoading || !selectedCouponIds.length"
+            @click="handleBatchDelete"
+          >
+            {{ t('admin.common.delete') }}
+          </BaseButton>
+        </div>
       </div>
 
       <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
@@ -45,6 +59,8 @@
       </div>
 
       <AdminTable
+        v-model:selected-keys="selectedCouponIds"
+        selectable
         :columns="columns"
         :rows="items"
         :loading="tableLoading"
@@ -231,7 +247,6 @@ const {
   pageSize,
   items,
   total,
-  pending,
   listLoading,
   tableLoading,
   reload,
@@ -259,6 +274,8 @@ const {
     return params
   }
 })
+
+const selectedCouponIds = ref<(string | number)[]>([])
 
 const clearSearch = async () => {
   searchKeywordInput.value = ''
@@ -315,6 +332,7 @@ const openEdit = (row: AdminCoupon) => {
 }
 
 const handleSubmit = async () => {
+  if (listLoading.value) return
   if (!form.code || !form.name) {
     toast.error(t('admin.marketing.coupon.errorRequired'))
     return
@@ -369,6 +387,7 @@ const handleSubmit = async () => {
 }
 
 const handleDelete = async (row: AdminCoupon) => {
+  if (listLoading.value) return
   const ok = await confirm(t('admin.marketing.coupon.deleteConfirm'))
   if (!ok) return
 
@@ -382,15 +401,29 @@ const handleDelete = async (row: AdminCoupon) => {
   }
 }
 
+const handleBatchDelete = async () => {
+  if (!selectedCouponIds.value.length || listLoading.value) return
+  const ok = await confirm(t('admin.marketing.coupon.deleteBatchConfirm', { count: selectedCouponIds.value.length }))
+  if (!ok) return
+
+  try {
+    listLoading.value = true
+    for (const id of selectedCouponIds.value) {
+      await http.delete(`/admin/coupons/${id}`)
+    }
+    selectedCouponIds.value = []
+    await reload()
+    toast.success(t('admin.marketing.coupon.deleteBatchSuccess'))
+  } finally {
+    listLoading.value = false
+  }
+}
+
+const { formatDateTime } = useLocaleFormatter()
+
 const formatDate = (dateStr: string | null) => {
   if (!dateStr) return t('admin.marketing.coupon.noLimit')
-  return new Date(dateStr).toLocaleString(undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return formatDateTime(dateStr)
 }
 
 const columns = computed(() => [

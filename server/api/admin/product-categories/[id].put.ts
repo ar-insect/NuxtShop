@@ -29,13 +29,9 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody<AdminCategoryUpdatePayload>(event)
 
-  const patch: AdminCategoryUpdatePayload = {}
-
-  if (body.label !== undefined) patch.label = body.label
-  if (body.parentKey !== undefined) patch.parentKey = body.parentKey
-  if (body.order !== undefined) patch.order = body.order
-  if (body.active !== undefined) patch.active = body.active
-  if (body.description !== undefined) patch.description = body.description
+  const patch = Object.fromEntries(
+    Object.entries(body).filter(([, value]) => value !== undefined)
+  ) as AdminCategoryUpdatePayload
 
   if (Object.keys(patch).length === 0) {
     throw createApiError({
@@ -65,4 +61,3 @@ export default defineEventHandler(async (event) => {
     data: updated
   }
 })
-

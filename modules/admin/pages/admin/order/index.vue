@@ -7,12 +7,27 @@
       </h1>
     </div>
 
-    <BaseCard class="p-4 space-y-4">
-      <div class="flex flex-col gap-4">
+    <ClientOnly>
+      <BaseCard class="p-4 space-y-4">
+        <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
               {{ t('admin.order.list.total', { count: totalOrders }) }}
           </p>
+          <div v-if="selectedOrderIds.length" class="flex items-center gap-2">
+            <span class="text-xs text-[var(--text-secondary)]">
+              {{ t('admin.common.selected', { count: selectedOrderIds.length }) }}
+            </span>
+            <BaseButton
+              size="xs"
+              variant="outline"
+              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              :disabled="listLoading || !selectedOrderIds.length"
+              @click="handleBatchDelete"
+            >
+              {{ t('admin.common.delete') }}
+            </BaseButton>
+          </div>
         </div>
 
         <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
@@ -51,6 +66,8 @@
       </div>
 
       <AdminTable
+        v-model:selected-keys="selectedOrderIds"
+        selectable
         :columns="columns"
         :rows="filteredOrders"
         :loading="tableLoading"
@@ -60,6 +77,16 @@
         @update:page="handlePageChange"
         @update:page-size="handlePageSizeChange"
       >
+        <template #cell-id="{ row }">
+          <div class="flex flex-col text-xs">
+            <span class="font-mono text-[var(--text-color)]">
+              {{ row.id }}
+            </span>
+            <span class="text-[var(--text-secondary)]">
+              {{ row.shippingAddress?.name || '-' }} / {{ row.shippingAddress?.phone || '-' }}
+            </span>
+          </div>
+        </template>
         <template #cell-status="{ value }">
           <AdminTag :label="statusLabel(value)" :status="statusColor(value)" size="sm" />
         </template>
@@ -80,18 +107,17 @@
             </BaseButton>
           </div>
         </template>
-      </AdminTable>
-    </BaseCard>
+        </AdminTable>
+      </BaseCard>
 
       <BaseModal
-      v-model="detailOpen"
-      :title="currentOrder
-        ? t('admin.order.list.detailTitle', { id: currentOrder.id })
-        : t('admin.order.list.detailTitleFallback')"
-      :close-on-mask="true"
-      draggable
-      enable-fullscreen
-    >
+        v-model="detailOpen"
+        mode="drawer"
+        :title="currentOrder
+          ? t('admin.order.list.detailTitle', { id: currentOrder.id })
+          : t('admin.order.list.detailTitleFallback')"
+        :close-on-mask="true"
+      >
       <div v-if="currentOrder" class="space-y-4">
         <div class="flex flex-col gap-2 text-sm text-[var(--text-secondary)]">
           <p>
@@ -185,8 +211,9 @@
         >
           {{ t('admin.order.list.updateStatus') }}
         </BaseButton>
-      </template>
-    </BaseModal>
+        </template>
+      </BaseModal>
+    </ClientOnly>
   </div>
 </template>
 
@@ -201,7 +228,8 @@ import { useI18n } from '~/composables/useI18n'
 definePageMeta({
   name: 'AdminOrderListPage',
   middleware: ['auth', 'admin' as never],
-  layout: 'admin'
+  layout: 'admin',
+  ssr: false
 })
 
 interface AdminOrder extends OrderDetail {
@@ -223,7 +251,6 @@ const {
   pageSize,
   items: orders,
   total: totalOrders,
-  pending,
   listLoading,
   tableLoading,
   reload,
@@ -251,6 +278,8 @@ const {
     return params
   }
 })
+
+const selectedOrderIds = ref<(string | number)[]>([])
 
 const searchFieldOptions = computed(() => [
   { label: t('admin.order.list.searchFieldId'), value: 'id' },
@@ -316,8 +345,9 @@ watch(filterStatus, async () => {
 const formatDate = (value?: string) => {
   if (!value) return ''
   try {
-    const d = new Date(value)
-    return d.toLocaleString()
+    const iso = String(value)
+    // 简单截断为 YYYY-MM-DD HH:mm，避免受时区和本地化影响导致 SSR 与客户端不一致
+    return iso.replace('T', ' ').slice(0, 16)
   } catch {
     return value
   }
@@ -396,9 +426,27 @@ const updateStatus = async () => {
 }
 
 const columns = computed(() => [
-  { key: 'id', label: t('admin.order.list.columnId'), sortable: true, width: 200 },
+  { key: 'id', label: t('admin.order.list.columnId'), sortable: true, width: 260 },
   { key: 'total', label: t('admin.order.list.columnTotal'), sortable: true, width: 120 },
   { key: 'status', label: t('admin.order.list.columnStatus'), sortable: true, width: 120 },
   { key: 'date', label: t('admin.order.list.columnDate'), sortable: true, width: 200 }
 ])
+
+const handleBatchDelete = async () => {
+  if (!selectedOrderIds.value.length || listLoading.value) return
+  const ok = await confirm(t('admin.order.list.deleteConfirm', { count: selectedOrderIds.value.length }))
+  if (!ok) return
+
+  try {
+    listLoading.value = true
+    for (const id of selectedOrderIds.value) {
+      await http.delete(`/admin/orders/${id}`)
+    }
+    selectedOrderIds.value = []
+    await reload()
+    toast.success(t('admin.order.list.deleteBatchSuccess'))
+  } finally {
+    listLoading.value = false
+  }
+}
 </script>

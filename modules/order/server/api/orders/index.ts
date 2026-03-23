@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { findOrdersByUserId, insertOrder, deleteOrderByUser, clearOrdersByUser } from '~/server/utils/order'
+import { findBestCouponForAmount } from '~/server/utils/coupon'
 import type { OrderSummary, OrderDetail } from '~/types/api'
 
 export default defineEventHandler(async (event) => {
@@ -31,7 +32,10 @@ export default defineEventHandler(async (event) => {
         id: o.id,
         total: o.total,
         status: o.status,
-        date: o.date
+        date: o.date,
+        discount: o.discount,
+        couponCode: o.couponCode,
+        couponName: o.couponName
       }))
       return summaries
     } catch (e) {
@@ -44,11 +48,27 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    const body = await readBody<OrderDetail>(event)
+    const body = await readBody<OrderDetail & { discount?: number; couponCode?: string; couponName?: string }>(event)
 
     try {
-      await insertOrder(userObjectId, body)
-      return { success: true, order: body }
+      const originalTotal = typeof body.total === 'number' ? body.total : 0
+      const { coupon, discount } = await findBestCouponForAmount(originalTotal)
+      const finalTotal = Math.max(originalTotal - discount, 0)
+
+      const orderToSave: OrderDetail & {
+        discount?: number
+        couponCode?: string
+        couponName?: string
+      } = {
+        ...body,
+        total: finalTotal,
+        discount: discount > 0 ? discount : undefined,
+        couponCode: coupon?.code,
+        couponName: coupon?.name
+      }
+
+      await insertOrder(userObjectId, orderToSave)
+      return { success: true, order: orderToSave }
     } catch (e) {
       console.error('Failed to save order to MongoDB:', e)
       throw createError({

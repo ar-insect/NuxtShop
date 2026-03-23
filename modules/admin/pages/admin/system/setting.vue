@@ -100,7 +100,7 @@ const applySettings = (payload: any) => {
   }
 }
 
-const { data, pending } = await useAsyncData(
+const { data } = await useAsyncData(
   'admin-system-settings',
   () => http.get<{ code: number; message: string; data: any }>('/admin/system/settings'),
   { server: false }

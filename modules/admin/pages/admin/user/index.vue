@@ -7,8 +7,9 @@
       </h1>
     </div>
 
-    <BaseCard class="p-4 space-y-4">
-      <div class="flex flex-col gap-4">
+    <ClientOnly>
+      <BaseCard class="p-4 space-y-4">
+        <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
             {{ t('admin.user.list.total', { count: totalUsers }) }}
@@ -108,16 +109,16 @@
             </BaseButton>
           </div>
         </template>
-      </AdminTable>
-    </BaseCard>
+        </AdminTable>
+      </BaseCard>
 
-    <BaseModal
-      v-model="modalOpen"
-      :title="editing ? t('admin.user.list.modalTitleEdit') : t('admin.user.list.modalTitleCreate')"
-      :close-on-mask="false"
-      draggable
-      enable-fullscreen
-    >
+      <BaseModal
+        v-model="modalOpen"
+        :title="editing ? t('admin.user.list.modalTitleEdit') : t('admin.user.list.modalTitleCreate')"
+        :close-on-mask="false"
+        draggable
+        enable-fullscreen
+      >
       <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleSubmit">
         <AdminFormField
           v-model="form.username"
@@ -152,15 +153,16 @@
           :placeholder="t('admin.user.list.fieldPasswordPlaceholder')"
         />
       </form>
-      <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
-          {{ t('admin.user.list.modalCancel') }}
-        </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleSubmit">
-          {{ editing ? t('admin.user.list.modalSubmitEdit') : t('admin.user.list.modalSubmitCreate') }}
-        </BaseButton>
-      </template>
-    </BaseModal>
+        <template #footer>
+          <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+            {{ t('admin.user.list.modalCancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" size="sm" @click="handleSubmit">
+            {{ editing ? t('admin.user.list.modalSubmitEdit') : t('admin.user.list.modalSubmitCreate') }}
+          </BaseButton>
+        </template>
+      </BaseModal>
+    </ClientOnly>
   </div>
 </template>
 
@@ -181,6 +183,8 @@ definePageMeta({
 
 interface AdminUser extends UserPublic {
   createdAt?: string
+  orderCount?: number
+  totalSpent?: number
 }
 
 const { user } = useAuth()
@@ -198,7 +202,6 @@ const {
   pageSize,
   items: users,
   total: totalUsers,
-  pending,
   listLoading,
   tableLoading,
   reload,
@@ -277,8 +280,8 @@ const applySearch = () => {
 const formatDate = (value?: string) => {
   if (!value) return ''
   try {
-    const d = new Date(value)
-    return d.toLocaleString()
+    const iso = String(value)
+    return iso.replace('T', ' ').slice(0, 16)
   } catch {
     return value
   }
@@ -403,6 +406,8 @@ const columns = computed(() => [
   { key: 'name', label: t('admin.user.list.tableColumnName'), sortable: true, width: 140 },
   { key: 'role', label: t('admin.user.list.tableColumnRole'), sortable: true, width: 120 },
   { key: 'phone', label: t('admin.user.list.tableColumnPhone'), sortable: false, width: 160 },
+  { key: 'orderCount', label: t('admin.user.list.tableColumnOrderCount'), sortable: false, width: 120 },
+  { key: 'totalSpent', label: t('admin.user.list.tableColumnTotalSpent'), sortable: false, width: 140 },
   { key: 'createdAt', label: t('admin.user.list.tableColumnCreatedAt'), sortable: true, width: 200 }
 ])
 </script>

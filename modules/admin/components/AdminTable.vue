@@ -7,12 +7,21 @@
           :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 70%, transparent)' }"
         >
           <tr>
+            <th v-if="selectable" class="py-2 pl-4 pr-2 w-8">
+              <input
+                type="checkbox"
+                class="rounded border-[var(--border-color)]"
+                :checked="allSelectedOnPage"
+                @click.stop
+                @change.stop="toggleSelectAll"
+              >
+            </th>
             <th
               v-for="(column, colIndex) in columns"
               :key="column.key"
               :class="[
                 'py-2 pr-4 relative select-none',
-                colIndex === 0 ? 'pl-4' : ''
+                colIndex === 0 && !selectable ? 'pl-4' : ''
               ]"
               :style="{ width: widthStyle(column.key) }"
             >
@@ -54,12 +63,21 @@
             :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 40%, transparent)' }"
             @click="emit('row-click', row)"
           >
+            <td v-if="selectable" class="py-2 pl-4 pr-2 align-middle">
+              <input
+                type="checkbox"
+                class="rounded border-[var(--border-color)]"
+                :checked="isRowSelected(row, rowIndex)"
+                @click.stop
+                @change.stop="toggleRowSelection(row, rowIndex)"
+              >
+            </td>
             <td
               v-for="(column, colIndex) in columns"
               :key="column.key"
               :class="[
                 'py-2 pr-4 align-middle',
-                colIndex === 0 ? 'pl-4' : ''
+                colIndex === 0 && !selectable ? 'pl-4' : ''
               ]"
             >
               <slot
@@ -87,6 +105,19 @@
         </tbody>
       </table>
       <BaseLoading :loading="loading" />
+    </div>
+
+    <div
+      v-if="selectable && selectedKeysComputed.length && $slots.selectionActions"
+      class="flex items-center justify-between text-xs text-[var(--text-secondary)] px-1"
+    >
+      <div>
+        <slot
+          name="selectionActions"
+          :selected-keys="selectedKeysComputed"
+          :selected-rows="selectedRows"
+        />
+      </div>
     </div>
 
     <AdminPagination
@@ -120,6 +151,8 @@ const props = defineProps<{
   loading?: boolean
   total?: number
   serverSide?: boolean
+  selectable?: boolean
+  selectedKeys?: (string | number)[]
 }>()
 
 const emit = defineEmits<{
@@ -127,6 +160,8 @@ const emit = defineEmits<{
   (e: 'row-click', row: any): void
   (e: 'update:page', page: number): void
   (e: 'update:pageSize', pageSize: number): void
+  (e: 'update:selectedKeys', keys: (string | number)[]): void
+  (e: 'selection-change', payload: { keys: (string | number)[]; rows: any[] }): void
 }>()
 
 const page = ref(1)
@@ -171,6 +206,57 @@ const paginatedRows = computed(() => {
   const start = (page.value - 1) * pageSizeComputed.value
   return sortedRows.value.slice(start, start + pageSizeComputed.value)
 })
+
+const selectedKeysComputed = computed<(string | number)[]>(() => props.selectedKeys || [])
+
+const selectedKeySet = computed(() => new Set(selectedKeysComputed.value))
+
+const allSelectedOnPage = computed(() => {
+  if (!props.selectable || !paginatedRows.value.length) return false
+  return paginatedRows.value.every((row, index) => selectedKeySet.value.has(rowKey(row, index) as any))
+})
+
+const selectedRows = computed(() => {
+  if (!props.selectable || !selectedKeysComputed.value.length) return []
+  const set = new Set(selectedKeysComputed.value)
+  return props.rows.filter((row, index) => set.has(rowKey(row, index) as any))
+})
+
+const updateSelection = (keys: (string | number)[]) => {
+  emit('update:selectedKeys', keys)
+  emit('selection-change', { keys, rows: selectedRows.value })
+}
+
+const isRowSelected = (row: any, index: number) => {
+  if (!props.selectable) return false
+  return selectedKeySet.value.has(rowKey(row, index) as any)
+}
+
+const toggleRowSelection = (row: any, index: number) => {
+  if (!props.selectable) return
+  const key = rowKey(row, index) as string | number
+  const next = new Set(selectedKeysComputed.value)
+  if (next.has(key)) next.delete(key)
+  else next.add(key)
+  updateSelection(Array.from(next))
+}
+
+const toggleSelectAll = () => {
+  if (!props.selectable) return
+  if (allSelectedOnPage.value) {
+    // 取消当前页所有选择
+    const pageKeySet = new Set(paginatedRows.value.map((row, index) => rowKey(row, index) as any))
+    const next = selectedKeysComputed.value.filter(key => !pageKeySet.has(key))
+    updateSelection(next)
+  } else {
+    // 选中当前页所有行（在原有选择基础上追加）
+    const next = new Set(selectedKeysComputed.value)
+    paginatedRows.value.forEach((row, index) => {
+      next.add(rowKey(row, index) as any)
+    })
+    updateSelection(Array.from(next))
+  }
+}
 
 const toggleSort = (key: string) => {
   if (sortKey.value === key) {

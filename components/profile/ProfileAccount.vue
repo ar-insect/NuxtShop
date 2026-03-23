@@ -114,9 +114,12 @@
 
     <!-- Wallet/Assets Info -->
     <div class="-mx-4 -mb-5 sm:-mx-6 sm:-mb-6 mt-8 px-4 py-6 border-t border-[var(--border-color)] sm:px-8 bg-[var(--muted-bg)]">
-      <h3 class="text-base font-medium text-[var(--text-color)] mb-6">
+      <h3 class="text-base font-medium text-[var(--text-color)] mb-2">
         {{ t('profile.account.walletTitle') }}
       </h3>
+      <p class="text-xs text-[var(--text-secondary)] mb-4">
+        {{ t('profile.account.timezoneHint', { timezone: timezoneLabel }) }}
+      </p>
       
       <div class="space-y-6">
         <!-- Balance -->
@@ -138,13 +141,13 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[var(--border-color)] pt-6">
           <div class="space-y-1">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-rose-500 text-white">
-              {{ t('profile.account.couponLabel') }} 12
+              {{ t('profile.account.couponLabel') }} {{ couponCount }}
             </span>
             <p class="text-sm text-[var(--text-secondary)] mt-1">
               {{ t('profile.account.couponDesc') }}
             </p>
           </div>
-          <BaseButton size="sm" variant="outline">
+          <BaseButton size="sm" variant="outline" to="/cart/checkout">
             {{ t('profile.account.view') }}
           </BaseButton>
         </div>
@@ -163,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick } from 'vue'
+import { ref, reactive, watch, nextTick, computed } from 'vue'
 import { PencilIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { validatePhone } from '~/utils/validation'
 import { useI18n } from '~/composables/useI18n'
@@ -188,11 +191,24 @@ const form = reactive({
   phone: user.value?.phone || ''
 })
 
+const { data: couponSummary } = await useAsyncData(
+  'user-coupons-summary',
+  () => $fetch<{ code: number; message: string; data: { unusedCount: number } }>('/api/user/coupons/summary'),
+  {
+    server: false,
+    lazy: true
+  }
+)
+
+const couponCount = computed(() => couponSummary.value?.data?.unusedCount ?? 0)
+
 const avatarSrc = computed(() => form.avatar || user.value?.avatar || '')
 const displayInitial = computed(() => {
   const base = form.name || user.value?.name || user.value?.username || 'U'
   return base.charAt(0).toUpperCase()
 })
+
+const timezoneLabel = computed(() => user.value?.timezone || 'Asia/Shanghai')
 
 // 用户数据加载/刷新后同步表单内容
 watch(user, (newUser) => {

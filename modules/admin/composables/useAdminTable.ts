@@ -1,14 +1,14 @@
 import { ref, computed } from 'vue'
 import { http } from '~/utils/http'
 
-interface UseAdminTableOptions<T> {
+interface UseAdminTableOptions {
   key: string
   endpoint: string
   getFilterParams?: () => Record<string, string | number>
   defaultPageSize?: number
 }
 
-export function useAdminTable<T>(options: UseAdminTableOptions<T>) {
+export function useAdminTable<T>(options: UseAdminTableOptions) {
   const page = ref(1)
   const pageSize = ref(options.defaultPageSize || 10)
 
@@ -32,14 +32,17 @@ export function useAdminTable<T>(options: UseAdminTableOptions<T>) {
         options.endpoint,
         buildParams()
       ),
-    { server: false }
+    {
+      server: false,
+      lazy: true
+    }
   )
 
   const items = computed<T[]>(() => data.value?.data.items || [])
   const total = computed<number>(() => data.value?.data.total || 0)
 
   const listLoading = ref(false)
-  const tableLoading = computed(() => pending.value || listLoading.value)
+  const tableLoading = computed(() => listLoading.value)
 
   const reload = async () => {
     const res = await http.get<{ code: number; message: string; data: { items: T[]; total: number } }>(
@@ -83,4 +86,3 @@ export function useAdminTable<T>(options: UseAdminTableOptions<T>) {
     handlePageSizeChange
   }
 }
-

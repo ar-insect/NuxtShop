@@ -12,7 +12,7 @@
     :model-value="displayValue"
     inputmode="decimal"
     :class="alignmentClass"
-    @update:modelValue="onInput"
+    @update:model-value="onInput"
     @blur="onBlur"
   >
     <template #prefix>

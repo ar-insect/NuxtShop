@@ -25,7 +25,7 @@
         v-bind="inputProps"
         :model-value="internalValue"
         :error="firstError"
-        @update:modelValue="onInput"
+        @update:model-value="onInput"
       />
     </template>
     <template v-else>

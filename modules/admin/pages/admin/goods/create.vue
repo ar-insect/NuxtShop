@@ -132,6 +132,7 @@ const goBack = () => {
 }
 
 const handleSubmit = async () => {
+  if (submitting.value) return
   if (!form.title || !form.category || !form.image || form.price === null || form.price === undefined) {
     toast.error(t('admin.goods.form.errorRequired'))
     return

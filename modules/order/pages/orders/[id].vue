@@ -30,7 +30,7 @@
               class="px-3 py-1 text-sm font-medium rounded-full"
               :class="{
                 'bg-yellow-100 text-yellow-800': order.status === 'pending',
-                'bg-green-100 text-green-800': order.status === 'completed',
+                'bg-green-100 text-green-800': order.status === 'delivered',
                 'bg-gray-100 text-gray-800': order.status === 'cancelled'
               }"
             >
@@ -91,15 +91,18 @@
                 <div class="relative">
                   <div class="absolute -left-[21px] bg-green-500 h-4 w-4 rounded-full border-2 border-white"/>
                   <p class="text-sm font-medium text-gray-900">{{ t('pages.orders.detail.timelineCreated') }}</p>
-                  <p class="text-xs text-gray-500">{{ new Date(order.date).toLocaleString() }}</p>
+                  <p class="text-xs text-gray-500">{{ formatDate(order.date) }}</p>
                 </div>
-                <div v-if="order.status === 'completed'" class="relative">
+                <div v-if="order.status === 'delivered'" class="relative">
                   <div class="absolute -left-[21px] bg-green-500 h-4 w-4 rounded-full border-2 border-white"/>
                   <p class="text-sm font-medium text-gray-900">{{ t('pages.orders.detail.timelinePaid') }}</p>
-                  <p class="text-xs text-gray-500">{{ new Date(order.date).toLocaleString() }}</p>
+                  <p class="text-xs text-gray-500">{{ formatDate(order.date) }}</p>
                 </div>
                 <!-- More mock steps -->
               </div>
+              <p class="mt-4 text-xs text-gray-400">
+                {{ t('pages.orders.detail.timezoneHint', { timezone: timeZone }) }}
+              </p>
             </div>
           </div>
         </div>
@@ -146,20 +149,27 @@
 
 <script setup lang="ts">
 import type { OrderDetail } from '~/types/api'
+import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
 
 const route = useRoute()
 const { user } = useAuth()
 const { t } = useI18n()
+const { formatDateTime, timeZone } = useLocaleFormatter()
 const id = route.params.id
 
 const { data: order, pending, error } = await useFetch<OrderDetail>(`/api/orders/${id}`)
+
+const formatDate = (value?: string) => {
+  if (!value) return ''
+  return formatDateTime(value)
+}
 
 const getStatusText = (status: string) => {
   const map: Record<string, string> = {
     pending: t('pages.orders.detail.statusPending'),
     processing: t('pages.orders.detail.statusProcessing'),
     shipped: t('pages.orders.detail.statusShipped'),
-    completed: t('pages.orders.detail.statusCompleted'),
+    delivered: t('pages.orders.detail.statusCompleted'),
     cancelled: t('pages.orders.detail.statusCancelled')
   }
   return map[status] || status

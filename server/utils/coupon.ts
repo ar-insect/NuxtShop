@@ -135,3 +135,72 @@ export async function findEnabledCouponByCode(code: string): Promise<CouponDocum
     ]
   } as any)
 }
+
+export interface BestCouponResult {
+  coupon: CouponDocument | null
+  discount: number
+}
+
+export async function findBestCouponForAmount(orderTotal: number): Promise<BestCouponResult> {
+  const collection = getCouponCollection()
+  const now = new Date()
+
+  const candidates = await collection
+    .find({
+      enabled: true,
+      $and: [
+        { $or: [{ startAt: null }, { startAt: { $lte: now } }] },
+        { $or: [{ endAt: null }, { endAt: { $gte: now } }] }
+      ]
+    } as any)
+    .toArray()
+
+  if (!candidates.length || orderTotal <= 0) {
+    return { coupon: null, discount: 0 }
+  }
+
+  let best: CouponDocument | null = null
+  let bestDiscount = 0
+
+  for (const c of candidates) {
+    if (typeof c.minOrderAmount === 'number' && orderTotal < c.minOrderAmount) {
+      continue
+    }
+
+    let d = 0
+    if (c.type === 'fixed') {
+      d = c.amount
+    } else if (c.type === 'percent') {
+      d = (orderTotal * c.amount) / 100
+    }
+
+    if (d <= 0) continue
+
+    if (d > orderTotal) {
+      d = orderTotal
+    }
+
+    if (d > bestDiscount) {
+      bestDiscount = d
+      best = c
+    }
+  }
+
+  return {
+    coupon: best,
+    discount: Number(bestDiscount.toFixed(2))
+  }
+}
+
+export async function countAvailableCoupons(): Promise<number> {
+  const collection = getCouponCollection()
+  const now = new Date()
+
+  return collection.countDocuments({
+    enabled: true,
+    $and: [
+      { $or: [{ startAt: null }, { startAt: { $lte: now } }] },
+      { $or: [{ endAt: null }, { endAt: { $gte: now } }] }
+    ]
+  } as any)
+}

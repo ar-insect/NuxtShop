@@ -192,6 +192,7 @@ import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useAdminPermission } from '~/modules/admin/composables/useAdminPermission'
 import { useI18n } from '~/composables/useI18n'
+import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
 
 definePageMeta({
   name: 'AdminSystemAdminPage',
@@ -203,10 +204,9 @@ interface AdminUser extends UserPublic {
   createdAt?: string
 }
 
-const { user } = useAuth()
-const currentUserId = computed(() => user.value?._id)
 const { isSuperAdmin, canDeleteAdmin } = useAdminPermission()
 const { t } = useI18n()
+const { formatDateTime } = useLocaleFormatter()
 
 const page = ref(1)
 const pageSize = ref(10)
@@ -312,13 +312,7 @@ const handlePageSizeChange = async (value: number) => {
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return ''
-  return new Date(dateStr).toLocaleString(undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return formatDateTime(dateStr)
 }
 
 const form = reactive({
@@ -349,6 +343,7 @@ const openEdit = (row: AdminUser) => {
 }
 
 const handleSubmit = async () => {
+  if (listLoading.value) return
   if (!form.username) {
     toast.error(t('admin.system.admin.errorUsernameRequired'))
     return
@@ -386,6 +381,7 @@ const handleSubmit = async () => {
 }
 
 const handleDelete = async (row: AdminUser) => {
+  if (listLoading.value) return
   const ok = await confirm(t('admin.system.admin.deleteConfirm'))
   if (!ok) return
 
@@ -409,6 +405,7 @@ const openResetPassword = (row: AdminUser) => {
 }
 
 const handleResetSubmit = async () => {
+  if (listLoading.value) return
   if (!resetTarget.value) return
   if (!resetPassword.value || resetPassword.value.length < 6) {
     toast.error(t('admin.system.admin.resetErrorPasswordShort'))

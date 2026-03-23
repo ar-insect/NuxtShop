@@ -87,16 +87,20 @@
           </div>
           <div class="flex items-center justify-between">
             <dt class="text-sm text-[var(--text-secondary)]">{{ t('pages.cart.discountLabel') }}</dt>
-            <dd class="text-sm font-medium text-emerald-600">¥0.00</dd>
+            <dd class="text-sm font-medium text-emerald-600">
+              -¥{{ couponDiscount.toFixed(2) }}
+            </dd>
           </div>
           <div class="border-t border-[var(--border-color)] pt-4 flex items-center justify-between">
             <dt class="text-base font-medium text-[var(--text-color)]">{{ t('pages.cart.totalLabel') }}</dt>
-            <dd class="text-base font-bold text-[var(--text-color)]">¥{{ cartTotal.toFixed(2) }}</dd>
+            <dd class="text-base font-bold text-[var(--text-color)]">
+              ¥{{ (cartTotal - couponDiscount).toFixed(2) }}
+            </dd>
           </div>
         </dl>
 
         <p class="mt-3 text-xs text-[var(--text-secondary)]">
-          {{ t('pages.cart.summaryHint') }}
+          {{ summaryHintText }}
         </p>
 
         <div class="mt-6">
@@ -152,6 +156,35 @@ useSeoMeta({
   title: t('seo.cart.title'),
   description: t('seo.cart.description')
 })
+
+const couponDiscount = ref(0)
+const summaryHintText = computed(() => {
+  if (couponDiscount.value > 0) {
+    return t('pages.cart.summaryHintApplied')
+  }
+  return t('pages.cart.summaryHint')
+})
+
+watch(
+  cartTotal,
+  async (total) => {
+    if (total <= 0) {
+      couponDiscount.value = 0
+      return
+    }
+    try {
+      const res = await http.post<{
+        code: number
+        message: string
+        data: { total: number; discount: number }
+      }>('/orders/preview', { total })
+      couponDiscount.value = res.data.discount || 0
+    } catch {
+      couponDiscount.value = 0
+    }
+  },
+  { immediate: true }
+)
 
 // Fetch recommended products：最近 7 天全站浏览最多的商品，再排除购物车中已有的
 const { data: recommendedProductsData, pending: recommendedProductsPending } = await useAsyncData(

@@ -138,9 +138,16 @@
                 <p>{{ t('pages.checkout.shippingLabel') }}</p>
                 <p>¥{{ shippingFee.toFixed(2) }}</p>
               </div>
+              <div v-if="couponDiscount > 0" class="flex justify-between text-sm text-[var(--text-color)]">
+                <p>
+                  {{ t('pages.checkout.couponDiscountLabel') }}
+                  <span v-if="appliedCouponName" class="text-[var(--text-secondary)]">({{ appliedCouponName }})</span>
+                </p>
+                <p>-¥{{ couponDiscount.toFixed(2) }}</p>
+              </div>
               <div class="flex justify-between text-base font-medium text-[var(--text-color)] pt-4 border-t border-[var(--border-color)]">
                 <p>{{ t('pages.checkout.totalLabel') }}</p>
-                <p>¥{{ orderTotal.toFixed(2) }}</p>
+                <p>¥{{ (orderTotal - couponDiscount).toFixed(2) }}</p>
               </div>
             </div>
 
@@ -350,6 +357,27 @@ const orderTotal = computed(() => {
   return cartTotal.value + shippingFee.value
 })
 
+const couponDiscount = ref(0)
+const appliedCouponName = ref('')
+
+const refreshCoupon = async () => {
+  try {
+    const res = await http.post<{ code: number; message: string; data: { total: number; discount: number; finalTotal: number; coupon: any | null } }>(
+      '/orders/preview',
+      { total: orderTotal.value }
+    )
+    couponDiscount.value = res.data.discount || 0
+    appliedCouponName.value = res.data.coupon?.name || ''
+  } catch {
+    couponDiscount.value = 0
+    appliedCouponName.value = ''
+  }
+}
+
+watch(orderTotal, () => {
+  refreshCoupon()
+}, { immediate: true })
+
 const handleCheckout = async () => {
   if (!isFormValid.value) {
     if (!isRegionValid.value) {
@@ -416,7 +444,7 @@ const handleCheckout = async () => {
   if (addressData) {
     createOrder(
       cartItems.value,
-      cartTotal.value,
+      orderTotal.value,
       addressData
     )
 

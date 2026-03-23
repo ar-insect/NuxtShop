@@ -76,6 +76,9 @@ export interface OrderSummary {
   total: number
   status: OrderStatus
   date: string
+  discount?: number
+  couponCode?: string
+  couponName?: string
 }
 
 export interface OrderItem {
@@ -130,6 +133,28 @@ export interface AdminDashboardTrendPoint {
   revenue: number
 }
 
+export interface AdminDashboardUserTrendPoint {
+  date: string
+  newUsers: number
+}
+
+export interface AdminDashboardTopProduct {
+  id: number | string
+  title: string
+  image?: string
+  category?: string
+  orderCount: number
+  totalQuantity: number
+  totalRevenue: number
+}
+
+export interface AdminDashboardTopCategory {
+  category: string
+  orderCount: number
+  totalQuantity: number
+  totalRevenue: number
+}
+
 export type AdminDashboardTodoType = 'order' | 'review' | 'coupon'
 
 export interface AdminDashboardTodoItem {
@@ -145,4 +170,7 @@ export interface AdminDashboardOverview {
   kpi: AdminDashboardKpi
   trend: AdminDashboardTrendPoint[]
   todos: AdminDashboardTodoItem[]
+  userTrend: AdminDashboardUserTrendPoint[]
+  topProducts: AdminDashboardTopProduct[]
+  topCategories: AdminDashboardTopCategory[]
 }

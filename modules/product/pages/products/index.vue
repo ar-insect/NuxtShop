@@ -47,22 +47,22 @@
 
         <div
           v-for="cat in categories"
-          :key="cat"
+          :key="cat.key"
           class="inline-flex items-center rounded-lg border transition-all duration-200 whitespace-nowrap capitalize"
-          :class="activeCategory === cat 
+          :class="activeCategory === cat.key 
             ? 'bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-sm' 
             : 'bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)] hover:bg-[var(--bg-color)]'"
         >
           <button
             type="button"
             class="px-4 py-1.5 text-sm font-medium flex items-center gap-1.5"
-            @click="setCategory(cat)"
+            @click="setCategory(cat.key)"
           >
-            <component :is="getCategoryIcon(cat)" class="w-4 h-4" />
-            {{ categoryLabels[cat] || cat }}
+            <component :is="getCategoryIcon(cat.key)" class="w-4 h-4" />
+            {{ categoryLabelMap[cat.key] || cat.label || cat.key }}
           </button>
           <button
-            v-if="activeCategory === cat"
+            v-if="activeCategory === cat.key"
             type="button"
             class="mr-1 p-1.5 rounded-full hover:bg-white/15 transition-colors"
             :aria-label="t('pages.products.list.clearFilterAria')"
@@ -74,24 +74,22 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <label class="text-sm text-[var(--text-secondary)] whitespace-nowrap">{{ t('pages.products.list.sortLabel') }}</label>
-        <select
+        <span class="text-sm text-[var(--text-secondary)] whitespace-nowrap">
+          {{ t('pages.products.list.sortLabel') }}
+        </span>
+        <BaseSelect
           v-model="sortKey"
-          class="border border-[var(--border-color)] bg-[var(--card-bg)] text-sm px-2 py-1 rounded-md text-[var(--text-color)]"
-        >
-          <option value="default">{{ t('pages.products.list.sortDefault') }}</option>
-          <option value="price-asc">{{ t('pages.products.list.sortPriceAsc') }}</option>
-          <option value="price-desc">{{ t('pages.products.list.sortPriceDesc') }}</option>
-          <option value="rating-desc">{{ t('pages.products.list.sortRatingDesc') }}</option>
-        </select>
+          :options="sortOptions"
+          size="sm"
+        />
       </div>
     </div>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
       <p class="text-[var(--text-secondary)]">
         {{ t('pages.products.list.filterCurrent') }}
-        <span v-if="activeCategory && categoryLabels[activeCategory]">
-          {{ t('pages.products.list.filterCategory', { category: categoryLabels[activeCategory] }) }}
+        <span v-if="activeCategory && categoryLabelMap[activeCategory]">
+          {{ t('pages.products.list.filterCategory', { category: categoryLabelMap[activeCategory] }) }}
         </span>
         <span v-else>
           {{ t('pages.products.list.filterAll') }}
@@ -158,6 +156,7 @@
 
 <script setup lang="ts">
 import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
@@ -185,10 +184,34 @@ const activeQuery = computed<string>(() => {
   return typeof v === 'string' ? v.trim() : ''
 })
 
+// 从 MongoDB 动态获取商品分类列表（供前台商品列表和后台商品表单复用）
+const { data: categoryData } = await useAsyncData(
+  'product-categories',
+  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  {
+    default: () => [] as { key: string; label: string }[]
+  }
+)
+
+const categories = computed(() => categoryData.value || [])
+
+const categoryLabelMap = computed<Record<string, string>>(() => {
+  const fromServer: Record<string, string> = {}
+  for (const c of categoryData.value || []) {
+    fromServer[c.key] = c.label
+  }
+  return {
+    // 优先使用服务端自定义分类名称，新分类可以直接生效；
+    // 对于默认分类（electronics 等），使用内置的中文映射覆盖英文 key。
+    ...fromServer,
+    ...categoryLabels
+  }
+})
+
 useSeoMeta({
   title: computed(() => {
-    if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return t('seo.products.listCategoryTitle', { category: categoryLabels[activeCategory.value] })
+    if (activeCategory.value && categoryLabelMap.value[activeCategory.value]) {
+      return t('seo.products.listCategoryTitle', { category: categoryLabelMap.value[activeCategory.value] })
     }
     if (activeQuery.value) {
       return t('seo.products.listSearchTitle', { keyword: activeQuery.value })
@@ -196,8 +219,8 @@ useSeoMeta({
     return t('seo.products.listTitle')
   }),
   description: computed(() => {
-    if (activeCategory.value && categoryLabels[activeCategory.value]) {
-      return t('seo.products.listCategoryDescription', { category: categoryLabels[activeCategory.value] })
+    if (activeCategory.value && categoryLabelMap.value[activeCategory.value]) {
+      return t('seo.products.listCategoryDescription', { category: categoryLabelMap.value[activeCategory.value] })
     }
     if (activeQuery.value) {
       return t('seo.products.listSearchDescription', { keyword: activeQuery.value })
@@ -208,18 +231,14 @@ useSeoMeta({
   ogDescription: t('seo.products.listDescription')
 })
 
-// 从 MongoDB 动态获取商品分类列表
-const { data: categoryData } = await useAsyncData(
-  'product-categories',
-  () => http.get<{ key: string; label: string }[]>('/products/categories'),
-  {
-    default: () => [] as { key: string; label: string }[]
-  }
-)
-
-const categories = computed(() => categoryData.value?.map(c => c.key) || [])
-
 const sortKey = ref<'default' | 'price-asc' | 'price-desc' | 'rating-desc'>('default')
+
+const sortOptions = computed(() => [
+  { label: t('pages.products.list.sortDefault'), value: 'default' },
+  { label: t('pages.products.list.sortPriceAsc'), value: 'price-asc' },
+  { label: t('pages.products.list.sortPriceDesc'), value: 'price-desc' },
+  { label: t('pages.products.list.sortRatingDesc'), value: 'rating-desc' }
+])
 
 // 通过 watch 响应路由变化并刷新数据
 const { data, pending } = await useAsyncData(

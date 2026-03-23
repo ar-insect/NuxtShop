@@ -88,6 +88,16 @@
             size="sm"
           />
         </template>
+        <template #cell-altKey="{ row }">
+          <div class="flex flex-col text-xs">
+            <span class="text-[var(--text-color)]">
+              {{ row.altKey }}
+            </span>
+            <span class="text-[var(--text-secondary)]">
+              {{ t(row.altKey) }}
+            </span>
+          </div>
+        </template>
         <template #cell-media="{ row }">
           <a
             :href="row.link || row.image"
@@ -388,6 +398,7 @@ const openEdit = (row: AdminAd) => {
 }
 
 const handleSubmit = async () => {
+  if (listLoading.value) return
   if (!form.position || !form.image || !form.altKey) {
     toast.error(t('admin.marketing.ads.errorRequired'))
     return
@@ -440,6 +451,7 @@ watch([filterPosition, filterStatus], async () => {
 })
 
 const handleDelete = async (row: AdminAd) => {
+  if (listLoading.value) return
   if (!row.id || typeof row.id !== 'number') {
     toast.error(t('admin.marketing.ads.errorInvalidId'))
     return

@@ -197,7 +197,8 @@ const zhCN = {
       subtotalLabel: '小计',
       discountLabel: '预计优惠',
       totalLabel: '订单总计',
-      summaryHint: '当前为示例环境，暂未启用真实优惠规则，可在此接入满减、优惠券等逻辑。',
+      summaryHint: '系统会根据当前商品金额自动计算可用优惠。',
+      summaryHintApplied: '已为你应用当前可用的最优优惠方案，具体以结算页为准。',
       buttonEmpty: '请先添加商品',
       buttonCheckout: '去结算',
       recommendedTitle: '推荐商品',
@@ -235,6 +236,7 @@ const zhCN = {
       quantityLabel: '数量',
       itemsSubtotalLabel: '商品小计',
       shippingLabel: '运费',
+      couponDiscountLabel: '优惠券抵扣',
       totalLabel: '订单总计',
       processingButton: '处理中...',
       payButton: '确认支付',
@@ -289,6 +291,7 @@ const zhCN = {
         timelineTitle: '订单进度',
         timelineCreated: '订单创建成功',
         timelinePaid: '支付成功',
+        timezoneHint: '时间显示基于 {timezone} 时区',
         priceSummaryTitle: '费用明细',
         priceItemsTotal: '商品总额',
         priceShipping: '运费',
@@ -513,6 +516,7 @@ const zhCN = {
       phoneLabel: '手机号：',
       phoneUnset: '未设置手机号',
       walletTitle: '我的钱包',
+       timezoneHint: '时间显示基于 {timezone} 时区',
       balanceLabel: '账户余额：',
       balanceDesc: '当前账户可用余额，可直接用于下单支付',
       recharge: '充值',
@@ -813,6 +817,10 @@ const zhCN = {
         pendingCancelled: '已取消'
       },
       trendTitle: '近 7 日订单趋势',
+      userTrendTitle: '近 7 日新增用户',
+      userTrendEmpty: '最近 7 日暂无新增用户',
+      topProductsTitle: '热销商品 Top 5',
+      topCategoriesTitle: '热销品类 Top 5',
       trendEmpty: '最近 7 日暂无订单数据',
       todosTitle: '待办事项',
       todosEmpty: '暂无待办事项'
@@ -823,7 +831,8 @@ const zhCN = {
       save: '保存',
       cancel: '取消',
       edit: '编辑',
-      delete: '删除'
+      delete: '删除',
+      selected: '已选 {count} 项'
     },
     goods: {
       list: {
@@ -986,6 +995,8 @@ const zhCN = {
         errorTimeRange: '开始时间不能晚于结束时间',
         deleteConfirm: '确定要删除该优惠券吗？',
         deleteSuccess: '优惠券已删除',
+        deleteBatchConfirm: '确定要批量删除选中的 {count} 张优惠券吗？',
+        deleteBatchSuccess: '已删除选中的优惠券',
         createSuccess: '优惠券已创建',
         updateSuccess: '优惠券已更新',
         noLimit: '不限'
@@ -1063,6 +1074,7 @@ const zhCN = {
         columnTotal: '金额',
         columnStatus: '状态',
         columnDate: '下单时间',
+        columnReceiver: '收货人',
         detailTitle: '订单详情：{id}',
         detailTitleFallback: '订单详情',
         detailId: '订单号：',
@@ -1078,7 +1090,9 @@ const zhCN = {
         itemsColumnSubtotal: '小计',
         close: '关闭',
         updateStatus: '更新状态',
-        statusUpdated: '订单状态已更新：{id}'
+        statusUpdated: '订单状态已更新：{id}',
+        deleteConfirm: '确定要批量删除选中的 {count} 个订单吗？',
+        deleteBatchSuccess: '已删除选中的订单'
       }
     },
     system: {
@@ -1175,6 +1189,8 @@ const zhCN = {
         tableColumnName: '姓名',
         tableColumnRole: '角色',
         tableColumnPhone: '手机号',
+        tableColumnOrderCount: '订单数',
+        tableColumnTotalSpent: '总消费',
         tableColumnCreatedAt: '创建时间',
         errorRequired: '请填写必填字段',
         errorDeleteSelf: '不能删除当前登录的管理员',

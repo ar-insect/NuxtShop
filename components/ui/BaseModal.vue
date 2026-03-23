@@ -1,13 +1,21 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="modelValue" class="modal-mask" @click.self="handleMaskClick">
+      <div
+        v-if="modelValue"
+        class="modal-mask"
+        :class="{
+          'modal-mask-drawer': props.mode === 'drawer'
+        }"
+        @click.self="handleMaskClick"
+      >
         <div
           ref="modalRef"
           class="modal-container"
           :class="{
             'modal-fullscreen': isFullscreen,
-            'modal-dragging': dragging
+            'modal-dragging': dragging,
+            'modal-drawer': props.mode === 'drawer'
           }"
           :style="modalStyle"
           role="dialog"
@@ -72,7 +80,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, PropType } from 'vue'
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useI18n } from '~/composables/useI18n'
 
@@ -84,6 +92,10 @@ const props = defineProps({
   title: {
     type: String,
     default: ''
+  },
+  mode: {
+    type: String as PropType<'modal' | 'drawer'>,
+    default: 'modal'
   },
   closeOnMask: {
     type: Boolean,
@@ -290,6 +302,11 @@ onBeforeUnmount(() => {
   transition: opacity 0.3s ease;
 }
 
+.modal-mask-drawer {
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
 .modal-container {
   width: 500px;
   max-width: 90%;
@@ -302,6 +319,14 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-color);
+}
+
+.modal-drawer {
+  height: 100%;
+  max-width: 100%;
+  width: min(480px, 100%);
+  border-radius: 0;
+  border-left: 1px solid var(--border-color);
 }
 
 .modal-header {
@@ -467,5 +492,16 @@ onBeforeUnmount(() => {
 .modal-leave-to .modal-container {
   transform: scale(1.05);
   filter: blur(3px);
+}
+
+/* Drawer 模式：从右侧滑入/滑出，覆盖默认缩放动画 */
+.modal-enter-from .modal-container.modal-drawer {
+  transform: translateX(100%);
+  filter: none;
+}
+
+.modal-leave-to .modal-container.modal-drawer {
+  transform: translateX(100%);
+  filter: none;
 }
 </style>

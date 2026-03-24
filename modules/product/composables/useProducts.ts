@@ -14,6 +14,11 @@
  */
 import { http } from '~/utils/http'
 
+export interface ProductSpec {
+  label: string
+  value: string
+}
+
 export interface Product {
   id: number
   title: string
@@ -27,6 +32,7 @@ export interface Product {
     rate: number
     count: number
   }
+  specs?: ProductSpec[]
 }
 
 /**

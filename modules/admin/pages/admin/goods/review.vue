@@ -14,18 +14,18 @@
 
       <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-5 items-end">
-          <div class="md:col-span-3">
-            <BaseInput
-              v-model="searchKeywordInput"
-              :placeholder="t('admin.goods.review.searchPlaceholder')"
-              @keyup.enter="applySearch"
-            />
-          </div>
           <div class="md:col-span-1">
             <BaseSelect
               v-model="filterRating"
               :options="ratingOptions"
               :placeholder="t('admin.goods.review.ratingPlaceholder')"
+            />
+          </div>
+          <div class="md:col-span-3">
+            <BaseInput
+              v-model="searchKeywordInput"
+              :placeholder="t('admin.goods.review.searchPlaceholder')"
+              @keyup.enter="applySearch"
             />
           </div>
           <div class="flex gap-2 justify-end md:col-span-1">
@@ -224,6 +224,11 @@ const handlePageSizeChange = async (value: number) => {
     listLoading.value = false
   }
 }
+
+watch(filterRating, async () => {
+  page.value = 1
+  await reload()
+})
 
 const clearSearch = async () => {
   searchKeywordInput.value = ''

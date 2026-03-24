@@ -10,6 +10,7 @@ interface AdminProductPayload {
   category?: string
   image?: string
   images?: string[]
+  specs?: { label: string; value: string }[]
 }
 
 export default defineEventHandler(async (event) => {
@@ -50,6 +51,15 @@ export default defineEventHandler(async (event) => {
 
   const images = Array.isArray(body.images) && body.images.length > 0 ? body.images : [body.image]
 
+  const specs = Array.isArray(body.specs)
+    ? body.specs
+        .map((item) => ({
+          label: String(item.label || '').trim(),
+          value: String(item.value || '').trim()
+        }))
+        .filter((item) => item.label || item.value)
+    : []
+
   const created = await createProduct({
     title: body.title,
     price: body.price,
@@ -57,7 +67,8 @@ export default defineEventHandler(async (event) => {
     detailHtml: body.detailHtml,
     category: body.category,
     image: body.image,
-    images
+    images,
+    specs
   })
 
   return {
@@ -67,4 +78,3 @@ export default defineEventHandler(async (event) => {
   }
 }
 )
-

@@ -19,36 +19,39 @@
         </div>
 
         <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-6 items-end">
-            <div class="md:col-span-1">
+          <div class="flex flex-wrap lg:flex-nowrap gap-3 items-end min-w-max">
+            <div class="w-full sm:w-auto">
               <BaseSelect
                 v-model="filterCategory"
                 :options="categoryFilterOptions"
                 :placeholder="t('admin.goods.list.categoryPlaceholder')"
+                size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="w-full sm:w-auto">
               <BaseSelect
                 v-model="sortMode"
                 :options="sortOptions"
                 :placeholder="t('admin.goods.list.sortPlaceholder')"
+                size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="w-full sm:w-auto">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
                 :placeholder="t('admin.goods.list.searchFieldPlaceholder')"
+                size="sm"
               />
             </div>
-            <div class="md:col-span-2">
+            <div class="flex-1 min-w-[220px]">
               <BaseInput
                 v-model="searchKeywordInput"
                 :placeholder="t('admin.goods.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
-            <div class="flex gap-2 justify-end md:col-span-1">
+            <div class="flex gap-2 justify-end">
               <BaseButton size="sm" variant="primary" @click="applySearch">
                 {{ t('admin.common.search') }}
               </BaseButton>
@@ -81,7 +84,11 @@
           </NuxtLink>
         </template>
         <template #cell-category="{ value }">
-          <AdminTag :label="categoryLabels[value] || value" status="muted" size="sm" />
+          <AdminTag
+            :label="categoryLabels[value] || value"
+            :status="getCategoryTagStatus(value)"
+            size="sm"
+          />
         </template>
         <template #cell-price="{ value }">
           <span class="text-sm text-[var(--text-color)]">
@@ -97,13 +104,13 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 whitespace-nowrap">
             <BaseButton
               size="xs"
               variant="outline"
               @click.stop="goEdit(row)"
             >
-              {{ t('admin.common.save') }}
+              {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
@@ -111,7 +118,7 @@
               class="text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
-              {{ t('demo.components.confirm.deleteConfirm') }}
+              {{ t('admin.common.delete') }}
             </BaseButton>
           </div>
         </template>
@@ -179,6 +186,17 @@ const {
     return params
   }
 })
+
+const getCategoryTagStatus = (key: string): 'primary' | 'success' | 'warning' | 'danger' | 'muted' => {
+  // 按当前业务分类映射固定颜色，便于快速区分
+  const map: Record<string, 'primary' | 'success' | 'warning' | 'danger' | 'muted'> = {
+    "men's clothing": 'primary',      // 男装 - 主色
+    "women's clothing": 'warning',    // 女装 - 暖色
+    electronics: 'success',           // 电子产品 - 绿色
+    jewelery: 'danger'                // 珠宝配饰 - 红色
+  }
+  return map[key] || 'muted'
+}
 
 watch(
   products,
@@ -323,7 +341,7 @@ const handleDelete = async (row: AdminProduct) => {
 
 const columns = computed(() => [
   { key: 'id', label: t('admin.goods.list.columnId'), sortable: true, width: 80, fixed: 'left' },
-  { key: 'title', label: t('admin.goods.list.columnTitle'), sortable: true, width: 260 },
+  { key: 'title', label: t('admin.goods.list.columnTitle'), sortable: true, width: 200 },
   { key: 'category', label: t('admin.goods.list.columnCategory'), sortable: true, width: 160 },
   { key: 'price', label: t('admin.goods.list.columnPrice'), sortable: true, width: 120 },
   { key: 'rating', label: t('admin.goods.list.columnRating'), sortable: false, width: 140 }

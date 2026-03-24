@@ -17,18 +17,18 @@
 
       <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-4 items-end">
-          <div class="md:col-span-2">
-            <BaseInput
-              v-model="searchKeywordInput"
-              :placeholder="t('admin.goods.category.searchPlaceholder')"
-              @keyup.enter="applySearch"
-            />
-          </div>
           <div class="md:col-span-1">
             <BaseSelect
               v-model="statusFilter"
               :options="statusOptions"
               :placeholder="t('admin.goods.category.statusPlaceholder')"
+            />
+          </div>
+          <div class="md:col-span-2">
+            <BaseInput
+              v-model="searchKeywordInput"
+              :placeholder="t('admin.goods.category.searchPlaceholder')"
+              @keyup.enter="applySearch"
             />
           </div>
           <div class="flex gap-2 justify-end md:col-span-1">
@@ -60,7 +60,7 @@
         <template #cell-active="{ value }">
           <AdminTag
             :label="value ? t('admin.goods.category.tagEnabled') : t('admin.goods.category.tagDisabled')"
-            :status="value ? 'success' : 'muted'"
+            :status="value ? 'success' : 'danger'"
             size="sm"
           />
         </template>

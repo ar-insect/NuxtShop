@@ -190,7 +190,8 @@ const zhCN = {
         loginHint: '登录后即可购买商品和收藏',
         loginButton: '立即登录',
         historyTitle: '最近浏览',
-        historyClear: '清空历史'
+        historyClear: '清空历史',
+        specsTitle: '商品参数'
       }
     },
     cart: {
@@ -888,8 +889,18 @@ const zhCN = {
         fieldImagesPlaceholder: '多个图片地址用逗号分隔',
         fieldDescription: '商品描述',
         fieldDescriptionPlaceholder: '请输入商品描述',
+        fieldDetailHtml: '图文详情（富文本）',
+        fieldDetailHtmlPlaceholder: '支持加粗、列表、段落等富文本内容',
+        fieldDetailHtmlHint: '用于商品详情页富文本展示，留空则使用上方商品描述。',
+        fieldSpecsTitle: '商品参数',
+        fieldSpecsAdd: '新增一行',
+        fieldSpecsNamePlaceholder: '参数名，例如：材质',
+        fieldSpecsValuePlaceholder: '参数值，例如：100% 棉',
+        fieldSpecsHint: '可选填写，会展示在商品详情页的「商品参数」区域。',
         imageUrlInvalid: '请输入合法的图片地址',
         errorRequired: '请填写必填字段',
+        errorDescriptionRequired: '请填写商品描述',
+        errorSpecsRequired: '请至少填写一条商品参数（如材质、尺码等）',
         errorPriceInvalid: '价格不合法',
         submitCreate: '保存商品',
         submitEdit: '保存修改',

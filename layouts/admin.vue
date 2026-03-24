@@ -304,6 +304,18 @@ const draggingPath = ref<string | null>(null)
 const TAB_STORAGE_KEY = 'nuxtshop-admin-tabs'
 
 const resolveTabTitle = (path: string) => {
+  // 商品管理：为新增/编辑页提供更明确的标题
+  if (path.startsWith('/admin/goods/create')) {
+    return t('admin.goods.form.createTitle')
+  }
+  if (
+    path.startsWith('/admin/goods/') &&
+    !path.startsWith('/admin/goods/category') &&
+    !path.startsWith('/admin/goods/review')
+  ) {
+    return t('admin.goods.form.editTitle')
+  }
+
   const items = flatNavItems.value
   const exact = items.find(item => path === item.path)
   if (exact) return exact.label

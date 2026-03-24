@@ -109,6 +109,31 @@
             v-html="product.detailHtml || product.description" 
           />
         </div>
+
+        <div v-if="product.specs && product.specs.length" class="mt-8">
+          <h3 class="text-sm font-medium text-[var(--text-color)] mb-3">
+            {{ t('pages.products.detail.specsTitle') }}
+          </h3>
+          <div
+            class="overflow-hidden rounded-lg border"
+            :style="{ borderColor: 'var(--border-color)' }"
+          >
+            <dl class="divide-y" :style="{ borderColor: 'var(--border-color)' }">
+              <div
+                v-for="(spec, index) in product.specs"
+                :key="index"
+                class="grid grid-cols-[120px_minmax(0,1fr)] text-sm"
+              >
+                <dt class="px-4 py-2 bg-[var(--muted-bg,#f9fafb)] text-[var(--text-secondary)]">
+                  {{ spec.label }}
+                </dt>
+                <dd class="px-4 py-2 text-[var(--text-color)]">
+                  {{ spec.value }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
         
         <div class="mt-6 flex items-center">
           <span
@@ -387,3 +412,41 @@ const zoomPreviewStyle = computed(() => {
   }
 })
 </script>
+
+<style scoped>
+.rich-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.35rem 0;
+}
+
+.rich-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.35rem 0;
+}
+
+.rich-content li + li {
+  margin-top: 0.15rem;
+}
+
+.rich-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+
+.rich-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.rich-content blockquote {
+  border-left: 3px solid var(--border-color);
+  padding-left: 0.75rem;
+  margin: 0.6rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+</style>

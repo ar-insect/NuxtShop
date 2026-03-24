@@ -190,7 +190,8 @@ const enUS = {
         loginHint: 'Sign in to purchase or add products to wishlist',
         loginButton: 'Sign in now',
         historyTitle: 'Recently viewed',
-        historyClear: 'Clear history'
+        historyClear: 'Clear history',
+        specsTitle: 'Specifications'
       }
     },
     cart: {
@@ -888,8 +889,18 @@ const enUS = {
         fieldImagesPlaceholder: 'Separate URLs with commas',
         fieldDescription: 'Description',
         fieldDescriptionPlaceholder: 'Enter product description',
+        fieldDetailHtml: 'Rich description (HTML)',
+        fieldDetailHtmlPlaceholder: 'Supports bold text, lists, paragraphs and other rich content.',
+        fieldDetailHtmlHint: 'Shown as rich content on the product detail page. If empty, the plain description above will be used.',
+        fieldSpecsTitle: 'Specifications',
+        fieldSpecsAdd: 'Add row',
+        fieldSpecsNamePlaceholder: 'Name, e.g. Material',
+        fieldSpecsValuePlaceholder: 'Value, e.g. 100% cotton',
+        fieldSpecsHint: 'Optional. Will be shown in the product detail “Specifications” section.',
         imageUrlInvalid: 'Please enter a valid image URL',
         errorRequired: 'Please fill in all required fields',
+        errorDescriptionRequired: 'Please enter product description',
+        errorSpecsRequired: 'Please provide at least one specification (e.g. material, size).',
         errorPriceInvalid: 'Invalid price',
         submitCreate: 'Save product',
         submitEdit: 'Save changes',

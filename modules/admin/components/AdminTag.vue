@@ -1,5 +1,5 @@
 <template>
-  <span :class="classes">
+  <span :class="classes" :style="styleObject">
     <slot>{{ label }}</slot>
   </span>
 </template>
@@ -17,20 +17,20 @@ const props = defineProps<{
 }>()
 
 const classes = computed(() => {
-  const base = ['inline-flex', 'items-center', 'rounded-full', 'font-medium', 'transition-colors']
+  const base = ['inline-flex', 'items-center', 'rounded-full', 'font-medium', 'transition-colors', 'border']
   const sizeClass = props.size === 'sm' || !props.size
     ? ['px-3', 'py-0.5', 'text-xs']
     : ['px-3.5', 'py-1', 'text-sm']
 
+  return [...base, ...sizeClass].join(' ')
+})
+
+const styleObject = computed(() => {
   const status = props.status || 'default'
-
-  const colorClass = [
-    'border',
-    `border-[var(--admin-tag-${status}-border)]`,
-    `bg-[var(--admin-tag-${status}-bg)]`,
-    `text-[var(--admin-tag-${status}-fg)]`
-  ]
-
-  return [...base, ...sizeClass, ...colorClass].join(' ')
+  return {
+    borderColor: `var(--admin-tag-${status}-border)`,
+    backgroundColor: `var(--admin-tag-${status}-bg)`,
+    color: `var(--admin-tag-${status}-fg)`
+  }
 })
 </script>

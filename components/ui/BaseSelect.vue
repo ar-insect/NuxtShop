@@ -79,7 +79,7 @@
     <div 
       v-if="isOpen" 
       ref="listboxRef"
-      class="absolute z-10 mt-1 w-full bg-[var(--card-bg)] shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black/5 overflow-auto focus:outline-none sm:text-sm border border-gray-200 dark:border-gray-700"
+      class="absolute z-50 mt-1 w-full bg-[var(--card-bg)] shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black/5 overflow-auto focus:outline-none sm:text-sm border border-gray-200 dark:border-gray-700"
       role="listbox"
       tabindex="-1"
     >

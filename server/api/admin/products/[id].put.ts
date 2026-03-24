@@ -10,6 +10,7 @@ interface AdminProductUpdatePayload {
   category?: string
   image?: string
   images?: string[]
+  specs?: { label: string; value: string }[]
 }
 
 export default defineEventHandler(async (event) => {
@@ -59,6 +60,14 @@ export default defineEventHandler(async (event) => {
   if (body.images !== undefined && Array.isArray(body.images) && body.images.length > 0) {
     patch.images = body.images
   }
+  if (body.specs !== undefined && Array.isArray(body.specs)) {
+    patch.specs = body.specs
+      .map((item) => ({
+        label: String(item.label || '').trim(),
+        value: String(item.value || '').trim()
+      }))
+      .filter((item) => item.label || item.value)
+  }
 
   if (Object.keys(patch).length === 0) {
     throw createError({
@@ -94,4 +103,3 @@ export default defineEventHandler(async (event) => {
     data: updated
   }
 })
-

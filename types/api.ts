@@ -13,6 +13,12 @@ export type ApiErrorCode =
   | 'AUTH_INVALID_TOKEN'
   | 'AUTH_USER_NOT_FOUND'
   | 'AUTH_FORBIDDEN'
+  | 'AUTH_CHANGE_PASSWORD_MISSING_FIELDS'
+  | 'AUTH_CHANGE_PASSWORD_MISMATCH'
+  | 'AUTH_CHANGE_PASSWORD_WEAK'
+  | 'AUTH_CHANGE_PASSWORD_SAME_AS_OLD'
+  | 'AUTH_CHANGE_PASSWORD_INVALID_CURRENT'
+  | 'AUTH_CHANGE_PASSWORD_FAILED'
   | 'USER_UPDATE_EMPTY'
   | 'USER_UPDATE_FAILED'
   | 'USER_NOT_FOUND'
@@ -67,6 +73,7 @@ export interface UserPublic {
   language?: UserLanguage
   timezone?: string
   isSuperAdmin?: boolean
+  twoFactorEnabled?: boolean
 }
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -106,10 +113,19 @@ export interface AdItem {
   altKey: string
 }
 
-export interface LoginResponse {
+export interface LoginSuccessResponse {
   token: string
   user: UserPublic
 }
+
+export interface LoginTwoFactorResponse {
+  requires2FA: true
+  userId: string
+  maskedPhone?: string
+  debugCode?: string
+}
+
+export type LoginResponse = LoginSuccessResponse | LoginTwoFactorResponse
 
 export interface MeResponse {
   user: UserPublic

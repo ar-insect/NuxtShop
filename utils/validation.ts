@@ -13,7 +13,10 @@ export const validateUsername = (value: string) => {
 
 export const validatePassword = (value: string) => {
   if (!value) return 'validation.passwordRequired'
-  if (value.length < 6) return 'validation.passwordTooShort'
+  if (value.length < 8) return 'validation.passwordTooShort'
+  const hasLetter = /[A-Za-z]/.test(value)
+  const hasDigit = /\d/.test(value)
+  if (!hasLetter || !hasDigit) return 'validation.passwordWeak'
   return null
 }
 

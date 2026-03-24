@@ -1,33 +1,19 @@
 <template>
   <div
-    class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative"
+    class="min-h-screen flex flex-col relative"
     :style="{ backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }"
   >
-    <div class="absolute top-4 left-4">
-      <NuxtLink to="/" class="flex items-center transition-colors hover:text-[var(--primary-color)]" :style="{ color: 'var(--text-secondary)' }">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-        </svg>
-        {{ t('auth.backHome') }}
+    <div class="absolute top-4 left-4 z-20">
+      <NuxtLink
+        to="/"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 shadow-[0_10px_25px_rgba(15,23,42,0.18)] transition-all hover:bg-white hover:shadow-[0_14px_35px_rgba(15,23,42,0.28)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+      >
+        <SvgIcon name="home" class="h-5 w-5 text-slate-600" />
       </NuxtLink>
     </div>
 
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <h2 class="mt-6 text-center text-3xl font-extrabold">
-        NuxtShop
-      </h2>
-      <p class="mt-2 text-center text-sm" :style="{ color: 'var(--text-secondary)' }">
-        {{ t('auth.authTitle') }}
-      </p>
-    </div>
-
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div
-        class="py-8 px-4 shadow sm:rounded-lg sm:px-10 border"
-        :style="{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }"
-      >
-        <slot />
-      </div>
+    <div class="flex-1">
+      <slot />
     </div>
     
     <BaseToast />
@@ -38,7 +24,5 @@
 <script setup lang="ts">
 import BaseToast from '~/components/ui/BaseToast.vue'
 import BaseModal from '~/components/ui/BaseModal.vue'
-import { useI18n } from '~/composables/useI18n'
-
-const { t } = useI18n()
+import SvgIcon from '~/components/ui/SvgIcon.vue'
 </script>

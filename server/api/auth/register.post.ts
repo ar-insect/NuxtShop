@@ -25,12 +25,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 基础密码强度校验
-  if (password.length < 6) {
+  // 基础密码强度校验：长度 ≥ 8，且包含字母和数字
+  const hasLetter = /[A-Za-z]/.test(password)
+  const hasDigit = /\d/.test(password)
+  if (password.length < 8 || !hasLetter || !hasDigit) {
     throw createApiError({
       statusCode: 400,
       code: 'AUTH_REGISTER_PASSWORD_WEAK',
-      message: '密码长度至少需要6位',
+      message: '密码长度至少 8 位，且需同时包含字母和数字',
       details: null
     });
   }

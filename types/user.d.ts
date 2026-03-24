@@ -12,6 +12,7 @@ export interface User {
   phone?: string;
    language?: 'zh-CN' | 'en-US';
    timezone?: string;
+  twoFactorEnabled?: boolean;
   createdAt: Date;
   updatedAt?: Date;
   preferences?: ThemeConfig; // 添加偏好设置字段

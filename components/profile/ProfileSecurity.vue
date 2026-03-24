@@ -19,6 +19,7 @@
             :label="t('profile.security.newPasswordLabel')"
             :placeholder="t('profile.security.newPasswordPlaceholder')"
             :hint="t('profile.security.newPasswordHint')"
+            :error="newPasswordError"
           />
           <BaseInput
             v-model="passwordForm.confirm"
@@ -47,20 +48,11 @@
             </p>
           </div>
           <div class="flex items-center">
-             <button 
-              :class="[
-                twoFactorEnabled ? 'bg-teal-600' : 'bg-gray-200',
-                'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-              ]"
-              @click="toggle2FA"
-             >
-              <span 
-                :class="[
-                  twoFactorEnabled ? 'translate-x-5' : 'translate-x-0',
-                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-                ]"
-              />
-             </button>
+            <BaseSwitch
+              v-model="twoFactorEnabled"
+              :aria-label="t('profile.security.twoFactorTitle')"
+              @change="toggle2FA"
+            />
           </div>
         </div>
       </div>
@@ -70,35 +62,33 @@
         <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
           {{ t('profile.security.loginHistoryTitle') }}
         </h4>
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-          <table class="min-w-full divide-y divide-[var(--border-color)]">
-            <thead class="bg-[var(--muted-bg)]">
+        <div class="relative overflow-hidden rounded-md border border-[var(--border-color)] bg-[var(--card-bg)]">
+          <table class="min-w-full divide-y divide-[var(--border-color)] text-sm">
+            <thead class="bg-[var(--muted-bg)]/60">
               <tr>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[var(--text-color)] sm:pl-6">
+                <th scope="col" class="py-2.5 pl-4 pr-3 text-left font-medium text-[var(--text-secondary)] sm:pl-6">
                   {{ t('profile.security.loginHistoryDevice') }}
                 </th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
-                  {{ t('profile.security.loginHistoryIp') }}
-                </th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
+                <th scope="col" class="px-3 py-2.5 text-left font-medium text-[var(--text-secondary)]">
                   {{ t('profile.security.loginHistoryTime') }}
-                </th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-[var(--text-color)]">
-                  {{ t('profile.security.loginHistoryStatus') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-[var(--border-color)] bg-[var(--card-bg)]">
-              <tr v-for="log in loginHistory" :key="log.id">
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-[var(--text-color)] sm:pl-6">
+            <tbody class="divide-y divide-[var(--border-color)]">
+              <tr v-for="log in loginHistory" :key="log.id" class="bg-[var(--card-bg)]">
+                <td class="whitespace-nowrap py-3 pl-4 pr-3 text-[var(--text-color)] sm:pl-6 max-w-[200px] truncate">
                   {{ log.device }}
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-[var(--text-secondary)]">{{ log.ip }}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-[var(--text-secondary)]">{{ log.time }}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-                    {{ t('profile.security.loginHistoryStatusSuccess') }}
-                  </span>
+                <td class="whitespace-nowrap px-3 py-3 text-[var(--text-secondary)]">
+                  {{ formatDateTime(log.time, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) }}
+                </td>
+              </tr>
+              <tr v-if="!loginHistory.length">
+                <td colspan="2" class="py-4 px-4 text-center text-xs text-[var(--text-secondary)]">
+                  <BaseEmpty
+                    :title="t('profile.security.loginHistoryTitle')"
+                    :description="t('profile.security.loginHistoryEmptyDesc')"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -112,9 +102,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from '~/composables/useI18n'
+import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
 
 const toast = useToast()
 const { t } = useI18n()
+const { user, logout } = useAuth()
+const { formatDateTime } = useLocaleFormatter()
 
 const passwordForm = reactive({
   current: '',
@@ -123,32 +116,82 @@ const passwordForm = reactive({
 })
 const updatingPassword = ref(false)
 const twoFactorEnabled = ref(false)
-const loginHistory = ref([
-  { id: 1, device: 'MacBook Pro', ip: '192.168.1.101', time: '2023-05-20 14:30:00' },
-  { id: 2, device: 'iPhone 13', ip: '10.0.0.5', time: '2023-05-19 09:15:00' },
-  { id: 3, device: 'Windows PC', ip: '172.16.0.23', time: '2023-05-15 18:45:00' },
-])
+
+const { data: loginHistoryData, pending: loginHistoryPending } = await useAsyncData(
+  'user-login-history',
+  () => $fetch<{ code: number; message: string; data: { id: string; device: string; ip: string; time: string; status: string }[] }>(
+    '/api/user/login-history'
+  ),
+  {
+    server: false
+  }
+)
+
+const loginHistory = computed(() => loginHistoryData.value?.data || [])
+
+watch(
+  user,
+  (val) => {
+    twoFactorEnabled.value = !!val?.twoFactorEnabled
+  },
+  { immediate: true }
+)
 
 const isPasswordValid = computed(() => {
-  return passwordForm.current && 
-         passwordForm.new && 
+  return passwordForm.current &&
+         passwordForm.new &&
          passwordForm.new.length >= 8 &&
-         passwordForm.new === passwordForm.confirm
+         passwordForm.new === passwordForm.confirm &&
+         passwordForm.new !== passwordForm.current
+})
+
+const newPasswordError = computed(() => {
+  if (!passwordForm.new) return ''
+  if (passwordForm.new === passwordForm.current) {
+    return t('profile.security.newPasswordSameError')
+  }
+  return ''
 })
 
 const updatePassword = async () => {
-  updatingPassword.value = true
-  // 模拟 API 请求
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  updatingPassword.value = false
-  passwordForm.current = ''
-  passwordForm.new = ''
-  passwordForm.confirm = ''
-  toast.success(t('profile.security.updatePasswordSuccess'))
+  if (!isPasswordValid.value) return
+  try {
+    updatingPassword.value = true
+    await $fetch('/api/user/change-password', {
+      method: 'POST',
+      body: {
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.new,
+        confirmPassword: passwordForm.confirm
+      }
+    })
+    passwordForm.current = ''
+    passwordForm.new = ''
+    passwordForm.confirm = ''
+    toast.success(t('profile.security.updatePasswordSuccess'))
+    logout()
+  } catch (e: any) {
+    const msg = e?.data?.message || e?.statusMessage || t('toast.profileUpdateFailed')
+    toast.error(msg)
+  } finally {
+    updatingPassword.value = false
+  }
 }
 
-const toggle2FA = () => {
-  twoFactorEnabled.value = !twoFactorEnabled.value
-  toast.success(twoFactorEnabled.value ? t('profile.security.twoFactorOn') : t('profile.security.twoFactorOff'))
+const toggle2FA = async (value: boolean) => {
+  try {
+    await $fetch('/api/user/two-factor', {
+      method: 'POST',
+      body: { enabled: value }
+    })
+    if (user.value) {
+      user.value = { ...user.value, twoFactorEnabled: value }
+    }
+    toast.success(value ? t('profile.security.twoFactorOn') : t('profile.security.twoFactorOff'))
+  } catch (e: any) {
+    twoFactorEnabled.value = !value
+    const msg = e?.data?.message || e?.statusMessage || t('toast.profileUpdateFailed')
+    toast.error(msg)
+  }
 }
 </script>

@@ -2,7 +2,7 @@
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useOrders } from '~/modules/order/composables/useOrders'
-import type { UserPublic } from '~/types/api'
+import type { LoginResponse, LoginSuccessResponse, UserPublic } from '~/types/api'
 import { http } from '~/utils/http'
 import { useApiErrorHandler } from '~/composables/useApiErrorHandler'
 import { useI18n } from '~/composables/useI18n'
@@ -39,34 +39,61 @@ export const useAuth = () => {
   const { handleError } = useApiErrorHandler()
   const { t } = useI18n()
 
-  /**
-   * 使用用户名与密码进行登录认证。
-   * 
-   * @async
-   * @param {string} username - 用户名
-   * @param {string} password - 密码
-   * @param {LoginOptions} options - 登录选项
-   * @returns {Promise<boolean>} 登录成功返回 true，否则返回 false
-   */
-  const login = async (username: string, password: string, options: LoginOptions = {}) => {
+  const applyLoginPayload = async (payload: LoginSuccessResponse, options: LoginOptions) => {
+    token.value = payload.token
+    user.value = payload.user as User
+    resetCartLocal()
+    resetWishlistLocal()
+    resetOrdersLocal()
+    await nextTick()
+    await refreshCart()
+    await refreshWishlist()
+    await refreshOrders()
+    if (options.redirect !== false) {
+      await router.push(options.redirectTo || '/')
+    }
+  }
+
+  type LoginResult =
+    | { success: true }
+    | { success: false; requires2FA?: false }
+    | { success: false; requires2FA: true; userId: string; maskedPhone?: string }
+
+  const login = async (username: string, password: string, options: LoginOptions = {}): Promise<LoginResult> => {
     try {
-      const res = await http.post<{ token: string; user: User }>('/auth/login', {
+      const res = await http.post<LoginResponse>('/auth/login', {
         username,
         password
       })
-      token.value = res.token
-      user.value = res.user as User
-      // toast.success('登录成功')
-      resetCartLocal()
-      resetWishlistLocal()
-      resetOrdersLocal()
-      await nextTick()
-      await refreshCart()
-      await refreshWishlist()
-      await refreshOrders()
-      if (options.redirect !== false) {
-        await router.push(options.redirectTo || '/')
+
+      if ('requires2FA' in res && res.requires2FA) {
+        if (import.meta.client && res.debugCode) {
+          // eslint-disable-next-line no-console
+          console.info('[2FA DEBUG] login code:', res.debugCode)
+        }
+        return {
+          success: false,
+          requires2FA: true,
+          userId: res.userId,
+          maskedPhone: res.maskedPhone
+        }
       }
+
+      await applyLoginPayload(res as LoginSuccessResponse, options)
+      return { success: true }
+    } catch (e: any) {
+      handleError(e)
+      return { success: false }
+    }
+  }
+
+  const verifyTwoFactorLogin = async (userId: string, code: string, options: LoginOptions = {}) => {
+    try {
+      const res = await http.post<LoginSuccessResponse>('/auth/verify-2fa', {
+        userId,
+        code
+      })
+      await applyLoginPayload(res, options)
       return true
     } catch (e: any) {
       handleError(e)
@@ -123,6 +150,7 @@ export const useAuth = () => {
     token,
     isAuthenticated: computed(() => !!user.value),
     login,
+    verifyTwoFactorLogin,
     logout,
     register
   }

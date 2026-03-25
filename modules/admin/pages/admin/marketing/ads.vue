@@ -57,6 +57,7 @@
               <BaseButton
                 size="sm"
                 variant="primary"
+                class="px-4"
                 @click="applySearch"
               >
                 {{ t('admin.marketing.ads.search') }}
@@ -64,6 +65,7 @@
               <BaseButton
                 size="sm"
                 variant="secondary"
+                class="px-4"
                 @click="clearSearch"
               >
                 {{ t('admin.marketing.ads.reset') }}

@@ -128,22 +128,44 @@
         :close-on-mask="true"
       >
       <div v-if="currentOrder" class="space-y-4">
-        <div class="flex flex-col gap-2 text-sm text-[var(--text-secondary)]">
-          <p>
-            {{ t('admin.order.list.detailId') }}<span class="font-mono text-[var(--text-color)]">{{ currentOrder.id }}</span>
-          </p>
-          <p>
-            {{ t('admin.order.list.detailDate') }}{{ formatDate(currentOrder.date) }}
-          </p>
-          <p>
-            {{ t('admin.order.list.detailReceiver') }}{{ currentOrder.shippingAddress.name }} / {{ currentOrder.shippingAddress.phone }}
-          </p>
-          <p>
-            {{ t('admin.order.list.detailAddress') }}{{ currentOrder.shippingAddress.address }}
-          </p>
-          <p>
-            {{ t('admin.order.list.detailTotal') }}￥{{ currentOrder.total.toFixed(2) }}
-          </p>
+        <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start">
+          <div class="space-y-2 text-sm text-[var(--text-secondary)]">
+            <p>
+              {{ t('admin.order.list.detailId') }}
+              <span class="font-mono text-[var(--text-color)] break-all">{{ currentOrder.id }}</span>
+            </p>
+            <p>
+              {{ t('admin.order.list.detailDate') }}{{ formatDate(currentOrder.date) }}
+            </p>
+          </div>
+          <div class="flex flex-col items-end gap-1 text-sm">
+            <div class="flex items-center gap-2">
+              <AdminTag
+                :label="statusLabel(currentOrder.status)"
+                :status="statusColor(currentOrder.status)"
+                size="sm"
+              />
+            </div>
+            <p class="text-[var(--text-secondary)]">
+              {{ t('admin.order.list.detailTotal') }}
+              <span class="ml-1 text-base font-semibold text-[var(--text-color)]">
+                ￥{{ currentOrder.total.toFixed(2) }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2 text-sm text-[var(--text-secondary)]">
+          <div class="space-y-1">
+            <p>
+              {{ t('admin.order.list.detailReceiver') }}{{ currentOrder.shippingAddress.name }} / {{ currentOrder.shippingAddress.phone }}
+            </p>
+          </div>
+          <div class="space-y-1 md:text-right">
+            <p>
+              {{ t('admin.order.list.detailAddress') }}{{ currentOrder.shippingAddress.address }}
+            </p>
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -175,6 +197,7 @@
             :rows="currentOrder.items"
             :page-size="currentOrder.items.length"
             :hide-pagination="true"
+            compact
           >
             <template #cell-title="{ row }">
               <div class="flex items-center gap-2">

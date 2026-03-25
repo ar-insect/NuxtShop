@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-3 relative">
     <div class="overflow-x-auto rounded-md border" :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 60%, transparent)' }">
-      <table :class="['text-sm', props.compact ? 'min-w-full' : 'min-w-[960px]']">
+      <table :class="['text-sm w-full', props.compact ? 'min-w-full' : 'min-w-[960px]']">
         <thead
           class="text-left text-[var(--text-secondary)] border-b bg-[var(--card-bg)]"
           :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 70%, transparent)' }"
@@ -64,7 +64,7 @@
             </th>
             <th
               v-if="$slots.actions"
-              class="py-2 pr-2 sticky right-0 z-30 bg-[var(--card-bg)] text-right whitespace-nowrap"
+              class="py-2 px-2 w-[120px] sticky right-0 z-30 bg-[var(--card-bg)] text-center whitespace-nowrap"
             >
               操作
             </th>
@@ -118,7 +118,7 @@
             </td>
             <td
               v-if="$slots.actions"
-              class="py-2 pr-2 align-middle sticky right-0 z-30 bg-[var(--card-bg)] text-right whitespace-nowrap"
+              class="py-2 px-2 w-[120px] align-middle sticky right-0 z-30 bg-[var(--card-bg)] whitespace-nowrap"
             >
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>

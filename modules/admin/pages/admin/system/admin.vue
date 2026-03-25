@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.system.admin.title') }}
@@ -27,7 +27,9 @@
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4 items-end">
             <div class="md:col-span-3">
               <BaseInput
+                class="h-8"
                 v-model="searchKeywordInput"
+                clearable
                 :placeholder="t('admin.system.admin.searchPlaceholder')"
                 @keyup.enter="applySearch"
               />
@@ -77,11 +79,12 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
+          <AdminRowActions>
             <BaseButton
               v-if="isSuperAdmin"
               size="xs"
               variant="outline"
+              class="px-2"
               @click.stop="openEdit(row)"
             >
               {{ t('admin.common.edit') }}
@@ -90,6 +93,7 @@
               v-if="isSuperAdmin"
               size="xs"
               variant="outline"
+              class="px-2"
               @click.stop="openResetPassword(row)"
             >
               {{ t('admin.system.admin.resetModalTitle') }}
@@ -98,13 +102,13 @@
               v-if="isSuperAdmin"
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               :disabled="!canDeleteAdmin(row)"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -188,6 +192,7 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useAdminPermission } from '~/modules/admin/composables/useAdminPermission'
@@ -425,9 +430,9 @@ const handleResetSubmit = async () => {
 }
 
 const columns = computed(() => [
-  { key: 'username', label: t('admin.system.admin.tableColumnUsername'), sortable: true, width: 160 },
-  { key: 'name', label: t('admin.system.admin.tableColumnName'), sortable: true, width: 140 },
-  { key: 'phone', label: t('admin.system.admin.tableColumnPhone'), sortable: false, width: 140 },
-  { key: 'createdAt', label: t('admin.system.admin.tableColumnCreatedAt'), sortable: true, width: 180 }
+  { key: 'username', label: t('admin.system.admin.tableColumnUsername'), sortable: true, width: 180 },
+  { key: 'name', label: t('admin.system.admin.tableColumnName'), sortable: true, width: 160 },
+  { key: 'phone', label: t('admin.system.admin.tableColumnPhone'), sortable: false, width: 160 },
+  { key: 'createdAt', label: t('admin.system.admin.tableColumnCreatedAt'), sortable: true, width: 200 }
 ])
 </script>

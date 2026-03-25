@@ -4,11 +4,12 @@
       <span>第 {{ page }} / {{ totalPages }} 页，共 {{ total }} 条</span>
       <span class="hidden sm:inline-flex items-center gap-1">
         每页
-        <div class="w-20">
+        <div class="w-18">
           <BaseSelect
             v-model="pageSizeModel"
             :options="pageSizeSelectOptions"
             size="sm"
+            compact
             placeholder=""
           />
         </div>

@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <h1 class="text-2xl font-bold text-[var(--text-color)]">
       {{ t('admin.goods.category.title') }}
     </h1>
@@ -22,11 +22,14 @@
               v-model="statusFilter"
               :options="statusOptions"
               :placeholder="t('admin.goods.category.statusPlaceholder')"
+              size="sm"
             />
           </div>
           <div class="md:col-span-2">
             <BaseInput
+              class="h-8"
               v-model="searchKeywordInput"
+              clearable
               :placeholder="t('admin.goods.category.searchPlaceholder')"
               @keyup.enter="applySearch"
             />
@@ -49,6 +52,7 @@
         :page-size="pageSize"
         :total="total"
         server-side
+        compact
         @update:page="handlePageChange"
         @update:page-size="handlePageSizeChange"
       >
@@ -70,19 +74,19 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
+          <AdminRowActions>
+            <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -140,6 +144,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
 
@@ -382,10 +387,10 @@ const applySearch = () => {
 }
 
 const columns = computed(() => [
-  { key: 'key', label: t('admin.goods.category.columnKey'), sortable: true, width: 160 },
-  { key: 'label', label: t('admin.goods.category.columnLabel'), sortable: true, width: 200 },
-  { key: 'order', label: t('admin.goods.category.columnOrder'), sortable: true, width: 80 },
-  { key: 'active', label: t('admin.goods.category.columnStatus'), sortable: true, width: 80 }
+  { key: 'key', label: t('admin.goods.category.columnKey'), sortable: true, width: 180 },
+  { key: 'label', label: t('admin.goods.category.columnLabel'), sortable: true, width: 280 },
+  { key: 'order', label: t('admin.goods.category.columnOrder'), sortable: true, width: 80, align: 'right' as const, minWidth: 80 },
+  { key: 'active', label: t('admin.goods.category.columnStatus'), sortable: true, width: 100 }
 ])
 
 const generateCategoryKey = (label: string) => {

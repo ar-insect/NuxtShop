@@ -19,7 +19,7 @@
           error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500' : '',
           disabled ? 'opacity-60 cursor-not-allowed' : '',
           $slots.prefix ? 'pl-10' : 'pl-3',
-          $slots.suffix ? 'pr-10' : 'pr-3'
+          ($slots.suffix || clearable) ? 'pr-10' : 'pr-3'
         ]"
         :style="{ 
           borderRadius: 'var(--border-radius)',

@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.marketing.ads.title') }}
@@ -25,6 +25,7 @@
                 v-model="filterPosition"
                 :options="positionFilterOptions"
                 :placeholder="t('admin.marketing.ads.positionPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-1">
@@ -32,6 +33,7 @@
                 v-model="filterStatus"
                 :options="statusFilterOptions"
                 :placeholder="t('admin.marketing.ads.statusPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-1">
@@ -39,11 +41,14 @@
                 v-model="searchField"
                 :options="searchFieldOptions"
                 :placeholder="t('admin.marketing.ads.searchFieldPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-2">
               <BaseInput
+                class="h-8"
                 v-model="searchKeywordInput"
+                clearable
                 :placeholder="t('admin.marketing.ads.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
@@ -84,13 +89,13 @@
         <template #cell-active="{ value }">
           <AdminTag
             :label="value !== false ? t('admin.marketing.ads.tagActive') : t('admin.marketing.ads.tagInactive')"
-            :status="value !== false ? 'success' : 'muted'"
+            :status="value !== false ? 'success' : 'danger'"
             size="sm"
           />
         </template>
         <template #cell-altKey="{ row }">
-          <div class="flex flex-col text-xs">
-            <span class="text-[var(--text-color)]">
+          <div class="flex flex-col text-xs max-w-xs">
+            <span class="text-[var(--text-color)] truncate" :title="row.altKey">
               {{ row.altKey }}
             </span>
             <span class="text-[var(--text-secondary)]">
@@ -113,20 +118,20 @@
           </a>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
+          <AdminRowActions>
+            <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               :disabled="row.active !== false"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -201,6 +206,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { http, type ApiResponse } from '~/utils/http'
 import { watch } from 'vue'
 import { useI18n } from '~/composables/useI18n'
@@ -257,14 +263,27 @@ const pageSize = ref(10)
 
 const buildFilterParams = () => {
   const params: Record<string, string | number> = {}
+
   if (filterPosition.value !== 'ALL') {
     params.position = filterPosition.value
   }
+
   if (filterStatus.value === 'ACTIVE') {
     params.status = 'ACTIVE'
   } else if (filterStatus.value === 'INACTIVE') {
     params.status = 'INACTIVE'
   }
+
+  const keyword = searchKeyword.value.trim()
+  if (keyword) {
+    const field = searchField.value
+    if (field === 'id') {
+      params.id = keyword
+    } else {
+      params[field] = keyword
+    }
+  }
+
   return params
 }
 
@@ -282,19 +301,7 @@ const { data, pending } = await useAsyncData(
 const ads = computed(() => data.value?.data.items || [])
 const totalAds = computed(() => data.value?.data.total || 0)
 
-const filteredAds = computed(() => {
-  const keyword = searchKeyword.value.trim().toLowerCase()
-  if (!keyword) {
-    return ads.value
-  }
-
-  return ads.value.filter((ad) => {
-    const field = searchField.value
-    const value = (ad as any)[field]
-    if (value === null || value === undefined) return false
-    return String(value).toLowerCase().includes(keyword)
-  })
-})
+const filteredAds = computed(() => ads.value)
 
 const clearSearch = async () => {
   searchKeywordInput.value = ''
@@ -305,8 +312,10 @@ const clearSearch = async () => {
   await reloadAds()
 }
 
-const applySearch = () => {
+const applySearch = async () => {
   searchKeyword.value = searchKeywordInput.value.trim()
+  page.value = 1
+  await reloadAds()
 }
 
 const positionOptions = computed(() => [
@@ -483,9 +492,9 @@ const handleDelete = async (row: AdminAd) => {
 const columns = computed(() => [
   { key: 'id', label: t('admin.marketing.ads.columnId'), sortable: true, width: 80 },
   { key: 'position', label: t('admin.marketing.ads.columnPosition'), sortable: true, width: 120 },
-  { key: 'order', label: t('admin.marketing.ads.columnOrder'), sortable: true, width: 100 },
+  { key: 'order', label: t('admin.marketing.ads.columnOrder'), sortable: true, width: 100, align: 'right' as const, minWidth: 100 },
   { key: 'active', label: t('admin.marketing.ads.columnStatus'), sortable: true, width: 100 },
   { key: 'media', label: t('admin.marketing.ads.columnMedia'), sortable: false, width: 260 },
-  { key: 'altKey', label: t('admin.marketing.ads.columnAltKey'), sortable: false }
+  { key: 'altKey', label: t('admin.marketing.ads.columnAltKey'), sortable: false, width: 220 }
 ])
 </script>

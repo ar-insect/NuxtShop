@@ -84,51 +84,16 @@
         </header>
 
         <div class="flex-1 flex flex-col overflow-hidden">
-          <div
-            class="flex items-center gap-1 px-3 pt-2 border-b bg-[var(--card-bg)] overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-thin"
-            :style="{ borderColor: 'var(--border-color)' }"
-          >
-            <button
-              v-for="tab in tabs"
-              :key="tab.path"
-              type="button"
-              class="inline-flex items-center max-w-xs rounded-t-lg px-3 py-1.5 text-xs md:text-sm border border-b-0 -mb-px transition-colors transition-shadow duration-150"
-              :class="tab.path === currentPath
-                ? 'bg-[var(--bg-color)] text-[var(--text-color)] border-[var(--border-color)] shadow-sm'
-                : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--primary-color)]/5 hover:text-[var(--primary-color)]'"
-              draggable="true"
-              @click="goTab(tab.path)"
-              @dblclick.prevent="refreshTab(tab.path)"
-              @contextmenu.prevent="openContextMenu($event, tab.path)"
-              @dragstart="handleTabDragStart(tab.path)"
-              @dragover.prevent="handleTabDragOver(tab.path)"
-              @drop.prevent="handleTabDrop(tab.path)"
-            >
-              <span
-                class="truncate"
-                :class="tab.path === currentPath ? 'font-medium' : ''"
-              >
-                {{ tab.title }}
-              </span>
-              <button
-                v-if="tabs.length > 1"
-                type="button"
-                class="ml-1 inline-flex items-center justify-center rounded-full hover:bg-black/10 px-0.5 py-0.5"
-                @click.stop="closeTab(tab.path)"
-              >
-                <span class="sr-only">Close</span>
-                <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M4 4L12 12M12 4L4 12"
-                    stroke="currentColor"
-                    stroke-width="1.3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-            </button>
-          </div>
+          <AdminTabNav
+            :tabs="tabs"
+            :current-path="currentPath"
+            @navigate="goTab"
+            @refresh="refreshTab"
+            @close="closeTab"
+            @reorder="updateTabsOrder"
+            @close-others="closeOthersTabs"
+            @close-all="closeAllTabs"
+          />
           <main class="flex-1 overflow-y-auto p-4 md:p-6">
             <slot />
           </main>
@@ -139,38 +104,12 @@
     <BaseToast />
     <BaseModal />
     <BaseConfirm />
-
-    <div
-      v-if="contextMenu.visible"
-      class="fixed inset-0 z-40"
-      @click="hideContextMenu"
-    >
-      <div
-        class="absolute z-50 w-32 rounded-md border bg-[var(--card-bg)] text-xs shadow-lg py-1"
-        :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px`, borderColor: 'var(--border-color)' }"
-        @click.stop
-      >
-        <button
-          type="button"
-          class="w-full px-3 py-1.5 text-left hover:bg-[var(--primary-color)]/5 hover:text-[var(--primary-color)]"
-          @click="closeOthersTabs"
-        >
-          关闭其它
-        </button>
-        <button
-          type="button"
-          class="w-full px-3 py-1.5 text-left hover:bg-[var(--primary-color)]/5 hover:text-[var(--primary-color)]"
-          @click="closeAllTabs"
-        >
-          关闭全部
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from '~/composables/useI18n'
+import AdminTabNav from '~/modules/admin/components/AdminTabNav.vue'
 
 const { t } = useI18n()
 
@@ -300,7 +239,6 @@ interface AdminTab {
 }
 
 const tabs = ref<AdminTab[]>([])
-const draggingPath = ref<string | null>(null)
 const TAB_STORAGE_KEY = 'nuxtshop-admin-tabs'
 
 const resolveTabTitle = (path: string) => {
@@ -337,27 +275,15 @@ const ensureTab = (path: string) => {
   }
 }
 
-const findTabIndex = (path: string) => tabs.value.findIndex(tab => tab.path === path)
-
-const handleTabDragStart = (path: string) => {
-  draggingPath.value = path
-}
-
-const handleTabDragOver = (targetPath: string) => {
-  if (!draggingPath.value || draggingPath.value === targetPath) return
-}
-
-const handleTabDrop = (targetPath: string) => {
-  const sourcePath = draggingPath.value
-  draggingPath.value = null
-  if (!sourcePath || sourcePath === targetPath) return
-  const fromIndex = findTabIndex(sourcePath)
-  const toIndex = findTabIndex(targetPath)
-  if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return
-  const updated = [...tabs.value]
-  const [moved] = updated.splice(fromIndex, 1)
-  updated.splice(toIndex, 0, moved)
-  tabs.value = updated
+const updateTabsOrder = (next: AdminTab[]) => {
+  const fixedPath = '/admin'
+  const fixed = next.find(tab => tab.path === fixedPath) || tabs.value.find(tab => tab.path === fixedPath)
+  if (!fixed) {
+    tabs.value = next
+    return
+  }
+  const rest = next.filter(tab => tab.path !== fixed.path)
+  tabs.value = [fixed, ...rest]
 }
 
 watch(
@@ -407,6 +333,7 @@ const goTab = (path: string) => {
 }
 
 const closeTab = (path: string) => {
+  if (path === '/admin') return
   const index = tabs.value.findIndex(tab => tab.path === path)
   if (index === -1) return
 
@@ -435,42 +362,32 @@ const refreshTab = (path: string) => {
   }
 }
 
-const contextMenu = ref<{
-  visible: boolean
-  x: number
-  y: number
-  path: string | null
-}>({
-  visible: false,
-  x: 0,
-  y: 0,
-  path: null
-})
+const closeOthersTabs = (path: string) => {
+  const fixedPath = '/admin'
 
-const openContextMenu = (event: MouseEvent, path: string) => {
-  contextMenu.value = {
-    visible: true,
-    x: event.clientX,
-    y: event.clientY,
-    path
+  const result: AdminTab[] = []
+
+  const overview =
+    tabs.value.find(tab => tab.path === fixedPath) ||
+    { path: fixedPath, title: resolveTabTitle(fixedPath) }
+
+  result.push(overview)
+
+  if (path !== fixedPath) {
+    const target =
+      tabs.value.find(tab => tab.path === path) ||
+      { path, title: resolveTabTitle(path) }
+
+    if (!result.some(tab => tab.path === target.path)) {
+      result.push(target)
+    }
   }
-}
 
-const hideContextMenu = () => {
-  contextMenu.value.visible = false
-}
+  tabs.value = result
 
-const closeOthersTabs = () => {
-  const path = contextMenu.value.path
-  if (!path) {
-    hideContextMenu()
-    return
-  }
-  tabs.value = tabs.value.filter(tab => tab.path === path)
   if (currentPath.value !== path) {
     router.push(path)
   }
-  hideContextMenu()
 }
 
 const closeAllTabs = () => {
@@ -478,6 +395,5 @@ const closeAllTabs = () => {
   if (currentPath.value !== '/admin') {
     router.push('/admin')
   }
-  hideContextMenu()
 }
 </script>

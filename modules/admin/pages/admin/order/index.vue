@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.order.list.title') }}
@@ -37,6 +37,7 @@
                 v-model="filterStatus"
                 :options="statusFilterOptions"
                 :placeholder="t('admin.order.list.statusPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-1">
@@ -44,11 +45,14 @@
                 v-model="searchField"
                 :options="searchFieldOptions"
                 :placeholder="t('admin.order.list.searchFieldPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-3">
               <BaseInput
+                class="h-8"
                 v-model="searchKeywordInput"
+                clearable
                 :placeholder="t('admin.order.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
@@ -101,11 +105,16 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openDetail(row)">
+          <AdminRowActions>
+            <BaseButton
+              size="xs"
+              variant="outline"
+              class="px-2"
+              @click.stop="openDetail(row)"
+            >
               {{ t('admin.order.list.detailTitleFallback') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
         </AdminTable>
       </BaseCard>
@@ -141,13 +150,19 @@
           <p class="text-sm font-medium text-[var(--text-color)]">
             {{ t('admin.order.list.statusSectionTitle') }}
           </p>
-          <div class="flex items-center gap-3">
+          <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
             <BaseSelect
               v-model="statusEdit"
               :options="statusEditOptions"
-              class="w-48"
+              class="w-40"
             />
-            <AdminTag :label="statusLabel(currentOrder.status)" :status="statusColor(currentOrder.status)" size="sm" />
+            <div class="flex justify-end">
+              <AdminTag
+                :label="statusLabel(currentOrder.status)"
+                :status="statusColor(currentOrder.status)"
+                size="sm"
+              />
+            </div>
           </div>
         </div>
 
@@ -155,47 +170,39 @@
           <p class="text-sm font-medium text-[var(--text-color)] mb-2">
             {{ t('admin.order.list.itemsSectionTitle') }}
           </p>
-          <div class="border rounded-md overflow-hidden">
-            <table class="min-w-full text-xs">
-              <thead class="bg-[var(--muted-bg)]/60 text-[var(--text-secondary)]">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium">{{ t('admin.order.list.itemsColumnTitle') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnPrice') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnQuantity') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('admin.order.list.itemsColumnSubtotal') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="item in currentOrder.items"
-                  :key="item.id"
-                  class="border-t text-[var(--text-color)]"
-                  :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 50%, transparent)' }"
+          <AdminTable
+            :columns="itemColumns"
+            :rows="currentOrder.items"
+            :page-size="currentOrder.items.length"
+            :hide-pagination="true"
+          >
+            <template #cell-title="{ row }">
+              <div class="flex items-center gap-2">
+                <img
+                  v-if="row.image"
+                  :src="row.image"
+                  alt=""
+                  class="w-8 h-8 rounded border border-[var(--border-color)] object-cover"
                 >
-                  <td class="px-3 py-2">
-                    <div class="flex items-center gap-2">
-                      <img
-                        v-if="item.image"
-                        :src="item.image"
-                        alt=""
-                        class="w-8 h-8 rounded border border-[var(--border-color)] object-cover"
-                      >
-                      <span>{{ item.title }}</span>
-                    </div>
-                  </td>
-                  <td class="px-3 py-2 text-right">
-                    ￥{{ item.price.toFixed(2) }}
-                  </td>
-                  <td class="px-3 py-2 text-right">
-                    {{ item.quantity }}
-                  </td>
-                  <td class="px-3 py-2 text-right">
-                    ￥{{ (item.price * item.quantity).toFixed(2) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                <span>{{ row.title }}</span>
+              </div>
+            </template>
+            <template #cell-price="{ value }">
+              <span class="text-xs text-[var(--text-color)]">
+                ￥{{ value.toFixed(2) }}
+              </span>
+            </template>
+            <template #cell-quantity="{ value }">
+              <span class="text-xs text-[var(--text-color)]">
+                {{ value }}
+              </span>
+            </template>
+            <template #cell-subtotal="{ row }">
+              <span class="text-xs text-[var(--text-color)]">
+                ￥{{ (row.price * row.quantity).toFixed(2) }}
+              </span>
+            </template>
+          </AdminTable>
         </div>
       </div>
 
@@ -220,6 +227,7 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { OrderDetail, OrderStatus } from '~/types/api'
@@ -240,6 +248,13 @@ interface AdminOrder extends OrderDetail {
 
 const toast = useToast()
 const { t } = useI18n()
+
+const itemColumns = [
+  { key: 'title', label: '商品' },
+  { key: 'price', label: '单价' },
+  { key: 'quantity', label: '数量' },
+  { key: 'subtotal', label: '小计' }
+]
 
 const searchField = ref<'id' | 'name' | 'phone'>('id')
 const searchKeyword = ref('')
@@ -427,7 +442,7 @@ const updateStatus = async () => {
 
 const columns = computed(() => [
   { key: 'id', label: t('admin.order.list.columnId'), sortable: true, width: 260 },
-  { key: 'total', label: t('admin.order.list.columnTotal'), sortable: true, width: 120 },
+  { key: 'total', label: t('admin.order.list.columnTotal'), sortable: true, width: 120, align: 'right' as const, minWidth: 120 },
   { key: 'status', label: t('admin.order.list.columnStatus'), sortable: true, width: 120 },
   { key: 'date', label: t('admin.order.list.columnDate'), sortable: true, width: 200 }
 ])

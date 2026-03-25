@@ -20,6 +20,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const position = query.position ? String(query.position) : undefined
   const status = query.status ? String(query.status) : undefined
+  const id = query.id ? Number(query.id) || undefined : undefined
+  const altKey = query.altKey ? String(query.altKey) : undefined
   const page = query.page ? Math.max(1, Number(query.page) || 1) : 1
   const limitRaw = query.limit ? Number(query.limit) || 10 : 10
   const limit = Math.min(Math.max(limitRaw, 1), 100)
@@ -35,6 +37,14 @@ export default defineEventHandler(async (event) => {
     filter.active = { $ne: false }
   } else if (status === 'INACTIVE') {
     filter.active = false
+  }
+
+  if (typeof id === 'number' && !Number.isNaN(id)) {
+    filter.id = id
+  }
+
+  if (altKey) {
+    filter.altKey = { $regex: altKey, $options: 'i' }
   }
 
   const skip = (page - 1) * limit

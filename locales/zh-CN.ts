@@ -173,7 +173,11 @@ const zhCN = {
         clearAllFilters: '清除所有筛选',
         emptyTitle: '未找到商品',
         emptyDesc: '尝试调整搜索词或筛选条件。',
-        emptyButton: '清除筛选'
+        emptyButton: '清除筛选',
+        loadMoreHint: '下滑即可加载更多商品',
+        loadMoreButton: '加载更多',
+        noMore: '已经到底啦～',
+        backToTop: '回到顶部'
       },
       detail: {
         loading: '正在加载商品详情...',

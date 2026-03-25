@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.marketing.coupon.title') }}
@@ -33,18 +33,21 @@
 
       <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-5 items-end">
-          <div class="md:col-span-3">
-            <BaseInput
-              v-model="searchKeywordInput"
-              :placeholder="t('admin.marketing.coupon.searchPlaceholder')"
-              @keyup.enter="applySearch"
-            />
-          </div>
           <div class="md:col-span-1">
             <BaseSelect
               v-model="enabledFilter"
               :options="enabledOptions"
               :placeholder="t('admin.marketing.coupon.statusPlaceholder')"
+              size="sm"
+            />
+          </div>
+          <div class="md:col-span-3">
+            <BaseInput
+              class="h-8"
+              v-model="searchKeywordInput"
+              clearable
+              :placeholder="t('admin.marketing.coupon.searchPlaceholder')"
+              @keyup.enter="applySearch"
             />
           </div>
           <div class="flex gap-2 justify-end md:col-span-1">
@@ -70,6 +73,11 @@
         @update:page="handlePageChange"
         @update:page-size="handlePageSizeChange"
       >
+        <template #cell-name="{ value }">
+          <span class="block max-w-[320px] truncate" :title="value">
+            {{ value }}
+          </span>
+        </template>
         <template #cell-type="{ value }">
           <AdminTag
             :label="value === 'fixed' ? t('admin.marketing.coupon.typeFixed') : t('admin.marketing.coupon.typePercent')"
@@ -90,7 +98,7 @@
         <template #cell-enabled="{ value }">
           <AdminTag
             :label="value ? t('admin.marketing.coupon.statusEnabled') : t('admin.marketing.coupon.statusDisabled')"
-            :status="value ? 'success' : 'muted'"
+            :status="value ? 'success' : 'danger'"
             size="sm"
           />
         </template>
@@ -105,19 +113,19 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
+          <AdminRowActions>
+            <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -198,6 +206,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
@@ -428,12 +437,12 @@ const formatDate = (dateStr: string | null) => {
 
 const columns = computed(() => [
   { key: 'code', label: t('admin.marketing.coupon.columnCode'), sortable: true, width: 140 },
-  { key: 'name', label: t('admin.marketing.coupon.columnName'), sortable: true, width: 200 },
-  { key: 'type', label: t('admin.marketing.coupon.columnType'), sortable: true, width: 100 },
-  { key: 'amount', label: t('admin.marketing.coupon.columnAmount'), sortable: true, width: 120 },
-  { key: 'minOrderAmount', label: t('admin.marketing.coupon.columnMinOrderAmount'), sortable: true, width: 140 },
-  { key: 'startAt', label: t('admin.marketing.coupon.columnStartAt'), sortable: true, width: 160 },
-  { key: 'endAt', label: t('admin.marketing.coupon.columnEndAt'), sortable: true, width: 160 },
+  { key: 'name', label: t('admin.marketing.coupon.columnName'), sortable: true, width: 360 },
+  { key: 'type', label: t('admin.marketing.coupon.columnType'), sortable: true, width: 110 },
+  { key: 'amount', label: t('admin.marketing.coupon.columnAmount'), sortable: true, width: 110, align: 'right' as const, minWidth: 110 },
+  { key: 'minOrderAmount', label: t('admin.marketing.coupon.columnMinOrderAmount'), sortable: true, width: 130, align: 'right' as const, minWidth: 120 },
+  { key: 'startAt', label: t('admin.marketing.coupon.columnStartAt'), sortable: true, width: 150 },
+  { key: 'endAt', label: t('admin.marketing.coupon.columnEndAt'), sortable: true, width: 150 },
   { key: 'enabled', label: t('admin.marketing.coupon.columnEnabled'), sortable: true, width: 80 }
 ])
 </script>

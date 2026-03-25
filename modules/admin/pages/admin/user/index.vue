@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.user.list.title') }}
@@ -26,6 +26,7 @@
                 v-model="filterRole"
                 :options="roleFilterOptions"
                 :placeholder="t('admin.user.list.rolePlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-1">
@@ -33,11 +34,14 @@
                 v-model="searchField"
                 :options="searchFieldOptions"
                 :placeholder="t('admin.user.list.searchFieldPlaceholder')"
+                size="sm"
               />
             </div>
             <div class="md:col-span-3">
               <BaseInput
+                class="h-8"
                 v-model="searchKeywordInput"
+                clearable
                 :placeholder="t('admin.user.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
@@ -94,20 +98,20 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton size="xs" variant="outline" @click.stop="openEdit(row)">
+          <AdminRowActions>
+            <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               :disabled="row._id === currentUserId || row.role === 'admin'"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
         </AdminTable>
       </BaseCard>
@@ -170,6 +174,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
@@ -402,12 +407,12 @@ watch(filterRole, async () => {
 })
 
 const columns = computed(() => [
-  { key: 'username', label: t('admin.user.list.tableColumnUsername'), sortable: true, width: 160 },
-  { key: 'name', label: t('admin.user.list.tableColumnName'), sortable: true, width: 140 },
+  { key: 'username', label: t('admin.user.list.tableColumnUsername'), sortable: true, width: 180 },
+  { key: 'name', label: t('admin.user.list.tableColumnName'), sortable: true, width: 160 },
   { key: 'role', label: t('admin.user.list.tableColumnRole'), sortable: true, width: 120 },
   { key: 'phone', label: t('admin.user.list.tableColumnPhone'), sortable: false, width: 160 },
-  { key: 'orderCount', label: t('admin.user.list.tableColumnOrderCount'), sortable: false, width: 120 },
-  { key: 'totalSpent', label: t('admin.user.list.tableColumnTotalSpent'), sortable: false, width: 140 },
+  { key: 'orderCount', label: t('admin.user.list.tableColumnOrderCount'), sortable: false, width: 120, align: 'right' as const, minWidth: 100 },
+  { key: 'totalSpent', label: t('admin.user.list.tableColumnTotalSpent'), sortable: false, width: 140, align: 'right' as const, minWidth: 120 },
   { key: 'createdAt', label: t('admin.user.list.tableColumnCreatedAt'), sortable: true, width: 200 }
 ])
 </script>

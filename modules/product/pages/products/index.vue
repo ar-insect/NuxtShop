@@ -1,5 +1,4 @@
 <template>
-  <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="border-b border-[var(--border-color)] pb-5 mb-8">
       <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.products.list.title') }}</h1>
@@ -110,18 +109,22 @@
     </div>
 
       <!-- Loading State -->
-      <div v-if="pending" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div v-if="pending && products.length === 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <ProductCardSkeleton v-for="n in 8" :key="n" />
       </div>
 
-      <!-- Product Grid -->
-      <div v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <ProductCard
+      <!-- Product Grid (fixed 4 columns on desktop) -->
+      <div
+        v-else-if="products.length > 0"
+        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+      >
+        <div
           v-for="product in products"
           :key="product.id"
-          :product="product"
           @click="navigateTo(`/products/${product.id}`)"
-        />
+        >
+          <ProductCard :product="product" />
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -142,20 +145,41 @@
         </BaseButton>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1 && !pending && products.length > 0" class="mt-8 flex justify-center">
-        <BasePagination
-          :model-value="page"
-          :total-pages="totalPages"
-          :get-to="paginationTo"
-        />
+      <!-- Infinite Load More -->
+      <div
+        v-if="hasMore"
+        ref="loadMoreRef"
+        class="mt-8 flex justify-center text-xs text-[var(--text-secondary)]"
+      >
+        <span v-if="loadingMore">
+          {{ t('ui.loading') }}
+        </span>
+        <span v-else>
+          {{ t('pages.products.list.loadMoreHint') }}
+        </span>
       </div>
+      <div
+        v-else-if="products.length > 0"
+        class="mt-8 flex justify-center text-xs text-[var(--text-secondary)]"
+      >
+        {{ t('pages.products.list.noMore') }}
+      </div>
+
+      <!-- Back To Top -->
+      <button
+        v-if="showBackToTop"
+        type="button"
+        class="back-to-top-btn"
+        @click="scrollToTop"
+        :aria-label="t('pages.products.list.backToTop')"
+      >
+        <ArrowUpIcon class="w-5 h-5" />
+      </button>
   </div>
-  </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { ComputerDesktopIcon, SparklesIcon, Squares2X2Icon, UserCircleIcon, UserIcon, XMarkIcon, ArrowUpIcon } from '@heroicons/vue/24/outline'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
@@ -170,9 +194,6 @@ const router = useRouter()
 const { getProducts } = useProducts()
 const { categoryLabels } = useCategoryMapper()
 const { t } = useI18n()
-
-const page = computed(() => Number(route.query.page) || 1)
-const limit = 16 // Show 16 products per page
 
 const activeCategory = computed<string | undefined>(() => {
   const v = route.query.category
@@ -240,20 +261,135 @@ const sortOptions = computed(() => [
   { label: t('pages.products.list.sortRatingDesc'), value: 'rating-desc' }
 ])
 
-// 通过 watch 响应路由变化并刷新数据
-const { data, pending } = await useAsyncData(
+const limit = 16
+
+// 首屏数据，支持 SSR（仅加载第 1 页）
+const { data: firstPageData, pending } = await useAsyncData(
   'products',
-  () => getProducts(page.value, limit, activeCategory.value, activeQuery.value, sortKey.value),
+  () => getProducts(1, limit, activeCategory.value, activeQuery.value, sortKey.value),
   {
-    watch: [page, activeCategory, activeQuery, sortKey], // 当页码/分类/搜索词变化时重新拉取
-    default: () => ({ items: [], total: 0 })
+    watch: [activeCategory, activeQuery, sortKey],
+    default: () => ({ items: [] as Product[], total: 0 })
   }
 )
 
-const products = computed(() => data.value?.items || [])
+const products = ref<Product[]>(firstPageData.value?.items || [])
+const total = ref(firstPageData.value?.total || 0)
+const loadingMore = ref(false)
+const currentPage = ref(1)
+const hasMore = ref(false)
 
-const total = computed(() => data.value?.total || 0)
-const totalPages = computed(() => Math.ceil(total.value / limit))
+watch(
+  firstPageData,
+  (val) => {
+    const data = val || { items: [] as Product[], total: 0 }
+    products.value = data.items
+    total.value = data.total
+    currentPage.value = 1
+    hasMore.value = products.value.length === limit
+  },
+  { immediate: true }
+)
+
+const loadMore = async () => {
+  if (!hasMore.value || loadingMore.value) return
+  loadingMore.value = true
+  try {
+    const nextPage = currentPage.value + 1
+    const result = await getProducts(
+      nextPage,
+      limit,
+      activeCategory.value,
+      activeQuery.value,
+      sortKey.value
+    )
+    const existingIds = new Set(products.value.map(p => p.id))
+    const newItems = result.items.filter(item => !existingIds.has(item.id))
+
+    if (newItems.length === 0) {
+      hasMore.value = false
+      return
+    }
+
+    products.value = [...products.value, ...newItems]
+    total.value = result.total
+    currentPage.value = nextPage
+
+    if (newItems.length < limit) {
+      hasMore.value = false
+    } else {
+      hasMore.value = true
+    }
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+const loadMoreRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+const showBackToTop = ref(false)
+
+const handleScroll = () => {
+  if (typeof window === 'undefined') return
+  showBackToTop.value = window.scrollY > 400
+}
+
+const scrollToTop = () => {
+  if (typeof window === 'undefined') return
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry && entry.isIntersecting) {
+        loadMore()
+      }
+    },
+    { rootMargin: '200px' }
+  )
+
+  if (loadMoreRef.value && observer) {
+    observer.observe(loadMoreRef.value)
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', handleScroll, { passive: true })
+  }
+})
+
+watch(
+  () => loadMoreRef.value,
+  (el) => {
+    if (observer && el && hasMore.value) {
+      observer.observe(el)
+    }
+  }
+)
+
+watch(
+  hasMore,
+  (val) => {
+    if (!observer || !loadMoreRef.value) return
+    if (val) {
+      observer.observe(loadMoreRef.value)
+    } else {
+      observer.unobserve(loadMoreRef.value)
+    }
+  }
+)
+
+onBeforeUnmount(() => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', handleScroll)
+  }
+})
 
 const categoryIcons: Record<string, any> = {
   electronics: ComputerDesktopIcon,
@@ -263,10 +399,6 @@ const categoryIcons: Record<string, any> = {
 }
 const getCategoryIcon = (key: string) => {
   return categoryIcons[key] || Squares2X2Icon
-}
-
-const paginationTo = (p: number) => {
-  return { path: '/products', query: { ...route.query, page: p } }
 }
 
 const searchText = ref<string>(activeQuery.value)
@@ -281,8 +413,7 @@ const setCategory = (category?: string) => {
     path: '/products',
     query: {
       ...route.query,
-      category: category || undefined,
-      page: 1 // 筛选条件变化时重置到第 1 页
+      category: category || undefined
     }
   })
 }
@@ -292,7 +423,6 @@ const clearFilters = () => {
   router.push({
     path: '/products',
     query: {
-      page: 1
     }
   })
 }
@@ -308,8 +438,7 @@ const debouncedSearch = (newVal: string) => {
         path: '/products',
         query: {
           ...route.query,
-          q: newVal || undefined,
-          page: 1 // 搜索时重置到第 1 页
+          q: newVal || undefined
         }
       })
     }
@@ -333,3 +462,40 @@ const handleSearch = (query: string) => {
 }
 
 </script>
+
+<style scoped>
+.back-to-top-btn {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  /* border: 1px solid rgba(148, 163, 184, 0.35); */
+  background: radial-gradient(circle at 10% 20%, rgba(248, 250, 252, 0.9) 0, rgba(226, 232, 240, 0.65) 40%, rgba(148, 163, 184, 0.35) 100%);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--primary-color);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.back-to-top-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.3);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.25);
+}
+</style>

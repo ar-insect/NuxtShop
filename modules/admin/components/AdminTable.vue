@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-3 relative">
     <div class="overflow-x-auto rounded-md border" :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 60%, transparent)' }">
-      <table class="min-w-full text-sm">
+      <table :class="['text-sm', props.compact ? 'min-w-full' : 'min-w-[960px]']">
         <thead
-          class="text-left text-[var(--text-secondary)] border-b bg-[var(--muted-bg)]"
+          class="text-left text-[var(--text-secondary)] border-b bg-[var(--card-bg)]"
           :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 70%, transparent)' }"
         >
           <tr>
@@ -22,10 +22,19 @@
               :class="[
                 'py-2 pr-4 relative select-none',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
-                column.fixed === 'left' ? 'sticky left-0 z-20 bg-[var(--muted-bg)]' : '',
-                column.fixed === 'right' ? 'sticky right-0 z-20 bg-[var(--muted-bg)]' : ''
+                column.fixed === 'left' ? 'sticky left-0 z-20 bg-[var(--card-bg)]' : '',
+                column.fixed === 'right' ? 'sticky right-0 z-20 bg-[var(--card-bg)]' : '',
+                resizingKey === column.key ? 'bg-[var(--primary-color)]/5' : '',
+                column.align === 'right'
+                  ? 'text-right'
+                  : column.align === 'center'
+                    ? 'text-center'
+                    : 'text-left'
               ]"
-              :style="{ width: widthStyle(column.key) }"
+              :style="{
+                width: widthStyle(column.key),
+                minWidth: column.minWidth ? `${column.minWidth}px` : undefined
+              }"
             >
               <button
                 v-if="column.sortable"
@@ -44,13 +53,18 @@
                 {{ column.label }}
               </span>
               <span
-                class="absolute right-0 top-0 h-full w-1 cursor-col-resize"
+                class="absolute right-0 top-0 h-full w-3 cursor-col-resize flex items-stretch justify-center group"
                 @mousedown.prevent="startResize($event, column.key)"
-              />
+              >
+                <span
+                  class="w-px bg-[var(--border-color)] group-hover:bg-[var(--primary-color)] transition-colors"
+                  :class="resizingKey === column.key ? 'bg-[var(--primary-color)]' : ''"
+                />
+              </span>
             </th>
             <th
               v-if="$slots.actions"
-              class="py-2 pr-4 sticky right-0 z-30 bg-[var(--muted-bg)]"
+              class="py-2 pr-2 sticky right-0 z-30 bg-[var(--card-bg)] text-right whitespace-nowrap"
             >
               操作
             </th>
@@ -62,7 +76,7 @@
             :key="rowKey(row, rowIndex)"
             :class="[
               'border-b last:border-b-0 transition-colors',
-              rowIndex % 2 === 0 ? 'bg-[var(--card-bg)]' : 'bg-[var(--muted-bg)]/40',
+              rowIndex % 2 === 0 ? 'bg-[var(--card-bg)]' : 'bg-[var(--muted-bg)]',
               'hover:bg-[var(--primary-color)]/5'
             ]"
             :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 40%, transparent)' }"
@@ -84,7 +98,12 @@
                 'py-2 pr-4 align-middle',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
                 column.fixed === 'left' ? 'sticky left-0 z-10 bg-[var(--card-bg)]' : '',
-                column.fixed === 'right' ? 'sticky right-0 z-10 bg-[var(--card-bg)]' : ''
+                column.fixed === 'right' ? 'sticky right-0 z-10 bg-[var(--card-bg)]' : '',
+                column.align === 'right'
+                  ? 'text-right'
+                  : column.align === 'center'
+                    ? 'text-center'
+                    : 'text-left'
               ]"
             >
               <slot
@@ -99,7 +118,7 @@
             </td>
             <td
               v-if="$slots.actions"
-              class="py-2 pr-4 align-middle sticky right-0 z-30 bg-[var(--card-bg)]"
+              class="py-2 pr-2 align-middle sticky right-0 z-30 bg-[var(--card-bg)] text-right whitespace-nowrap"
             >
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>
@@ -153,6 +172,8 @@ interface AdminTableColumn {
   sortable?: boolean
   width?: number
   fixed?: 'left' | 'right'
+  align?: 'left' | 'center' | 'right'
+  minWidth?: number
 }
 
 const props = defineProps<{
@@ -164,6 +185,8 @@ const props = defineProps<{
   serverSide?: boolean
   selectable?: boolean
   selectedKeys?: (string | number)[]
+  hidePagination?: boolean
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -204,7 +227,7 @@ const sortedRows = computed(() => {
   return copy
 })
 
-const showPagination = computed(() => props.rows.length > 0)
+const showPagination = computed(() => !props.hidePagination && props.rows.length > 0)
 
 const totalComputed = computed(() => (typeof props.total === 'number' ? props.total : props.rows.length))
 
@@ -306,7 +329,9 @@ const rowKey = (row: any, index: number) => {
 
 const widthStyle = (key: string) => {
   const w = widths.value[key]
-  return w ? `${w}px` : undefined
+  if (w) return `${w}px`
+  const column = props.columns.find(col => col.key === key)
+  return column?.width ? `${column.width}px` : undefined
 }
 
 const startResize = (event: MouseEvent, key: string) => {

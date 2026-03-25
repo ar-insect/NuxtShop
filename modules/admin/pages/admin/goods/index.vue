@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.goods.list.title') }}
@@ -46,7 +46,9 @@
             </div>
             <div class="flex-1 min-w-[220px]">
               <BaseInput
+                class="h-8"
                 v-model="searchKeywordInput"
+                clearable
                 :placeholder="t('admin.goods.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
@@ -78,7 +80,8 @@
             :to="`/products/${row.id}`"
             target="_blank"
             rel="noreferrer"
-            class="text-[var(--primary-color)] hover:underline"
+            class="text-[var(--primary-color)] hover:underline max-w-xs truncate inline-block align-middle"
+            :title="row.title"
           >
             {{ row.title }}
           </NuxtLink>
@@ -104,10 +107,11 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2 whitespace-nowrap">
+          <AdminRowActions>
             <BaseButton
               size="xs"
               variant="outline"
+              class="px-2"
               @click.stop="goEdit(row)"
             >
               {{ t('admin.common.edit') }}
@@ -115,12 +119,12 @@
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -130,6 +134,7 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
@@ -188,12 +193,11 @@ const {
 })
 
 const getCategoryTagStatus = (key: string): 'primary' | 'success' | 'warning' | 'danger' | 'muted' => {
-  // 按当前业务分类映射固定颜色，便于快速区分
   const map: Record<string, 'primary' | 'success' | 'warning' | 'danger' | 'muted'> = {
-    "men's clothing": 'primary',      // 男装 - 主色
-    "women's clothing": 'warning',    // 女装 - 暖色
-    electronics: 'success',           // 电子产品 - 绿色
-    jewelery: 'danger'                // 珠宝配饰 - 红色
+    electronics: 'primary',
+    jewelery: 'warning',
+    "men's clothing": 'success',
+    "women's clothing": 'danger'
   }
   return map[key] || 'muted'
 }
@@ -341,9 +345,9 @@ const handleDelete = async (row: AdminProduct) => {
 
 const columns = computed(() => [
   { key: 'id', label: t('admin.goods.list.columnId'), sortable: true, width: 80, fixed: 'left' },
-  { key: 'title', label: t('admin.goods.list.columnTitle'), sortable: true, width: 200 },
+  { key: 'title', label: t('admin.goods.list.columnTitle'), sortable: true, width: 260 },
   { key: 'category', label: t('admin.goods.list.columnCategory'), sortable: true, width: 160 },
-  { key: 'price', label: t('admin.goods.list.columnPrice'), sortable: true, width: 120 },
-  { key: 'rating', label: t('admin.goods.list.columnRating'), sortable: false, width: 140 }
+  { key: 'price', label: t('admin.goods.list.columnPrice'), sortable: true, width: 120, align: 'right', minWidth: 120 },
+  { key: 'rating', label: t('admin.goods.list.columnRating'), sortable: false, width: 140, align: 'right', minWidth: 120 }
 ])
 </script>

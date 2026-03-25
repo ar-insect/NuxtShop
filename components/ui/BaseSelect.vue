@@ -5,8 +5,9 @@
     </label>
     
     <div 
-      class="relative w-full min-w-[120px] border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors cursor-pointer flex items-center flex-wrap gap-1"
+      class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors cursor-pointer flex items-center flex-wrap gap-1"
       :class="[
+        minWidthClass,
         disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : '',
         isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]',
         sizeClass
@@ -133,6 +134,7 @@ const props = defineProps<{
   clearable?: boolean
   multiple?: boolean
   size?: 'sm' | 'md'
+  compact?: boolean
 }>()
 
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
@@ -141,6 +143,8 @@ const isOpen = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
 const listboxRef = ref<HTMLElement | null>(null)
 const highlightedIndex = ref<number>(-1)
+
+const minWidthClass = computed(() => (props.compact ? 'min-w-[72px]' : 'min-w-[120px]'))
 
 const sizeClass = computed(() => {
   const size = props.size || 'md'

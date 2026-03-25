@@ -173,7 +173,11 @@ const enUS = {
         clearAllFilters: 'Clear all filters',
         emptyTitle: 'No products found',
         emptyDesc: 'Try adjusting your search keywords or filters.',
-        emptyButton: 'Clear filters'
+        emptyButton: 'Clear filters',
+        loadMoreHint: 'Scroll down to load more products',
+        loadMoreButton: 'Load more',
+        noMore: 'You have reached the end.',
+        backToTop: 'Back to top'
       },
       detail: {
         loading: 'Loading product details...',

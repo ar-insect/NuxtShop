@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-4">
     <h1 class="text-2xl font-bold text-[var(--text-color)]">
       {{ t('admin.goods.review.title') }}
     </h1>
@@ -19,11 +19,14 @@
               v-model="filterRating"
               :options="ratingOptions"
               :placeholder="t('admin.goods.review.ratingPlaceholder')"
+              size="sm"
             />
           </div>
           <div class="md:col-span-3">
             <BaseInput
+              class="h-8"
               v-model="searchKeywordInput"
+              clearable
               :placeholder="t('admin.goods.review.searchPlaceholder')"
               @keyup.enter="applySearch"
             />
@@ -78,16 +81,16 @@
           </span>
         </template>
         <template #actions="{ row }">
-          <div class="flex items-center gap-2">
+          <AdminRowActions>
             <BaseButton
               size="xs"
               variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
               @click.stop="handleDelete(row)"
             >
               {{ t('admin.common.delete') }}
             </BaseButton>
-          </div>
+          </AdminRowActions>
         </template>
       </AdminTable>
     </BaseCard>
@@ -96,6 +99,7 @@
 
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
+import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
 

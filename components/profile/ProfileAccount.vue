@@ -117,9 +117,6 @@
       <h3 class="text-base font-medium text-[var(--text-color)] mb-2">
         {{ t('profile.account.walletTitle') }}
       </h3>
-      <p class="text-xs text-[var(--text-secondary)] mb-4">
-        {{ t('profile.account.timezoneHint', { timezone: timezoneLabel }) }}
-      </p>
       
       <div class="space-y-6">
         <!-- Balance -->
@@ -207,8 +204,6 @@ const displayInitial = computed(() => {
   const base = form.name || user.value?.name || user.value?.username || 'U'
   return base.charAt(0).toUpperCase()
 })
-
-const timezoneLabel = computed(() => user.value?.timezone || 'Asia/Shanghai')
 
 // 用户数据加载/刷新后同步表单内容
 watch(user, (newUser) => {

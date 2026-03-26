@@ -5,11 +5,11 @@
     </label>
     
     <div 
-      class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors cursor-pointer flex items-center flex-wrap gap-1"
+      class="relative w-full border rounded-md shadow-sm bg-[var(--input-bg)] transition-colors cursor-pointer flex items-center flex-wrap gap-1 hover:border-[var(--primary-color)]"
       :class="[
         minWidthClass,
         disabled ? 'opacity-50 cursor-not-allowed bg-[var(--muted-bg)]' : '',
-        isOpen ? 'border-[var(--primary-color)] ring-1 ring-[var(--primary-color)]' : 'border-[var(--border-color)]',
+        isOpen ? 'border-[var(--primary-color)]' : 'border-[var(--border-color)]',
         sizeClass
       ]"
       role="button"

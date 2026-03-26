@@ -13,10 +13,10 @@
         ref="inputRef"
         :type="type"
         :value="modelValue"
-        class="focus:outline-none focus:border-[var(--primary-color)] block w-full sm:text-sm border py-2 transition-colors"
+        class="block w-full sm:text-sm border py-2 transition-colors focus:outline-none hover:border-[var(--primary-color)] focus:border-[var(--primary-color)]"
         v-bind="$attrs"
         :class="[
-          error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500' : '',
+          error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500' : 'border-[var(--border-color)]',
           disabled ? 'opacity-60 cursor-not-allowed' : '',
           $slots.prefix ? 'pl-10' : 'pl-3',
           ($slots.suffix || clearable) ? 'pr-10' : 'pr-3'
@@ -24,7 +24,6 @@
         :style="{ 
           borderRadius: 'var(--border-radius)',
           backgroundColor: disabled ? 'rgba(0,0,0,0.05)' : 'var(--input-bg)',
-          borderColor: error ? '' : 'var(--border-color)',
           color: 'var(--text-color)'
         }"
         :placeholder="placeholder"

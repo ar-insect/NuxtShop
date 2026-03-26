@@ -98,16 +98,20 @@
             >
               {{ t('admin.system.admin.resetModalTitle') }}
             </BaseButton>
-            <BaseButton
+            <BaseTooltip
               v-if="isSuperAdmin"
-              size="xs"
-              variant="outline"
-              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
-              :disabled="!canDeleteAdmin(row)"
-              @click.stop="handleDelete(row)"
+              :text="!canDeleteAdmin(row) ? t('admin.system.admin.deleteDisabledHint') : ''"
             >
-              {{ t('admin.common.delete') }}
-            </BaseButton>
+              <BaseButton
+                size="xs"
+                variant="outline"
+                class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
+                :disabled="!canDeleteAdmin(row)"
+                @click.stop="handleDelete(row)"
+              >
+                {{ t('admin.common.delete') }}
+              </BaseButton>
+            </BaseTooltip>
           </AdminRowActions>
         </template>
       </AdminTable>
@@ -149,10 +153,21 @@
         />
       </form>
       <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          :disabled="listLoading"
+          @click="modalOpen = false"
+        >
           {{ t('admin.system.admin.modalCancel') }}
         </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleSubmit">
+        <BaseButton
+          variant="primary"
+          size="sm"
+          :loading="listLoading"
+          :disabled="listLoading"
+          @click="handleSubmit"
+        >
           {{ editing ? t('admin.system.admin.modalSubmitEdit') : t('admin.system.admin.modalSubmitCreate') }}
         </BaseButton>
       </template>
@@ -178,10 +193,21 @@
         />
       </form>
       <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="resetModalOpen = false">
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          :disabled="listLoading"
+          @click="resetModalOpen = false"
+        >
           {{ t('admin.system.admin.resetModalCancel') }}
         </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleResetSubmit">
+        <BaseButton
+          variant="primary"
+          size="sm"
+          :loading="listLoading"
+          :disabled="listLoading"
+          @click="handleResetSubmit"
+        >
           {{ t('admin.system.admin.resetModalSubmit') }}
         </BaseButton>
       </template>
@@ -193,6 +219,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useAdminPermission } from '~/modules/admin/composables/useAdminPermission'

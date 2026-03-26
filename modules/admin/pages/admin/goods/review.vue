@@ -12,9 +12,14 @@
         </p>
       </div>
 
-      <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-5 items-end">
-          <div class="md:col-span-1">
+      <AdminSearchPanel
+        :search-label="t('admin.goods.review.search')"
+        :reset-label="t('admin.goods.review.reset')"
+        @search="applySearch"
+        @reset="clearSearch"
+      >
+        <template #primary>
+          <div class="md:w-40">
             <BaseSelect
               v-model="filterRating"
               :options="ratingOptions"
@@ -22,25 +27,17 @@
               size="sm"
             />
           </div>
-          <div class="md:col-span-3">
+          <div class="flex-1 min-w-[220px]">
             <BaseInput
-              class="h-8"
+              class="h-8 w-full"
               v-model="searchKeywordInput"
               clearable
               :placeholder="t('admin.goods.review.searchPlaceholder')"
               @keyup.enter="applySearch"
             />
           </div>
-          <div class="flex gap-2 justify-end md:col-span-1">
-            <BaseButton size="sm" variant="primary" @click="applySearch">
-              {{ t('admin.goods.review.search') }}
-            </BaseButton>
-            <BaseButton size="sm" variant="secondary" @click="clearSearch">
-              {{ t('admin.goods.review.reset') }}
-            </BaseButton>
-          </div>
-        </div>
-      </div>
+        </template>
+      </AdminSearchPanel>
 
       <AdminTable
         :columns="columns"
@@ -100,6 +97,7 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
 

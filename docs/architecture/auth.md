@@ -184,7 +184,21 @@ runtimeConfig: {
 
 对应的 `.env.production.example` 中已经给出了示例 URI，请在真实部署时替换为生产库地址与强密码。
 
-### 4.2 Redis 配置
+### 4.2 管理员账号与默认密码
+
+开发环境示例中，`.env.development.example` 使用：
+
+```ini
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=Admin1234
+```
+
+仅作为本地体验用的示例配置。生产环境必须：
+
+- 在 `.env.production` 中为 `ADMIN_PASSWORD` 设置强随机密码；
+- 或在系统初始化后立即通过后台管理界面修改管理员密码。
+
+### 4.3 Redis 配置
 
 Nitro 与 runtimeConfig 中都使用了 Redis：
 
@@ -284,4 +298,3 @@ runtimeConfig: {
 - JWT 或其它可靠认证机制的落地与测试；
 - 为生产环境准备独立的 Mongo/Redis 实例与强密码；
 - 补充一两条覆盖登录 / 权限校验的端到端测试（Playwright），防止未来重构时误伤认证流程。
-

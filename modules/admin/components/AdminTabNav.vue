@@ -75,13 +75,16 @@
         :style="{ borderColor: 'var(--border-color)' }"
       >
         <button
-          v-for="tab in tabs"
+          v-for="(tab, index) in tabs"
           :key="tab.path"
           type="button"
           class="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-[var(--primary-color)]/5 hover:text-[var(--primary-color)]"
           @click="handleMoreNavigate(tab.path)"
         >
-          <span class="truncate">{{ tab.title }}</span>
+          <span class="truncate flex items-center gap-1">
+            <span v-if="isFixed(tab.path, index)" class="text-[10px] text-[var(--text-secondary)]">📌</span>
+            <span>{{ tab.title }}</span>
+          </span>
           <span v-if="tab.path === currentPath" class="ml-2 text-[var(--primary-color)]">●</span>
         </button>
       </div>

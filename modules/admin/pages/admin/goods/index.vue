@@ -18,8 +18,13 @@
           </BaseButton>
         </div>
 
-        <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-          <div class="flex flex-wrap lg:flex-nowrap gap-3 items-end min-w-max">
+        <AdminSearchPanel
+          :search-label="t('admin.common.search')"
+          :reset-label="t('admin.common.reset')"
+          @search="applySearch"
+          @reset="clearSearch"
+        >
+          <template #primary>
             <div class="w-full sm:w-auto">
               <BaseSelect
                 v-model="filterCategory"
@@ -53,16 +58,8 @@
                 @keyup.enter="applySearch"
               />
             </div>
-            <div class="flex gap-2 justify-end">
-              <BaseButton size="sm" variant="primary" @click="applySearch">
-                {{ t('admin.common.search') }}
-              </BaseButton>
-              <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                {{ t('admin.common.reset') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+          </template>
+        </AdminSearchPanel>
       </div>
 
       <AdminTable
@@ -135,6 +132,7 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { useProducts, type Product } from '~/modules/product/composables/useProducts'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'

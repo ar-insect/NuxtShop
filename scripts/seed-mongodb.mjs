@@ -77,6 +77,26 @@ async function seed() {
     await ensureCollection(db, 'users')
     await ensureCollection(db, 'ads')
 
+    const extraCollections = [
+      'shop_products_app',
+      'product_categories',
+      'coupons_app',
+      'product_reviews',
+      'user_login_history',
+      'user_two_factor_codes',
+      'addresses',
+      'user_carts',
+      'user_orders',
+      'user_wishlists',
+      'browse_history'
+    ]
+
+    for (const name of extraCollections) {
+      await ensureCollection(db, name)
+    }
+
+    await ensureCollection(db, 'system_settings_app')
+
     const users = db.collection('users')
     const existingAdmin = await users.findOne({ username: adminUsername })
     if (!existingAdmin) {
@@ -105,6 +125,28 @@ async function seed() {
       console.log('Seeded default ads')
     } else {
       console.log('Ads collection already has data, skip seeding')
+    }
+
+    const systemSettings = db.collection('system_settings_app')
+    const existingSettings = await systemSettings.findOne({ key: 'global' })
+    if (!existingSettings) {
+      const now = new Date()
+      await systemSettings.insertOne({
+        key: 'global',
+        shipping: {
+          baseFee: 0,
+          freeThreshold: null
+        },
+        payments: {
+          alipay: true,
+          wechat: true,
+          creditCard: true
+        },
+        updatedAt: now
+      })
+      console.log('Inserted default system settings document')
+    } else {
+      console.log('System settings already initialized')
     }
   } finally {
     await client.close().catch(() => {})

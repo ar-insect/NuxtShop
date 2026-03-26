@@ -1,6 +1,10 @@
 <template>
   <div class="space-y-3 relative">
-    <div class="overflow-x-auto rounded-md border" :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 60%, transparent)' }">
+    <div
+      ref="scrollContainer"
+      class="overflow-x-auto rounded-md border"
+      :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 60%, transparent)' }"
+    >
       <table :class="['text-sm w-full', props.compact ? 'min-w-full' : 'min-w-[960px]']">
         <thead
           class="text-left text-[var(--text-secondary)] border-b bg-[var(--card-bg)]"
@@ -22,12 +26,10 @@
               :class="[
                 'py-2 pr-4 relative select-none',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
-                column.fixed === 'left'
-                  ? 'sticky left-0 z-20 bg-[var(--card-bg)] shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.12)]'
-                  : '',
-                column.fixed === 'right'
-                  ? 'sticky right-0 z-20 bg-[var(--card-bg)] shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]'
-                  : '',
+                column.fixed === 'left' ? 'sticky left-0 z-20 bg-[var(--card-bg)]' : '',
+                column.fixed === 'left' && leftShadow ? 'shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.12)]' : '',
+                column.fixed === 'right' ? 'sticky right-0 z-20 bg-[var(--card-bg)]' : '',
+                column.fixed === 'right' && rightShadow ? 'shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]' : '',
                 resizingKey === column.key ? 'bg-[var(--primary-color)]/5' : '',
                 column.align === 'right'
                   ? 'text-right'
@@ -68,7 +70,10 @@
             </th>
             <th
               v-if="$slots.actions"
-              class="py-2 px-2 w-[120px] sticky right-0 z-30 bg-[var(--card-bg)] text-center whitespace-nowrap shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]"
+              :class="[
+                'py-2 px-2 w-[120px] sticky right-0 z-30 bg-[var(--card-bg)] text-center whitespace-nowrap',
+                rightShadow ? 'shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]' : ''
+              ]"
             >
               操作
             </th>
@@ -81,7 +86,8 @@
             :class="[
               'border-b last:border-b-0 transition-colors',
               rowIndex % 2 === 0 ? 'bg-[var(--card-bg)]' : 'bg-[var(--muted-bg)]',
-              'hover:bg-[var(--primary-color)]/5'
+              'hover:bg-[var(--primary-color)]/5',
+              props.rowClickable ? 'cursor-pointer' : ''
             ]"
             :style="{ borderColor: 'color-mix(in srgb, var(--border-color) 40%, transparent)' }"
             @click="emit('row-click', row)"
@@ -101,12 +107,10 @@
               :class="[
                 'py-2 pr-4 align-middle',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
-                column.fixed === 'left'
-                  ? 'sticky left-0 z-10 bg-[var(--card-bg)] shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.08)]'
-                  : '',
-                column.fixed === 'right'
-                  ? 'sticky right-0 z-10 bg-[var(--card-bg)] shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]'
-                  : '',
+                column.fixed === 'left' ? 'sticky left-0 z-10 bg-[var(--card-bg)]' : '',
+                column.fixed === 'left' && leftShadow ? 'shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.08)]' : '',
+                column.fixed === 'right' ? 'sticky right-0 z-10 bg-[var(--card-bg)]' : '',
+                column.fixed === 'right' && rightShadow ? 'shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]' : '',
                 column.align === 'right'
                   ? 'text-right'
                   : column.align === 'center'
@@ -126,7 +130,10 @@
             </td>
             <td
               v-if="$slots.actions"
-              class="py-2 px-2 w-[120px] align-middle sticky right-0 z-30 bg-[var(--card-bg)] whitespace-nowrap shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]"
+              :class="[
+                'py-2 px-2 w-[120px] align-middle sticky right-0 z-30 bg-[var(--card-bg)] whitespace-nowrap',
+                rightShadow ? 'shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]' : ''
+              ]"
             >
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>
@@ -195,6 +202,7 @@ const props = defineProps<{
   selectedKeys?: (string | number)[]
   hidePagination?: boolean
   compact?: boolean
+  rowClickable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -352,6 +360,10 @@ const startResize = (event: MouseEvent, key: string) => {
   startWidth.value = rect.width
 }
 
+const leftShadow = ref(false)
+const rightShadow = ref(false)
+const scrollContainer = ref<HTMLElement | null>(null)
+
 const handleMouseMove = (event: MouseEvent) => {
   if (!resizingKey.value) return
   const delta = event.clientX - startX.value
@@ -364,13 +376,34 @@ const stopResize = () => {
   resizingKey.value = null
 }
 
+const updateScrollShadows = () => {
+  const el = scrollContainer.value
+  if (!el) {
+    leftShadow.value = false
+    rightShadow.value = false
+    return
+  }
+  const { scrollLeft, clientWidth, scrollWidth } = el
+  leftShadow.value = scrollLeft > 0
+  rightShadow.value = scrollLeft + clientWidth < scrollWidth - 1
+}
+
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', stopResize)
+  const el = scrollContainer.value
+  if (el) {
+    el.addEventListener('scroll', updateScrollShadows)
+    updateScrollShadows()
+  }
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', stopResize)
+  const el = scrollContainer.value
+  if (el) {
+    el.removeEventListener('scroll', updateScrollShadows)
+  }
 })
 </script>

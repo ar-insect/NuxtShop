@@ -1025,7 +1025,8 @@ const enUS = {
         deleteBatchSuccess: 'Selected coupons have been deleted',
         createSuccess: 'Coupon created',
         updateSuccess: 'Coupon updated',
-        noLimit: 'No limit'
+        noLimit: 'No limit',
+        deleteDisabledLoadingHint: 'Coupons are loading, please try again later'
       },
       ads: {
         title: 'Ads management',
@@ -1072,6 +1073,7 @@ const enUS = {
         errorRequired: 'Please fill in required fields',
         errorInvalidId: 'Invalid ad ID, cannot delete (missing id field)',
         errorCannotDeleteActive: 'Cannot delete active ad, please disable it first',
+        deleteDisabledHint: 'Cannot delete active ad, please disable it first',
         deleteConfirm: 'Are you sure you want to delete this ad?',
         deleteSuccess: 'Ad deleted: {label}',
         createSuccess: 'Ad created: {label}',
@@ -1159,7 +1161,8 @@ const enUS = {
         createSuccess: 'Admin created',
         updateSuccess: 'Admin updated',
         resetErrorPasswordShort: 'New password must be at least 6 characters',
-        resetSuccess: 'Password has been reset'
+        resetSuccess: 'Password has been reset',
+        deleteDisabledHint: 'Cannot delete current logged-in admin or protected admin'
       },
       setting: {
         title: 'System settings',
@@ -1220,6 +1223,7 @@ const enUS = {
         tableColumnCreatedAt: 'Created at',
         errorRequired: 'Please fill in required fields',
         errorDeleteSelf: 'Cannot delete current logged-in admin',
+        deleteDisabledHint: 'Cannot delete current logged-in admin or admin user',
         deleteConfirm: 'Are you sure you want to delete this user?',
         deleteSuccess: 'User deleted: {username}',
         createSuccess: 'User created: {username}',

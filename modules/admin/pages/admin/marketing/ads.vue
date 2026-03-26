@@ -112,15 +112,19 @@
             <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
-            <BaseButton
-              size="xs"
-              variant="outline"
-              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
-              :disabled="row.active !== false"
-              @click.stop="handleDelete(row)"
+            <BaseTooltip
+              :text="row.active !== false ? t('admin.marketing.ads.deleteDisabledHint') : ''"
             >
-              {{ t('admin.common.delete') }}
-            </BaseButton>
+              <BaseButton
+                size="xs"
+                variant="outline"
+                class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
+                :disabled="row.active !== false"
+                @click.stop="handleDelete(row)"
+              >
+                {{ t('admin.common.delete') }}
+              </BaseButton>
+            </BaseTooltip>
           </AdminRowActions>
         </template>
       </AdminTable>
@@ -181,10 +185,21 @@
         </div>
       </form>
       <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          :disabled="listLoading"
+          @click="modalOpen = false"
+        >
           {{ t('admin.marketing.ads.modalCancel') }}
         </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleSubmit">
+        <BaseButton
+          variant="primary"
+          size="sm"
+          :loading="listLoading"
+          :disabled="listLoading"
+          @click="handleSubmit"
+        >
           {{ editing ? t('admin.marketing.ads.modalSubmitEdit') : t('admin.marketing.ads.modalSubmitCreate') }}
         </BaseButton>
       </template>
@@ -198,6 +213,7 @@ import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
+import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { http, type ApiResponse } from '~/utils/http'
 import { watch } from 'vue'
 import { useI18n } from '~/composables/useI18n'

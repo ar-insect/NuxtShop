@@ -19,9 +19,14 @@
           </BaseButton>
         </div>
 
-        <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-6 items-end">
-            <div class="md:col-span-1">
+        <AdminSearchPanel
+          :search-label="t('admin.common.search')"
+          :reset-label="t('admin.common.reset')"
+          @search="applySearch"
+          @reset="clearSearch"
+        >
+          <template #primary>
+            <div class="md:w-40">
               <BaseSelect
                 v-model="filterRole"
                 :options="roleFilterOptions"
@@ -29,7 +34,7 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="md:w-40">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
@@ -37,25 +42,17 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-3">
+            <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8"
+                class="h-8 w-full"
                 v-model="searchKeywordInput"
                 clearable
                 :placeholder="t('admin.user.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
-            <div class="flex gap-2 justify-end md:col-span-1">
-              <BaseButton size="sm" variant="primary" @click="applySearch">
-                {{ t('admin.common.search') }}
-              </BaseButton>
-              <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                {{ t('admin.common.reset') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+          </template>
+        </AdminSearchPanel>
       </div>
 
       <AdminTable
@@ -102,15 +99,19 @@
             <BaseButton size="xs" variant="outline" class="px-2" @click.stop="openEdit(row)">
               {{ t('admin.common.edit') }}
             </BaseButton>
-            <BaseButton
-              size="xs"
-              variant="outline"
-              class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
-              :disabled="row._id === currentUserId || row.role === 'admin'"
-              @click.stop="handleDelete(row)"
+            <BaseTooltip
+              :text="row._id === currentUserId || row.role === 'admin' ? t('admin.user.list.deleteDisabledHint') : ''"
             >
-              {{ t('admin.common.delete') }}
-            </BaseButton>
+              <BaseButton
+                size="xs"
+                variant="outline"
+                class="px-2 text-red-600 hover:bg-red-50 hover:border-red-200"
+                :disabled="row._id === currentUserId || row.role === 'admin'"
+                @click.stop="handleDelete(row)"
+              >
+                {{ t('admin.common.delete') }}
+              </BaseButton>
+            </BaseTooltip>
           </AdminRowActions>
         </template>
         </AdminTable>
@@ -158,10 +159,21 @@
         />
       </form>
         <template #footer>
-          <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            :disabled="listLoading"
+            @click="modalOpen = false"
+          >
             {{ t('admin.user.list.modalCancel') }}
           </BaseButton>
-          <BaseButton variant="primary" size="sm" @click="handleSubmit">
+          <BaseButton
+            variant="primary"
+            size="sm"
+            :loading="listLoading"
+            :disabled="listLoading"
+            @click="handleSubmit"
+          >
             {{ editing ? t('admin.user.list.modalSubmitEdit') : t('admin.user.list.modalSubmitCreate') }}
           </BaseButton>
         </template>
@@ -174,7 +186,9 @@
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'

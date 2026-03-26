@@ -129,10 +129,21 @@
         </div>
       </form>
       <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          :disabled="listLoading"
+          @click="modalOpen = false"
+        >
           {{ t('admin.goods.category.modalCancel') }}
         </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleSubmit">
+        <BaseButton
+          variant="primary"
+          size="sm"
+          :loading="listLoading"
+          :disabled="listLoading"
+          @click="handleSubmit"
+        >
           {{ editing ? t('admin.goods.category.modalSubmitEdit') : t('admin.goods.category.modalSubmitCreate') }}
         </BaseButton>
       </template>

@@ -47,15 +47,16 @@
                   <label :for="`quantity-${item.id}`" class="sr-only">
                     {{ t('pages.cart.quantityLabel', { title: item.title }) }}
                   </label>
-                  <select 
-                    :id="`quantity-${item.id}`" 
-                    :name="`quantity-${item.id}`" 
-                    :value="item.quantity"
-                    class="max-w-full rounded-md border border-[var(--border-color)] bg-[var(--input-bg)] py-1.5 text-base leading-5 font-medium text-[var(--text-color)] text-left shadow-sm focus:outline-none focus:border-indigo-500 sm:text-sm"
-                    @change="updateQuantity(item.id, parseInt(($event.target as HTMLSelectElement).value))"
-                  >
-                    <option v-for="num in 10" :key="num" :value="num">{{ num }}</option>
-                  </select>
+                  <BaseInputNumber
+                    :id="`quantity-${item.id}`"
+                    class="w-24"
+                    :model-value="item.quantity"
+                    :min="1"
+                    :max="10"
+                    :step="1"
+                    align="center"
+                    @update:model-value="(val) => updateQuantity(item.id, val || 1)"
+                  />
 
                   <div class="absolute top-0 right-0">
                     <button 

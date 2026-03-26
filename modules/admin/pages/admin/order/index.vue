@@ -30,9 +30,14 @@
           </div>
         </div>
 
-        <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-6 items-end">
-            <div class="md:col-span-1">
+        <AdminSearchPanel
+          :search-label="t('admin.common.search')"
+          :reset-label="t('admin.common.reset')"
+          @search="applySearch"
+          @reset="clearSearch"
+        >
+          <template #primary>
+            <div class="md:w-40">
               <BaseSelect
                 v-model="filterStatus"
                 :options="statusFilterOptions"
@@ -40,7 +45,7 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="md:w-40">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
@@ -48,25 +53,17 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-3">
+            <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8"
+                class="h-8 w-full"
                 v-model="searchKeywordInput"
                 clearable
                 :placeholder="t('admin.order.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
               />
             </div>
-            <div class="flex gap-2 justify-end md:col-span-1">
-              <BaseButton size="sm" variant="primary" @click="applySearch">
-                {{ t('admin.common.search') }}
-              </BaseButton>
-              <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                {{ t('admin.common.reset') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+          </template>
+        </AdminSearchPanel>
       </div>
 
       <AdminTable
@@ -78,6 +75,8 @@
         :page-size="pageSize"
         :total="totalOrders"
         server-side
+        row-clickable
+        @row-click="openDetail"
         @update:page="handlePageChange"
         @update:page-size="handlePageSizeChange"
       >
@@ -103,18 +102,6 @@
           <span class="text-xs text-[var(--text-secondary)]">
             {{ formatDate(value) }}
           </span>
-        </template>
-        <template #actions="{ row }">
-          <AdminRowActions>
-            <BaseButton
-              size="xs"
-              variant="outline"
-              class="px-2"
-              @click.stop="openDetail(row)"
-            >
-              {{ t('admin.order.list.detailTitleFallback') }}
-            </BaseButton>
-          </AdminRowActions>
         </template>
         </AdminTable>
       </BaseCard>
@@ -250,7 +237,7 @@
 <script setup lang="ts">
 import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
-import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import type { OrderDetail, OrderStatus } from '~/types/api'

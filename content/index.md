@@ -90,8 +90,8 @@ cp .env.production.example .env.production
 - **Redis**
   - 开发环境可以使用无密码的本地 Redis 或直接使用内存存储（当前 `nitro.devStorage` 已默认使用内存）。
   - 生产环境必须配置强密码 `REDIS_PASSWORD`，并将 Redis 部署在内网或私有子网，避免暴露公网端口。
-- **管理员账号**
-  - `ADMIN_USERNAME` / `ADMIN_PASSWORD` 在 demo 中默认为 `admin` / `123456`，仅用于本地体验。
+ - **管理员账号**
+  - 本地示例默认通过 `.env.development.example` 配置 `ADMIN_USERNAME=admin` / `ADMIN_PASSWORD=Admin1234`，仅用于本地体验。
   - 在生产环境中必须通过 `.env.production` 覆盖为强随机密码，或在初始化后立即修改管理员密码。
 
 ### 4) 启动开发服务器

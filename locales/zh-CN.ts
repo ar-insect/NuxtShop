@@ -1025,7 +1025,8 @@ const zhCN = {
         deleteBatchSuccess: '已删除选中的优惠券',
         createSuccess: '优惠券已创建',
         updateSuccess: '优惠券已更新',
-        noLimit: '不限'
+        noLimit: '不限',
+        deleteDisabledLoadingHint: '优惠券列表加载中，请稍后再试'
       },
       ads: {
         title: '广告管理',
@@ -1072,6 +1073,7 @@ const zhCN = {
         errorRequired: '请填写必填字段',
         errorInvalidId: '广告 ID 无效，无法删除（缺少 id 字段）',
         errorCannotDeleteActive: '启用中的广告不可删除，请先停用',
+        deleteDisabledHint: '启用中的广告不可删除，请先停用',
         deleteConfirm: '确定要删除这条广告吗？',
         deleteSuccess: '广告已删除：{label}',
         createSuccess: '广告已创建：{label}',
@@ -1159,7 +1161,8 @@ const zhCN = {
         createSuccess: '管理员已创建',
         updateSuccess: '管理员信息已更新',
         resetErrorPasswordShort: '新密码至少为 6 位',
-        resetSuccess: '密码已重置'
+        resetSuccess: '密码已重置',
+        deleteDisabledHint: '不能删除当前登录的管理员或受保护的管理员'
       },
       setting: {
         title: '系统配置',
@@ -1220,6 +1223,7 @@ const zhCN = {
         tableColumnCreatedAt: '创建时间',
         errorRequired: '请填写必填字段',
         errorDeleteSelf: '不能删除当前登录的管理员',
+        deleteDisabledHint: '不能删除当前登录的管理员或管理员角色用户',
         deleteConfirm: '确定要删除该用户吗？',
         deleteSuccess: '用户已删除：{username}',
         createSuccess: '用户已创建：{username}',

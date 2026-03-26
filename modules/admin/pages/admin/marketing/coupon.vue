@@ -20,22 +20,31 @@
             <span class="text-xs text-[var(--text-secondary)]">
               {{ t('admin.common.selected', { count: selectedCouponIds.length }) }}
             </span>
-            <BaseButton
-              size="xs"
-              variant="outline"
-              class="text-red-600 hover:bg-red-50 hover:border-red-200"
-              :disabled="tableLoading || !selectedCouponIds.length"
-              @click="handleBatchDelete"
+            <BaseTooltip
+              :text="tableLoading ? t('admin.marketing.coupon.deleteDisabledLoadingHint') : ''"
             >
-              {{ t('admin.common.delete') }}
-            </BaseButton>
+              <BaseButton
+                size="xs"
+                variant="outline"
+                class="text-red-600 hover:bg-red-50 hover:border-red-200"
+                :disabled="tableLoading || !selectedCouponIds.length"
+                @click="handleBatchDelete"
+              >
+                {{ t('admin.common.delete') }}
+              </BaseButton>
+            </BaseTooltip>
           </div>
         </div>
       </div>
 
-      <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-5 items-end">
-          <div class="md:col-span-1">
+      <AdminSearchPanel
+        :search-label="t('admin.marketing.coupon.search')"
+        :reset-label="t('admin.marketing.coupon.reset')"
+        @search="applySearch"
+        @reset="clearSearch"
+      >
+        <template #primary>
+          <div class="md:w-40">
             <BaseSelect
               v-model="enabledFilter"
               :options="enabledOptions"
@@ -43,25 +52,17 @@
               size="sm"
             />
           </div>
-          <div class="md:col-span-3">
+          <div class="flex-1 min-w-[220px]">
             <BaseInput
-              class="h-8"
+              class="h-8 w-full"
               v-model="searchKeywordInput"
               clearable
               :placeholder="t('admin.marketing.coupon.searchPlaceholder')"
               @keyup.enter="applySearch"
             />
           </div>
-          <div class="flex gap-2 justify-end md:col-span-1">
-            <BaseButton size="sm" variant="primary" @click="applySearch">
-              {{ t('admin.marketing.coupon.search') }}
-            </BaseButton>
-            <BaseButton size="sm" variant="secondary" @click="clearSearch">
-              {{ t('admin.marketing.coupon.reset') }}
-            </BaseButton>
-          </div>
-        </div>
-      </div>
+        </template>
+      </AdminSearchPanel>
 
       <AdminTable
         v-model:selected-keys="selectedCouponIds"
@@ -193,10 +194,21 @@
         </div>
       </form>
       <template #footer>
-        <BaseButton variant="secondary" size="sm" @click="modalOpen = false">
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          :disabled="listLoading"
+          @click="modalOpen = false"
+        >
           {{ t('admin.marketing.coupon.modalCancel') }}
         </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleSubmit">
+        <BaseButton
+          variant="primary"
+          size="sm"
+          :loading="listLoading"
+          :disabled="listLoading"
+          @click="handleSubmit"
+        >
           {{ editing ? t('admin.marketing.coupon.modalSubmitEdit') : t('admin.marketing.coupon.modalSubmitCreate') }}
         </BaseButton>
       </template>
@@ -209,6 +221,8 @@ import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
+import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'

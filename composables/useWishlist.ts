@@ -111,6 +111,11 @@ export const useWishlist = () => {
     wishlistItems.value = []
   }
 
+  const clearWishlist = async () => {
+    wishlistItems.value = []
+    await saveWishlist()
+  }
+
   return {
     wishlistItems,
     addToWishlist,
@@ -118,6 +123,7 @@ export const useWishlist = () => {
     toggleWishlist,
     isInWishlist,
     resetWishlistLocal,
-    refreshWishlist
+    refreshWishlist,
+    clearWishlist
   }
 }

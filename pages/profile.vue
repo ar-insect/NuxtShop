@@ -38,21 +38,6 @@
             </a>
           </nav>
         </BaseCard>
-        
-        <BaseCard>
-          <BaseButton
-            block
-            variant="danger"
-            class="flex items-center justify-center"
-            @click="handleLogout"
-          >
-            <ArrowRightOnRectangleIcon
-              class="flex-shrink-0 mr-2 h-5 w-5"
-              aria-hidden="true"
-            />
-            {{ t('profile.logoutConfirm') }}
-          </BaseButton>
-        </BaseCard>
       </aside>
 
       <!-- Main Content -->
@@ -89,8 +74,7 @@ import {
   Cog6ToothIcon, 
   BellIcon,
   ShoppingBagIcon,
-  MapPinIcon,
-  ArrowRightOnRectangleIcon
+  MapPinIcon
 } from '@heroicons/vue/24/outline'
 import ProfileAccount from '~/components/profile/ProfileAccount.vue'
 import ProfileAddress from '~/components/profile/ProfileAddress.vue'
@@ -104,8 +88,6 @@ definePageMeta({
   layout: 'dashboard'
 })
 
-const { logout } = useAuth()
-const { confirm } = useConfirm()
 const { t } = useI18n()
 
 useSeoMeta({
@@ -125,21 +107,6 @@ const navigation = computed(() => ([
 ]))
 
 const router = useRouter()
-
-const handleLogout = async () => {
-  const ok = await confirm({
-    title: t('profile.logoutTitle'),
-    message: t('profile.logoutMessage'),
-    type: 'danger',
-    confirmText: t('profile.logoutConfirm'),
-    cancelText: t('profile.logoutCancel')
-  })
-
-  if (ok) {
-    logout()
-  }
-}
-
 watch(currentTab, (val) => {
   if (val === 'orders') {
     router.push('/orders')

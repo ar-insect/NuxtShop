@@ -146,7 +146,15 @@ const openAddressModal = (address?: Address) => {
       isDefault: address.isDefault
     })
   } else {
-    Object.assign(addressForm, { _id: '', name: '', phone: '', region: '', detail: '', isDefault: false })
+    const shouldDefault = (addresses.value?.length || 0) === 0
+    Object.assign(addressForm, {
+      _id: '',
+      name: '',
+      phone: '',
+      region: '',
+      detail: '',
+      isDefault: shouldDefault
+    })
   }
   isAddressModalOpen.value = true
 }

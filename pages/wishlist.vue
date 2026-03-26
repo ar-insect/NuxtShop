@@ -90,7 +90,7 @@ import { useConfirm } from '~/composables/useConfirm'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
 
-const { wishlistItems, removeFromWishlist, resetWishlistLocal } = useWishlist()
+const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist()
 const { addToCart } = useCart()
 const toast = useToast()
 const { confirm } = useConfirm()
@@ -154,7 +154,7 @@ const handleClearWishlist = async () => {
 
   if (!ok) return
 
-  resetWishlistLocal()
+  await clearWishlist()
   toast.success(t('pages.wishlist.clearSuccess'))
 }
 </script>

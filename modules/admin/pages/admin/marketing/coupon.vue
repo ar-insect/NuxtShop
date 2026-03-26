@@ -5,9 +5,6 @@
       <h1 class="text-2xl font-bold text-[var(--text-color)]">
         {{ t('admin.marketing.coupon.title') }}
       </h1>
-      <BaseButton size="sm" variant="primary" @click="openCreate">
-        {{ t('admin.marketing.coupon.createButton') }}
-      </BaseButton>
     </div>
 
     <BaseCard class="p-4 space-y-4">
@@ -15,19 +12,24 @@
         <p class="text-sm text-[var(--text-secondary)]">
           {{ t('admin.marketing.coupon.total', { count: total }) }}
         </p>
-        <div v-if="selectedCouponIds.length" class="flex items-center gap-2">
-          <span class="text-xs text-[var(--text-secondary)]">
-            {{ t('admin.common.selected', { count: selectedCouponIds.length }) }}
-          </span>
-          <BaseButton
-            size="xs"
-            variant="outline"
-            class="text-red-600 hover:bg-red-50 hover:border-red-200"
-            :disabled="tableLoading || !selectedCouponIds.length"
-            @click="handleBatchDelete"
-          >
-            {{ t('admin.common.delete') }}
+        <div class="flex items-center gap-2">
+          <BaseButton size="sm" variant="primary" @click="openCreate">
+            {{ t('admin.marketing.coupon.createButton') }}
           </BaseButton>
+          <div v-if="selectedCouponIds.length" class="flex items-center gap-2">
+            <span class="text-xs text-[var(--text-secondary)]">
+              {{ t('admin.common.selected', { count: selectedCouponIds.length }) }}
+            </span>
+            <BaseButton
+              size="xs"
+              variant="outline"
+              class="text-red-600 hover:bg-red-50 hover:border-red-200"
+              :disabled="tableLoading || !selectedCouponIds.length"
+              @click="handleBatchDelete"
+            >
+              {{ t('admin.common.delete') }}
+            </BaseButton>
+          </div>
         </div>
       </div>
 
@@ -52,10 +54,10 @@
           </div>
           <div class="flex gap-2 justify-end md:col-span-1">
             <BaseButton size="sm" variant="primary" @click="applySearch">
-                {{ t('admin.marketing.coupon.search') }}
+              {{ t('admin.marketing.coupon.search') }}
             </BaseButton>
             <BaseButton size="sm" variant="secondary" @click="clearSearch">
-                {{ t('admin.marketing.coupon.reset') }}
+              {{ t('admin.marketing.coupon.reset') }}
             </BaseButton>
           </div>
         </div>

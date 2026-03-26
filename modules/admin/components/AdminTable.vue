@@ -22,8 +22,12 @@
               :class="[
                 'py-2 pr-4 relative select-none',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
-                column.fixed === 'left' ? 'sticky left-0 z-20 bg-[var(--card-bg)]' : '',
-                column.fixed === 'right' ? 'sticky right-0 z-20 bg-[var(--card-bg)]' : '',
+                column.fixed === 'left'
+                  ? 'sticky left-0 z-20 bg-[var(--card-bg)] shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.12)]'
+                  : '',
+                column.fixed === 'right'
+                  ? 'sticky right-0 z-20 bg-[var(--card-bg)] shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]'
+                  : '',
                 resizingKey === column.key ? 'bg-[var(--primary-color)]/5' : '',
                 column.align === 'right'
                   ? 'text-right'
@@ -57,14 +61,14 @@
                 @mousedown.prevent="startResize($event, column.key)"
               >
                 <span
-                  class="w-px bg-[var(--border-color)] group-hover:bg-[var(--primary-color)] transition-colors"
-                  :class="resizingKey === column.key ? 'bg-[var(--primary-color)]' : ''"
+                  class="w-px h-4 my-auto bg-[var(--border-color)] opacity-40 group-hover:opacity-100 transition-all"
+                  :class="resizingKey === column.key ? 'opacity-100 bg-[var(--primary-color)]' : ''"
                 />
               </span>
             </th>
             <th
               v-if="$slots.actions"
-              class="py-2 px-2 w-[120px] sticky right-0 z-30 bg-[var(--card-bg)] text-center whitespace-nowrap"
+              class="py-2 px-2 w-[120px] sticky right-0 z-30 bg-[var(--card-bg)] text-center whitespace-nowrap shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.12)]"
             >
               操作
             </th>
@@ -97,8 +101,12 @@
               :class="[
                 'py-2 pr-4 align-middle',
                 colIndex === 0 && !selectable ? 'pl-4' : '',
-                column.fixed === 'left' ? 'sticky left-0 z-10 bg-[var(--card-bg)]' : '',
-                column.fixed === 'right' ? 'sticky right-0 z-10 bg-[var(--card-bg)]' : '',
+                column.fixed === 'left'
+                  ? 'sticky left-0 z-10 bg-[var(--card-bg)] shadow-[inset_-6px_0_6px_-6px_rgba(15,23,42,0.08)]'
+                  : '',
+                column.fixed === 'right'
+                  ? 'sticky right-0 z-10 bg-[var(--card-bg)] shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]'
+                  : '',
                 column.align === 'right'
                   ? 'text-right'
                   : column.align === 'center'
@@ -118,7 +126,7 @@
             </td>
             <td
               v-if="$slots.actions"
-              class="py-2 px-2 w-[120px] align-middle sticky right-0 z-30 bg-[var(--card-bg)] whitespace-nowrap"
+              class="py-2 px-2 w-[120px] align-middle sticky right-0 z-30 bg-[var(--card-bg)] whitespace-nowrap shadow-[inset_6px_0_6px_-6px_rgba(15,23,42,0.08)]"
             >
               <slot name="actions" :row="row" :row-index="rowIndex" />
             </td>

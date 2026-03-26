@@ -4,7 +4,7 @@
     :to="to"
     :type="!to ? type : undefined"
     :class="[
-      'inline-flex items-center justify-center border font-medium focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+      'inline-flex items-center justify-center border font-medium focus:outline-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
       sizeClasses[size],
       variantClasses[variant],
       block ? 'w-full' : ''

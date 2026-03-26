@@ -8,7 +8,7 @@
     </div>
 
     <BaseCard class="p-4 space-y-4">
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col">
         <div class="flex items-center justify-between">
           <p class="text-sm text-[var(--text-secondary)]">
             {{ t('admin.marketing.ads.total', { count: totalAds }) }}
@@ -18,9 +18,12 @@
           </BaseButton>
         </div>
 
-        <div class="rounded-md bg-[var(--muted-bg)]/40 px-3 py-3">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-6 items-end">
-            <div class="md:col-span-1">
+        <AdminSearchPanel
+          :search-label="t('admin.marketing.ads.search')"
+          :reset-label="t('admin.marketing.ads.reset')"
+        >
+          <template #primary>
+            <div class="md:w-40">
               <BaseSelect
                 v-model="filterPosition"
                 :options="positionFilterOptions"
@@ -28,7 +31,19 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="flex-1">
+              <BaseInput
+                class="h-8 w-full"
+                v-model="searchKeywordInput"
+                clearable
+                :placeholder="t('admin.marketing.ads.searchKeywordPlaceholder')"
+                @keyup.enter="applySearch"
+              />
+            </div>
+          </template>
+
+          <template #more>
+            <div class="md:w-40">
               <BaseSelect
                 v-model="filterStatus"
                 :options="statusFilterOptions"
@@ -36,7 +51,7 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-1">
+            <div class="md:w-40">
               <BaseSelect
                 v-model="searchField"
                 :options="searchFieldOptions"
@@ -44,35 +59,8 @@
                 size="sm"
               />
             </div>
-            <div class="md:col-span-2">
-              <BaseInput
-                class="h-8"
-                v-model="searchKeywordInput"
-                clearable
-                :placeholder="t('admin.marketing.ads.searchKeywordPlaceholder')"
-                @keyup.enter="applySearch"
-              />
-            </div>
-            <div class="flex gap-2 justify-end md:col-span-1">
-              <BaseButton
-                size="sm"
-                variant="primary"
-                class="px-4"
-                @click="applySearch"
-              >
-                {{ t('admin.marketing.ads.search') }}
-              </BaseButton>
-              <BaseButton
-                size="sm"
-                variant="secondary"
-                class="px-4"
-                @click="clearSearch"
-              >
-                {{ t('admin.marketing.ads.reset') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+          </template>
+        </AdminSearchPanel>
       </div>
 
       <AdminTable
@@ -209,6 +197,7 @@ import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
+import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { http, type ApiResponse } from '~/utils/http'
 import { watch } from 'vue'
 import { useI18n } from '~/composables/useI18n'

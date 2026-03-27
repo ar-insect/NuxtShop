@@ -215,7 +215,8 @@ import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { http } from '~/utils/http'
-import type { ApiResponse, SearchQuery } from '~/types/common'
+import type { ApiResponse } from '~/types/common'
+import type { AdsSearchQuery } from '~/types/admin'
 import type { AdminAdDocument } from '~/types/ad'
 import { watch } from 'vue'
 import { useI18n } from '~/composables/useI18n'
@@ -262,8 +263,8 @@ const statusFilterOptions = computed(() => [
 const page = ref(1)
 const pageSize = ref(10)
 
-const buildFilterParams = (): Partial<SearchQuery> & Record<string, string | number> => {
-  const params: Record<string, string | number> = {}
+const buildFilterParams = (): AdsSearchQuery & Record<string, string | number> => {
+  const params: AdsSearchQuery & Record<string, string | number> = {}
 
   if (filterPosition.value !== 'ALL') {
     params.position = filterPosition.value
@@ -279,7 +280,8 @@ const buildFilterParams = (): Partial<SearchQuery> & Record<string, string | num
   if (keyword) {
     const field = searchField.value
     if (field === 'id') {
-      params.id = keyword
+      const maybeId = Number(keyword)
+      if (!Number.isNaN(maybeId)) params.id = maybeId
     } else {
       params[field] = keyword
     }

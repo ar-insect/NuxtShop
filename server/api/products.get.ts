@@ -1,7 +1,8 @@
 import { getQuery } from 'h3'
 import { findProductsWithFilters } from '~/server/utils/product'
+import type { ApiResponse } from '~/types/common'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{ items: any[]; total: number }>> => {
   const query = getQuery(event)
   const page = query.page ? Number(query.page) || 1 : 1
   const limit = query.limit ? Number(query.limit) || 16 : 16
@@ -19,8 +20,13 @@ export default defineEventHandler(async (event) => {
     sort
   })
 
-  return {
-    items: result.items,
-    total: result.total
+  const response: ApiResponse<{ items: any[]; total: number }> = {
+    code: 200,
+    message: 'OK',
+    data: {
+      items: result.items,
+      total: result.total
+    }
   }
+  return response
 })

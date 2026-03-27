@@ -137,7 +137,8 @@ import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapp
 import { useProducts } from '~/modules/product/composables/useProducts'
 import type { Product } from '~/types/product'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
-import type { SearchQuery, ApiResponse } from '~/types/common'
+import type { ApiResponse } from '~/types/common'
+import type { AdminSearchQuery } from '~/types/admin'
 import { useRouter } from '#imports'
 import { useI18n } from '~/composables/useI18n'
 
@@ -174,7 +175,7 @@ const {
   key: 'admin-products',
   endpoint: '/admin/products',
   getFilterParams: () => {
-    const params: Partial<SearchQuery> & Record<string, string | number> = {}
+    const params: AdminSearchQuery & Record<string, string | number> = {}
     if (filterCategory.value !== 'ALL') {
       params.category = filterCategory.value
     }

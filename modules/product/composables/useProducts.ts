@@ -1,6 +1,7 @@
 
 import { http } from '~/utils/http'
 import type { Product } from '~/types/product'
+import type { ApiResponse } from '~/types/common'
 
 /**
  * 商品数据访问组合式函数。
@@ -21,8 +22,8 @@ export const useProducts = () => {
    */
   const getProductById = async (id: number) => {
     try {
-      const product = await http.get<Product | null>(`/products/${id}`)
-      return product ?? undefined
+      const res = await http.get<ApiResponse<Product | null>>(`/products/${id}`)
+      return (res.data ?? undefined)
     } catch (error) {
       console.error('Failed to fetch product by id:', error)
       return undefined
@@ -66,7 +67,8 @@ export const useProducts = () => {
     }
 
     try {
-      const result = await http.get<{ items: Product[]; total: number }>('/products', params)
+      const res = await http.get<ApiResponse<{ items: Product[]; total: number }>>('/products', params)
+      const result = { items: res.data.items || [], total: res.data.total || 0 }
       products.value = result.items
       return result
     } catch (error) {

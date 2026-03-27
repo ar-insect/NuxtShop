@@ -121,6 +121,7 @@
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { http } from '~/utils/http'
 import type { ApiResponse } from '~/types/common'
+import type { Product } from '~/types/product'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseRichTextEditor from '~/components/ui/BaseRichTextEditor.vue'
@@ -177,17 +178,8 @@ const loadProduct = async () => {
   if (!Number.isFinite(id)) return
   loading.value = true
   try {
-    const product = await http.get<{
-      id: number
-      title: string
-      price: number
-      description: string
-      detailHtml?: string
-      category: string
-      image: string
-      images: string[]
-      specs?: { label: string; value: string }[]
-    }>(`/products/${id}`)
+    const res = await http.get<ApiResponse<Product>>(`/products/${id}`)
+    const product = res.data as Product
 
     form.title = product.title
     form.category = product.category

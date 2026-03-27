@@ -4,6 +4,7 @@ import { requireAdmin } from '~/server/utils/auth'
 import { getCollection } from '~/server/utils/mongodb'
 import type { OrderStatus } from '~/types/api'
 import type { OrderDocument } from '~/types/order'
+import type { AdminOrderListItem } from '~/types/admin'
 import type { ApiResponse } from '~/types/common'
 
 const COLLECTION_NAME = 'user_orders'
@@ -54,7 +55,7 @@ export default defineEventHandler(async (event: H3Event) => {
     collection.countDocuments(filter)
   ])
 
-  const items = docs.map((doc) => ({
+  const items: AdminOrderListItem[] = docs.map((doc) => ({
     ...doc,
     _id: doc._id ? doc._id.toHexString() : undefined,
     userId: doc.userId.toHexString(),
@@ -62,7 +63,7 @@ export default defineEventHandler(async (event: H3Event) => {
     updatedAt: doc.updatedAt.toISOString()
   }))
 
-  const response: ApiResponse<{ items: any[]; total: number }> = {
+  const response: ApiResponse<{ items: AdminOrderListItem[]; total: number }> = {
     code: 200,
     message: 'OK',
     data: {

@@ -190,7 +190,8 @@ import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
-import type { SearchQuery } from '~/types/common'
+import type { AdminSearchQuery } from '~/types/admin'
+import type { ApiResponse } from '~/types/common'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useI18n } from '~/composables/useI18n'
@@ -231,7 +232,7 @@ const {
   key: 'admin-users',
   endpoint: '/admin/users',
   getFilterParams: () => {
-    const params: Partial<SearchQuery> & Record<string, string | number> = {}
+    const params: AdminSearchQuery & Record<string, string | number> = {}
     if (filterRole.value !== 'ALL') {
       params.role = filterRole.value
     }

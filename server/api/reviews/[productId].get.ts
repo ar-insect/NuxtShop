@@ -1,5 +1,6 @@
 import { createApiError } from '~/server/utils/api-error'
 import { findReviewsByProductId } from '~/server/utils/review'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   const productIdParam = event.context.params?.productId
@@ -16,18 +17,21 @@ export default defineEventHandler(async (event) => {
 
   const reviews = await findReviewsByProductId(productId, 100)
 
-  return {
-    success: true,
-    data: reviews.map((r) => ({
-      id: r._id?.toString() || '',
-      productId: r.productId,
-      userId: r.userId.toString(),
-      username: r.username,
-      userAvatar: r.userAvatar || '',
-      rating: r.rating,
-      content: r.content,
-      createdAt: r.createdAt.toISOString()
-    }))
+  const response: ApiResponse<{ items: any[] }> = {
+    code: 200,
+    message: 'OK',
+    data: {
+      items: reviews.map((r) => ({
+        id: r._id?.toString() || '',
+        productId: r.productId,
+        userId: r.userId.toString(),
+        username: r.username,
+        userAvatar: r.userAvatar || '',
+        rating: r.rating,
+        content: r.content,
+        createdAt: r.createdAt.toISOString()
+      }))
+    }
   }
+  return response
 })
-

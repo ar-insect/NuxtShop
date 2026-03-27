@@ -1,4 +1,6 @@
+import { getQuery } from 'h3'
 import { findTopViewedProducts } from '~/server/utils/history'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -12,21 +14,26 @@ export default defineEventHandler(async (event) => {
   try {
     const items = await findTopViewedProducts(safeDays, safeLimit)
 
-    return {
-      success: true,
-      items: items.map((i) => ({
-        productId: i.productId,
-        product: i.product,
-        views: i.views,
-        lastViewedAt: i.lastViewedAt.toISOString()
-      }))
+    const response: ApiResponse<{ items: { productId: number; product: any; views: number; lastViewedAt: string }[] }> = {
+      code: 200,
+      message: 'OK',
+      data: {
+        items: items.map((i) => ({
+          productId: i.productId,
+          product: i.product,
+          views: i.views,
+          lastViewedAt: i.lastViewedAt.toISOString()
+        }))
+      }
     }
+    return response
   } catch (e) {
     console.error('Failed to fetch top viewed products:', e)
-    return {
-      success: false,
-      items: []
+    const response: ApiResponse<{ items: any[] }> = {
+      code: 500,
+      message: 'Failed to fetch top viewed products',
+      data: { items: [] }
     }
+    return response
   }
 })
-

@@ -1,21 +1,6 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-
-export type CouponType = 'fixed' | 'percent'
-
-export interface CouponDocument {
-  _id?: ObjectId
-  code: string
-  name: string
-  type: CouponType
-  amount: number
-  minOrderAmount: number
-  startAt: Date | null
-  endAt: Date | null
-  enabled: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+import type { CouponDocument, CouponType } from '~/types/coupon'
 
 const COLLECTION_NAME = 'coupons_app'
 

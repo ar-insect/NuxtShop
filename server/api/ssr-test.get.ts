@@ -1,4 +1,14 @@
-export default defineEventHandler(async (event) => {
+import { getQuery } from 'h3'
+import type { ApiResponse } from '~/types/common'
+
+export default defineEventHandler(async (event): Promise<ApiResponse<{
+  id: string
+  message: string
+  timestamp: number
+  serverTime: string
+  data: string
+  headers: string | undefined
+}>> => {
   // 模拟服务端处理延迟
   // 在此处打断点，可以调试服务端逻辑
   const query = getQuery(event)
@@ -10,11 +20,15 @@ export default defineEventHandler(async (event) => {
   const processedData = `服务端已处理 ${id} 于 ${new Date().toISOString()}`
   
   return {
-    id,
-    message: '来自服务端的问候！',
-    timestamp: Date.now(),
-    serverTime: new Date().toLocaleString(),
-    data: processedData,
-    headers: event.node.req.headers['user-agent'] // 显示请求来源
+    code: 200,
+    message: 'OK',
+    data: {
+      id: String(id),
+      message: '来自服务端的问候！',
+      timestamp: Date.now(),
+      serverTime: new Date().toLocaleString(),
+      data: processedData,
+      headers: event.node.req.headers['user-agent']
+    }
   }
 })

@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { requireUserId } from '~/server/utils/auth'
 import { findRecentLoginHistory } from '~/server/utils/login-history'
+import type { ApiResponse } from '~/types/common'
 
 const simplifyDevice = (ua: string | undefined): string => {
   if (!ua) return 'Unknown'
@@ -25,7 +26,7 @@ const simplifyDevice = (ua: string | undefined): string => {
   return platform
 }
 
-export default async (event: H3Event) => {
+export default async (event: H3Event): Promise<ApiResponse<{ id: string; device: string; ip: string; status: string; time: string }[]>> => {
   const userId = requireUserId(event)
 
   const items = await findRecentLoginHistory(userId, 10)

@@ -2,16 +2,6 @@ import { $fetch as ofetch } from 'ofetch'
 import type { FetchOptions } from 'ofetch'
 
 /**
- * 标准 API 响应结构接口。
- * @template T - data 的类型
- */
-export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data: T
-}
-
-/**
  * 基于 `ofetch` 的 HTTP 请求封装类。
  * 提供常用 HTTP 方法与文件上传，并支持拦截器与统一错误处理。
  */

@@ -1,6 +1,7 @@
 import { createError } from 'h3'
 import { requireAdmin } from '~/server/utils/auth'
 import { deleteProduct } from '~/server/utils/product'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -38,9 +39,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return {
+  const response: ApiResponse<{ deleted: boolean }> = {
     code: 200,
-    message: 'Deleted'
+    message: 'Deleted',
+    data: { deleted: true }
   }
+  return response
 })
-

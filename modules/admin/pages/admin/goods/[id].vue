@@ -120,6 +120,7 @@
 <script setup lang="ts">
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { http } from '~/utils/http'
+import type { ApiResponse } from '~/types/common'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseRichTextEditor from '~/components/ui/BaseRichTextEditor.vue'
@@ -143,19 +144,14 @@ const id = Number(idParam)
 
 const { data: categoryData } = await useAsyncData(
   'admin-product-categories-edit',
-  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  () => http.get<ApiResponse<{ key: string; label: string }[]>>('/products/categories'),
   {
-    default: () => [] as { key: string; label: string }[]
+    default: () => ({ code: 200, message: 'OK', data: [] as { key: string; label: string }[] })
   }
 )
 
 const categoryOptions = computed(() => {
-  const raw = categoryData.value as any
-  const list: { key: string; label: string }[] = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw?.data)
-      ? raw.data
-      : []
+  const list: { key: string; label: string }[] = categoryData.value?.data || []
 
   return list.map((c) => ({
     label: categoryLabels[c.key] || c.label || c.key,
@@ -261,7 +257,7 @@ const handleSubmit = async () => {
 
   try {
     submitting.value = true
-    await http.put(`/admin/products/${id}`, {
+    await http.put<ApiResponse<any>>(`/admin/products/${id}`, {
       title: form.title,
       category: form.category,
       price: priceNumber,

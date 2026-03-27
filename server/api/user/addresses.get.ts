@@ -1,18 +1,20 @@
 // server/api/user/addresses.get.ts
 import { findAddressesByUserId } from '~/server/utils/address';
 import { createApiError } from '~/server/utils/api-error';
+import type { ApiResponse } from '~/types/common';
 import { requireUserId } from '~/server/utils/auth';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<any[]>> => {
   const userId = requireUserId(event);
 
   try {
     const addresses = await findAddressesByUserId(userId);
-    return {
+    const response: ApiResponse<any[]> = {
       code: 200,
       message: '获取收货地址成功',
       data: addresses,
     };
+    return response;
   } catch (error) {
     console.error('Error fetching addresses:', error);
     throw createApiError({

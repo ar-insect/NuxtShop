@@ -2,6 +2,7 @@ import { getQuery } from 'h3'
 import { requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 import { findReviewsWithFilters } from '~/server/utils/review'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
       keyword
     })
 
-    return {
+    const response: ApiResponse<{ items: any[]; total: number }> = {
       code: 200,
       message: 'OK',
       data: {
@@ -40,6 +41,7 @@ export default defineEventHandler(async (event) => {
         total
       }
     }
+    return response
   } catch (error) {
     throw createApiError({
       statusCode: 500,
@@ -49,4 +51,3 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
-

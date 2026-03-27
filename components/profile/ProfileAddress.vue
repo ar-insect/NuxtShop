@@ -103,6 +103,7 @@ import { ref, reactive, watch } from 'vue'
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import RegionSelect from '~/components/ui/RegionSelect.vue'
 import type { Address as MongoAddress } from '~/types/address'
+import type { ApiResponse } from '~/types/common'
 import { useI18n } from '~/composables/useI18n'
 
 interface Address extends Omit<MongoAddress, '_id' | 'userId' | 'createdAt' | 'updatedAt'> {
@@ -114,9 +115,12 @@ const toast = useToast()
 const { confirm } = useConfirm()
 const { t } = useI18n()
 
-const { data: addresses, refresh: refreshAddresses } = await useAsyncData('user-addresses', () =>
-  $fetch<{ code: number; message: string; data: Address[] }>('/api/user/addresses').then(res => res.data)
+const { data: addressesResponse, refresh: refreshAddresses } = await useAsyncData(
+  'user-addresses',
+  () => $fetch<ApiResponse<Address[]>>('/api/user/addresses'),
+  { server: false }
 )
+const addresses = computed(() => addressesResponse.value?.data || [])
 
 const isAddressModalOpen = ref(false)
 const addressForm = reactive({
@@ -173,14 +177,14 @@ const saveAddress = async () => {
   try {
     if (addressForm._id) {
       // 更新地址
-      await $fetch(`/api/user/addresses/${addressForm._id}`, {
+      await $fetch<ApiResponse<any>>(`/api/user/addresses/${addressForm._id}`, {
         method: 'PUT',
         body: addressForm
       })
       toast.success(t('profile.address.updateSuccess'))
     } else {
       // 新增地址
-      await $fetch('/api/user/addresses', {
+      await $fetch<ApiResponse<any>>('/api/user/addresses', {
         method: 'POST',
         body: addressForm
       })
@@ -205,7 +209,7 @@ const deleteAddress = async (id: string) => {
 
   if (isConfirmed) {
     try {
-      await $fetch(`/api/user/addresses/${id}`, {
+      await $fetch<ApiResponse<any>>(`/api/user/addresses/${id}`, {
         method: 'DELETE'
       })
       toast.success(t('profile.address.deleteSuccess'))
@@ -221,7 +225,7 @@ const deleteAddress = async (id: string) => {
 watch(() => addressForm.isDefault, async (newVal) => {
   if (newVal && addressForm._id) {
     try {
-      await $fetch(`/api/user/addresses/${addressForm._id}/default`, {
+      await $fetch<ApiResponse<any>>(`/api/user/addresses/${addressForm._id}/default`, {
         method: 'PUT'
       })
       await refreshAddresses() // 刷新地址列表

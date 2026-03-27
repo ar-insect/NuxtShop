@@ -1,39 +1,6 @@
 
-/**
- * 表示商品的数据结构。
- * @interface Product
- * @property {number} id - 商品唯一标识
- * @property {string} title - 商品名称
- * @property {number} price - 商品价格
- * @property {string} description - 商品描述
- * @property {string} category - 商品分类（如 "men's clothing"）
- * @property {string} image - 商品图片 URL
- * @property {Object} rating - 评分信息
- * @property {number} rating.rate - 平均评分
- * @property {number} rating.count - 评分人数
- */
 import { http } from '~/utils/http'
-
-export interface ProductSpec {
-  label: string
-  value: string
-}
-
-export interface Product {
-  id: number
-  title: string
-  price: number
-  description: string
-  detailHtml?: string
-  category: string
-  image: string
-  images: string[]
-  rating: {
-    rate: number
-    count: number
-  }
-  specs?: ProductSpec[]
-}
+import type { Product } from '~/types/product'
 
 /**
  * 商品数据访问组合式函数。

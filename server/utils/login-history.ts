@@ -1,19 +1,9 @@
 import { ObjectId } from 'mongodb'
 import type { H3Event } from 'h3'
 import { getCollection } from '~/server/utils/mongodb'
+import type { LoginHistoryStatus, LoginHistoryDocument } from '~/types/security'
 
 const COLLECTION_NAME = 'user_login_history'
-
-export type LoginHistoryStatus = 'success' | 'failed'
-
-export interface LoginHistoryDocument {
-  _id?: ObjectId
-  userId: ObjectId
-  device: string
-  ip: string
-  status: LoginHistoryStatus
-  createdAt: Date
-}
 
 const getLoginHistoryCollection = () => getCollection<LoginHistoryDocument>(COLLECTION_NAME)
 

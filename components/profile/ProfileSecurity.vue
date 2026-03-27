@@ -103,6 +103,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from '~/composables/useI18n'
 import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
+import type { ApiResponse } from '~/types/common'
 
 const toast = useToast()
 const { t } = useI18n()
@@ -119,7 +120,7 @@ const twoFactorEnabled = ref(false)
 
 const { data: loginHistoryData } = await useAsyncData(
   'user-login-history',
-  () => $fetch<{ code: number; message: string; data: { id: string; device: string; ip: string; time: string; status: string }[] }>(
+  () => $fetch<ApiResponse<{ id: string; device: string; ip: string; time: string; status: string }[]>>(
     '/api/user/login-history'
   ),
   {
@@ -157,7 +158,7 @@ const updatePassword = async () => {
   if (!isPasswordValid.value) return
   try {
     updatingPassword.value = true
-    await $fetch('/api/user/change-password', {
+    await $fetch<ApiResponse<any>>('/api/user/change-password', {
       method: 'POST',
       body: {
         currentPassword: passwordForm.current,
@@ -180,7 +181,7 @@ const updatePassword = async () => {
 
 const toggle2FA = async (value: boolean) => {
   try {
-    await $fetch('/api/user/two-factor', {
+    await $fetch<ApiResponse<any>>('/api/user/two-factor', {
       method: 'POST',
       body: { enabled: value }
     })

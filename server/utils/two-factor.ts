@@ -1,15 +1,8 @@
 import { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
+import type { TwoFactorCode } from '~/types/security'
 
 const COLLECTION_NAME = 'user_two_factor_codes'
-
-interface TwoFactorCode {
-  _id?: ObjectId
-  userId: ObjectId
-  code: string
-  expiresAt: Date
-  used: boolean
-}
 
 const getTwoFactorCollection = () => getCollection<TwoFactorCode>(COLLECTION_NAME)
 

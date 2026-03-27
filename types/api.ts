@@ -106,12 +106,6 @@ export interface OrderDetail extends OrderSummary {
   }
 }
 
-export interface AdItem {
-  id: number
-  image: string
-  link: string
-  altKey: string
-}
 
 export interface LoginSuccessResponse {
   token: string
@@ -131,9 +125,6 @@ export interface MeResponse {
   user: UserPublic
 }
 
-export interface AdsResponse {
-  items: AdItem[]
-}
 
 export interface AdminDashboardKpi {
   todayOrderCount: number

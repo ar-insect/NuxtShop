@@ -167,6 +167,7 @@ import { ref, reactive, watch, nextTick, computed } from 'vue'
 import { PencilIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { validatePhone } from '~/utils/validation'
 import { useI18n } from '~/composables/useI18n'
+import type { ApiResponse } from '~/types/common'
 
 const { user } = useAuth()
 const toast = useToast()
@@ -190,7 +191,7 @@ const form = reactive({
 
 const { data: couponSummary } = await useAsyncData(
   'user-coupons-summary',
-  () => $fetch<{ code: number; message: string; data: { unusedCount: number } }>('/api/user/coupons/summary'),
+  () => $fetch<ApiResponse<{ unusedCount: number }>>('/api/user/coupons/summary'),
   {
     server: false,
     lazy: true
@@ -260,7 +261,7 @@ const handleCrop = async (blob: Blob) => {
 
   uploading.value = true
   try {
-    const response = await $fetch<{ data: { url: string } }>('/api/upload', {
+    const response = await $fetch<ApiResponse<{ url: string }>>('/api/upload', {
       method: 'POST',
       body: formData
     })
@@ -291,7 +292,7 @@ const saveProfile = async () => {
       phoneError.value = ''
     }
 
-    const response = await $fetch('/api/user/update', {
+    const response = await $fetch<ApiResponse<{ name: string; avatar: string; phone?: string }>>('/api/user/update', {
       method: 'POST',
       body: {
         name: form.name,

@@ -238,7 +238,8 @@
 </template>
 
 <script setup lang="ts">
-import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { useProducts } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { useHistory } from '~/composables/useHistory'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import ProductReviews from '~/modules/product/components/ProductReviews.vue'
@@ -278,15 +279,15 @@ const currentImages = computed(() => {
 
 const { data: ratingSummary } = await useAsyncData(
   `product-rating-${id}`,
-  () => http.get<{ success: boolean; data: { avgRating: number; reviewCount: number } }>(`/reviews/summary/${id}`),
+  () => http.get<ApiResponse<{ avgRating: number; reviewCount: number }>>(`/reviews/summary/${id}`),
   {
-    default: () => ({ success: true, data: { avgRating: 0, reviewCount: 0 } })
+    default: () => ({ code: 200, message: 'OK', data: { avgRating: 0, reviewCount: 0 } })
   }
 )
 
 const displayRatingRate = computed(() => {
   const payload = ratingSummary.value
-  if (payload?.success && payload.data.reviewCount > 0) {
+  if (payload?.data?.reviewCount && payload.data.reviewCount > 0) {
     return payload.data.avgRating
   }
   return product.value?.rating.rate ?? 0
@@ -294,7 +295,7 @@ const displayRatingRate = computed(() => {
 
 const displayRatingCount = computed(() => {
   const payload = ratingSummary.value
-  if (payload?.success && payload.data.reviewCount > 0) {
+  if (payload?.data?.reviewCount && payload.data.reviewCount > 0) {
     return payload.data.reviewCount
   }
   return product.value?.rating.count ?? 0

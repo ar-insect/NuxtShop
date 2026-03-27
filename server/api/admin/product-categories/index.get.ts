@@ -1,6 +1,7 @@
 import { getQuery } from 'h3'
 import { requireAdmin } from '~/server/utils/auth'
 import { getCategoryCollection } from '~/server/utils/product-category'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
     collection.countDocuments(filter)
   ])
 
-  return {
+  const response: ApiResponse<{ items: any[]; total: number }> = {
     code: 200,
     message: 'OK',
     data: {
@@ -40,5 +41,5 @@ export default defineEventHandler(async (event) => {
       total
     }
   }
+  return response
 })
-

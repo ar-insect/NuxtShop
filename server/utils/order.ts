@@ -1,13 +1,7 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
 import type { OrderDetail } from '~/types/api'
-
-interface OrderDocument extends OrderDetail {
-  _id?: ObjectId
-  userId: ObjectId
-  createdAt: Date
-  updatedAt: Date
-}
+import type { OrderDocument } from '~/types/order'
 
 const COLLECTION_NAME = 'user_orders'
 

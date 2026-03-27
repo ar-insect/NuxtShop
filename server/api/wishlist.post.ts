@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     await saveWishlistForUser(new ObjectId(userId), body)
-    return { success: true }
+    return { code: 200, message: 'OK', data: true }
   } catch (e) {
     console.error('Failed to save wishlist to MongoDB:', e)
     throw createError({

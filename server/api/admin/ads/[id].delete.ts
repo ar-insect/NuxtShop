@@ -1,6 +1,7 @@
 import { getCollection } from '~/server/utils/mongodb'
 import { requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
+import type { ApiResponse } from '~/types/common'
 
 interface AdminAdDocument {
   id: number
@@ -48,8 +49,10 @@ export default defineEventHandler(async (event) => {
 
   await collection.deleteOne({ id })
 
-  return {
+  const response: ApiResponse<{ deleted: boolean }> = {
     code: 200,
-    message: 'Deleted'
+    message: 'Deleted',
+    data: { deleted: true }
   }
+  return response
 })

@@ -1,6 +1,6 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-import type { Product } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 
 interface WishlistDocument {
   _id?: ObjectId
@@ -33,6 +33,7 @@ export async function saveWishlistForUser(userId: ObjectId, items: Product[]): P
   const collection = getCollection<WishlistDocument>(COLLECTION_NAME)
   const updatedAt = new Date()
   await collection.updateOne(
+    { userId },
     {
       $set: {
         userId,

@@ -1,27 +1,19 @@
 import { readBody } from 'h3'
 import { requireUserId } from '~/server/utils/auth'
-import { findUserById, updateUser, verifyPassword } from '~/server/utils/user'
 import { createApiError } from '~/server/utils/api-error'
+import { findUserById, updateUser, verifyPassword } from '~/server/utils/user'
+import type { ApiResponse } from '~/types/common'
 
-interface ChangePasswordPayload {
-  currentPassword?: string
-  newPassword?: string
-  confirmPassword?: string
-}
-
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{ success: boolean }>> => {
   const userId = requireUserId(event)
-  const body = await readBody<ChangePasswordPayload>(event)
-
-  const currentPassword = body.currentPassword?.trim() || ''
-  const newPassword = body.newPassword?.trim() || ''
-  const confirmPassword = body.confirmPassword?.trim() || ''
+  const body = await readBody<{ currentPassword?: string; newPassword?: string; confirmPassword?: string }>(event)
+  const { currentPassword, newPassword, confirmPassword } = body
 
   if (!currentPassword || !newPassword || !confirmPassword) {
     throw createApiError({
       statusCode: 400,
       code: 'AUTH_CHANGE_PASSWORD_MISSING_FIELDS',
-      message: '请完整填写当前密码与新密码',
+      message: '缺少必要参数',
       details: null
     })
   }
@@ -30,7 +22,7 @@ export default defineEventHandler(async (event) => {
     throw createApiError({
       statusCode: 400,
       code: 'AUTH_CHANGE_PASSWORD_MISMATCH',
-      message: '两次输入的新密码不一致',
+      message: '两次输入的密码不一致',
       details: null
     })
   }
@@ -44,22 +36,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (newPassword === currentPassword) {
-    throw createApiError({
-      statusCode: 400,
-      code: 'AUTH_CHANGE_PASSWORD_SAME_AS_OLD',
-      message: '新密码不能与当前密码相同',
-      details: null
-    })
-  }
-
   const user = await findUserById(userId)
-
   if (!user || !user.password) {
     throw createApiError({
-      statusCode: 401,
+      statusCode: 404,
       code: 'AUTH_USER_NOT_FOUND',
-      message: '用户不存在或未设置密码',
+      message: '用户不存在',
       details: null
     })
   }
@@ -74,20 +56,28 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const updated = await updateUser(userId, { password: newPassword })
+  if (currentPassword === newPassword) {
+    throw createApiError({
+      statusCode: 400,
+      code: 'AUTH_CHANGE_PASSWORD_SAME_AS_OLD',
+      message: '新密码不能与旧密码相同',
+      details: null
+    })
+  }
 
+  const updated = await updateUser(userId, { password: newPassword })
   if (!updated) {
     throw createApiError({
       statusCode: 500,
       code: 'AUTH_CHANGE_PASSWORD_FAILED',
-      message: '修改密码失败，请稍后再试',
+      message: '密码更新失败',
       details: null
     })
   }
 
   return {
     code: 200,
-    message: 'OK',
-    data: null
+    message: '密码更新成功',
+    data: { success: true }
   }
 })

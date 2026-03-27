@@ -82,6 +82,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from '~/composables/useToast'
+import type { ApiResponse } from '~/types/common'
 
 const toast = useToast()
 
@@ -99,12 +100,8 @@ const testReport = ref<any | null>(null)
 const fetchFeatures = async () => {
   fetchingFeatures.value = true
   try {
-    const response = await $fetch<{ success: boolean, data: string[] }>('/api/tests/features')
-    if (response.success) {
-      featureFiles.value = response.data
-    } else {
-      toast.error('获取测试用例失败')
-    }
+    const response = await $fetch<ApiResponse<string[]>>('/api/tests/features')
+    featureFiles.value = response.data || []
   } catch (error) {
     console.error('Failed to fetch feature files:', error)
     toast.error('获取测试用例失败')
@@ -117,16 +114,12 @@ const runTest = async (feature: string) => {
   runningTest.value = feature
   testReport.value = null
   try {
-    const response = await $fetch<{ success: boolean, report: any }>('/api/tests/run', {
+    const response = await $fetch<ApiResponse<{ report: any }>>('/api/tests/run', {
       method: 'POST',
       body: { feature }
     })
-    testReport.value = response.report
-    if (response.success) {
-      toast.success(`${feature}.feature 测试运行完成`)
-    } else {
-      toast.error(`${feature}.feature 测试运行失败`)
-    }
+    testReport.value = response.data?.report
+    toast.success(`${feature}.feature 测试运行完成`)
   } catch (error) {
     console.error(`Failed to run ${feature}.feature test:`, error)
     toast.error(`${feature}.feature 测试运行失败`)
@@ -139,16 +132,12 @@ const runAllTests = async () => {
   runningAllTests.value = true
   testReport.value = null
   try {
-    const response = await $fetch<{ success: boolean, report: any }>('/api/tests/run', {
+    const response = await $fetch<ApiResponse<{ report: any }>>('/api/tests/run', {
       method: 'POST',
       body: { feature: 'all' }
     })
-    testReport.value = response.report
-    if (response.success) {
-      toast.success('所有测试运行完成')
-    } else {
-      toast.error('所有测试运行失败')
-    }
+    testReport.value = response.data?.report
+    toast.success('所有测试运行完成')
   } catch (error) {
     console.error('Failed to run all tests:', error)
     toast.error('所有测试运行失败')

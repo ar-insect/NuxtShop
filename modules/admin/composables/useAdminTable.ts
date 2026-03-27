@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { http } from '~/utils/http'
+import type { ApiResponse, PaginationQuery } from '~/types/common'
 
 interface UseAdminTableOptions {
   key: string
@@ -12,8 +13,8 @@ export function useAdminTable<T>(options: UseAdminTableOptions) {
   const page = ref(1)
   const pageSize = ref(options.defaultPageSize || 10)
 
-  const buildParams = () => {
-    const params: Record<string, string | number> = {
+  const buildParams = (): PaginationQuery & Record<string, string | number> => {
+    const params: PaginationQuery & Record<string, string | number> = {
       page: page.value,
       limit: pageSize.value
     }
@@ -28,7 +29,7 @@ export function useAdminTable<T>(options: UseAdminTableOptions) {
   const { data, pending } = useAsyncData(
     options.key,
     () =>
-      http.get<{ code: number; message: string; data: { items: T[]; total: number } }>(
+      http.get<ApiResponse<{ items: T[]; total: number }>>(
         options.endpoint,
         buildParams()
       ),
@@ -45,7 +46,7 @@ export function useAdminTable<T>(options: UseAdminTableOptions) {
   const tableLoading = computed(() => listLoading.value)
 
   const reload = async () => {
-    const res = await http.get<{ code: number; message: string; data: { items: T[]; total: number } }>(
+    const res = await http.get<ApiResponse<{ items: T[]; total: number }>>(
       options.endpoint,
       buildParams()
     )

@@ -2,8 +2,17 @@
 import { updateUser } from '~/server/utils/user';
 import { createApiError } from '~/server/utils/api-error';
 import { requireUserId } from '~/server/utils/auth';
+import type { ApiResponse } from '~/types/common';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{
+  _id: string
+  username: string
+  name?: string
+  avatar?: string
+  phone?: string
+  language?: string
+  timezone?: string
+}>> => {
   const body = await readBody(event);
   const { name, avatar, phone, language, timezone } = body;
 
@@ -48,11 +57,19 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    return {
+    const response: ApiResponse<{
+      _id: string
+      username: string
+      name?: string
+      avatar?: string
+      phone?: string
+      language?: string
+      timezone?: string
+    }> = {
       code: 200,
       message: '个人资料更新成功',
       data: {
-        _id: updatedUser._id,
+        _id: String(updatedUser._id),
         username: updatedUser.username,
         name: updatedUser.name,
         avatar: updatedUser.avatar,
@@ -61,6 +78,7 @@ export default defineEventHandler(async (event) => {
         timezone: updatedUser.timezone,
       },
     };
+    return response;
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw createApiError({

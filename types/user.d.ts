@@ -1,6 +1,6 @@
 // types/user.d.ts
 import type { ObjectId } from 'mongodb';
-import type { ThemeConfig } from '~/stores/theme'; // 导入 ThemeConfig
+import type { ThemeConfig } from '~/types/theme'; // 导入 ThemeConfig
 
 export interface User {
   _id?: ObjectId; // MongoDB 的 ObjectId

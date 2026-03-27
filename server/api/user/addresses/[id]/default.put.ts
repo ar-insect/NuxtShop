@@ -3,8 +3,9 @@ import { setDefaultAddress } from '~/server/utils/address';
 import { ObjectId } from 'mongodb';
 import { createApiError } from '~/server/utils/api-error';
 import { requireUserId } from '~/server/utils/auth';
+import type { ApiResponse } from '~/types/common';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{ success: boolean }>> => {
   const userId = requireUserId(event);
 
   const addressId = event.context.params?.id;
@@ -29,10 +30,12 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    return {
+    const response: ApiResponse<{ success: boolean }> = {
       code: 200,
       message: '默认地址设置成功',
+      data: { success: true }
     };
+    return response;
   } catch (error) {
     console.error('Error setting default address:', error);
     throw createApiError({

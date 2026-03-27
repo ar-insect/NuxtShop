@@ -2,13 +2,9 @@ import type { H3Event } from 'h3'
 import { createError, readBody } from 'h3'
 import { getCollection } from '~/server/utils/mongodb'
 import { requireAdmin } from '~/server/utils/auth'
-import type { OrderDetail, OrderStatus } from '~/types/api'
-
-interface OrderDocument extends OrderDetail {
-  userId: string
-  createdAt: Date
-  updatedAt: Date
-}
+import type { OrderStatus } from '~/types/api'
+import type { ApiResponse } from '~/types/common'
+import type { OrderDocument } from '~/types/order'
 
 const COLLECTION_NAME = 'user_orders'
 
@@ -48,7 +44,7 @@ export default defineEventHandler(async (event: H3Event) => {
     })
   }
 
-  return {
+  const response: ApiResponse<{ id: string; status: OrderStatus }> = {
     code: 200,
     message: 'Updated',
     data: {
@@ -56,5 +52,5 @@ export default defineEventHandler(async (event: H3Event) => {
       status: result.value.status
     }
   }
+  return response
 })
-

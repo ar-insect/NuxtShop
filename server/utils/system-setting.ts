@@ -1,24 +1,5 @@
-import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-
-interface ShippingSetting {
-  baseFee: number
-  freeThreshold: number | null
-}
-
-interface PaymentSetting {
-  alipay: boolean
-  wechat: boolean
-  creditCard: boolean
-}
-
-export interface SystemSettingsDocument {
-  _id?: ObjectId
-  key: 'global'
-  shipping: ShippingSetting
-  payments: PaymentSetting
-  updatedAt: Date
-}
+import type { SystemSettingsDocument } from '~/types/settings'
 
 const COLLECTION_NAME = 'system_settings_app'
 

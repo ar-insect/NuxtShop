@@ -1,16 +1,6 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-
-export interface ReviewDocument {
-  _id?: ObjectId
-  productId: number
-  userId: ObjectId
-  username: string
-  userAvatar?: string
-  rating: number
-  content: string
-  createdAt: Date
-}
+import type { ReviewDocument, ReviewSummary, ReviewQueryParams, ReviewQueryResult } from '~/types/review'
 
 const COLLECTION_NAME = 'product_reviews'
 
@@ -38,12 +28,6 @@ export async function findReviewsByProductId(productId: number, limit = 50): Pro
     .sort({ createdAt: -1 })
     .limit(limit)
     .toArray()
-}
-
-export interface ReviewSummary {
-  productId: number
-  avgRating: number
-  reviewCount: number
 }
 
 /**
@@ -80,19 +64,6 @@ export async function getReviewSummaryByProductId(productId: number): Promise<Re
     avgRating: doc.avgRating,
     reviewCount: doc.reviewCount
   }
-}
-
-export interface ReviewQueryParams {
-  page?: number
-  limit?: number
-  productId?: number
-  rating?: number
-  keyword?: string
-}
-
-export interface ReviewQueryResult {
-  items: ReviewDocument[]
-  total: number
 }
 
 /**

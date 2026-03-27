@@ -252,7 +252,7 @@ const handleDelete = async (row: AdminReview) => {
 
   try {
     listLoading.value = true
-    await http.delete(`/admin/product-reviews/${row.id}`)
+    await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/product-reviews/${row.id}`)
     toast.success(t('admin.goods.review.deleteSuccess'))
     await reload()
   } finally {

@@ -1,16 +1,8 @@
 import { getQuery } from 'h3'
 import { getCollection } from '~/server/utils/mongodb'
 import { requireAdmin } from '~/server/utils/auth'
-
-interface AdminAdDocument {
-  id: number
-  position: string
-  order: number
-  active?: boolean
-  image: string
-  link: string
-  altKey: string
-}
+import type { AdminAdDocument } from '~/types/ad'
+import type { ApiResponse } from '~/types/common'
 
 const COLLECTION_NAME = 'ads'
 
@@ -59,7 +51,7 @@ export default defineEventHandler(async (event) => {
     collection.countDocuments(filter)
   ])
 
-  return {
+  const response: ApiResponse<{ items: AdminAdDocument[]; total: number }> = {
     code: 200,
     message: 'OK',
     data: {
@@ -67,4 +59,5 @@ export default defineEventHandler(async (event) => {
       total
     }
   }
+  return response
 })

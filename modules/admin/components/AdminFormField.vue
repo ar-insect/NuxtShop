@@ -43,6 +43,7 @@
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInputNumber from '~/components/ui/BaseInputNumber.vue'
+import type { SelectOption } from '~/types/common'
 
 type RuleType = 'required' | 'minLength' | 'maxLength' | 'url' | 'regex' | 'custom'
 
@@ -80,12 +81,6 @@ interface CustomRule extends BaseRule {
 }
 
 export type AdminFormRule = RequiredRule | MinLengthRule | MaxLengthRule | UrlRule | RegexRule | CustomRule
-
-interface SelectOption {
-  label: string
-  value: string | number
-  [key: string]: any
-}
 
 const props = defineProps<{
   modelValue: any

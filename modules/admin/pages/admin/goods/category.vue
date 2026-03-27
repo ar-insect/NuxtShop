@@ -158,6 +158,7 @@ import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
+import type { ApiResponse, PaginationQuery } from '~/types/common'
 
 definePageMeta({
   name: 'AdminGoodsCategoryPage',
@@ -193,8 +194,8 @@ const statusOptions = computed(() => [
   { label: t('admin.goods.category.statusInactive'), value: 'INACTIVE' }
 ])
 
-const buildFilterParams = () => {
-  const params: Record<string, string | number> = {}
+const buildFilterParams = (): PaginationQuery & Record<string, string | number> => {
+  const params: PaginationQuery & Record<string, string | number> = {}
   params.page = page.value
   params.limit = pageSize.value
   if (statusFilter.value === 'ACTIVE') {
@@ -207,7 +208,7 @@ const buildFilterParams = () => {
 
 const { data, pending } = await useAsyncData(
   'admin-product-categories',
-  () => http.get<{ code: number; message: string; data: { items: AdminCategory[]; total: number } }>(
+  () => http.get<ApiResponse<{ items: AdminCategory[]; total: number }>>(
     '/admin/product-categories',
     buildFilterParams()
   ),
@@ -252,7 +253,7 @@ const listLoading = ref(false)
 const tableLoading = computed(() => pending.value || listLoading.value)
 
 const reload = async () => {
-  const res = await http.get<{ code: number; message: string; data: { items: AdminCategory[]; total: number } }>(
+  const res = await http.get<ApiResponse<{ items: AdminCategory[]; total: number }>>(
     '/admin/product-categories',
     buildFilterParams()
   )
@@ -377,7 +378,7 @@ const handleDelete = async (row: AdminCategory) => {
 
   try {
     listLoading.value = true
-    await http.delete(`/admin/product-categories/${row._id}`)
+    await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/product-categories/${row._id}`)
     toast.success(t('admin.goods.category.deleteSuccess'))
     await reload()
   } finally {

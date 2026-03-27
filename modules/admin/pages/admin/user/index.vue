@@ -190,6 +190,7 @@ import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
+import type { SearchQuery } from '~/types/common'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useI18n } from '~/composables/useI18n'
@@ -230,7 +231,7 @@ const {
   key: 'admin-users',
   endpoint: '/admin/users',
   getFilterParams: () => {
-    const params: Record<string, string | number> = {}
+    const params: Partial<SearchQuery> & Record<string, string | number> = {}
     if (filterRole.value !== 'ALL') {
       params.role = filterRole.value
     }
@@ -402,7 +403,7 @@ const handleDelete = async (row: AdminUser) => {
 
   try {
     listLoading.value = true
-    await http.delete('/admin/users/' + row._id)
+    await http.delete<ApiResponse<{ deleted: boolean }>>('/admin/users/' + row._id)
     toast.success(t('admin.user.list.deleteSuccess', { username: row.username }))
     await reload()
   } finally {

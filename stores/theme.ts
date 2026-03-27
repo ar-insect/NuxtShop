@@ -1,17 +1,8 @@
 import { defineStore } from 'pinia'
 import { http } from '~/utils/http'
+import type { ThemeMode, FontSize, ThemeConfig } from '~/types/theme'
 
-export type ThemeMode = 'light' | 'dark' | 'system'
-export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
-
-export interface ThemeConfig {
-  mode: ThemeMode
-  fontSize: FontSize
-  primaryColor: string
-  backgroundColor: string
-  textColor: string
-  borderRadius: string
-}
+// 类型已抽离至 ~/types/theme
 
 const LIGHT_COLORS = {
   backgroundColor: '#f9fafb', // gray-50

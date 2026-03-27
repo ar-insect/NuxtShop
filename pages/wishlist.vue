@@ -85,7 +85,8 @@
 import { useWishlist } from '~/composables/useWishlist'
 import { useCart } from '~/modules/cart/composables/useCart'
 import { useToast } from '~/composables/useToast'
-import type { AdsResponse } from '~/types/api'
+import type { ApiResponse } from '~/types/common'
+import type { AdItem } from '~/types/ad'
 import { useConfirm } from '~/composables/useConfirm'
 import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import BaseAdCarousel from '~/components/ui/BaseAdCarousel.vue'
@@ -97,13 +98,13 @@ const { confirm } = useConfirm()
 const { t } = useI18n()
 
 const { data: adsData } = await useAsyncData('ads-wishlist', () =>
-  $fetch<AdsResponse>('/api/ads', {
+  $fetch<ApiResponse<{ items: AdItem[] }>>('/api/ads', {
     query: { position: 'wishlist' }
   })
 )
 
 const ads = computed(() =>
-  (adsData.value?.items || []).map((item) => ({
+  (adsData.value?.data.items || []).map((item) => ({
     id: item.id,
     image: item.image,
     link: item.link,

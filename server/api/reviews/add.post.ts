@@ -4,6 +4,7 @@ import { readBody } from 'h3'
 import { insertReview } from '~/server/utils/review'
 import { createApiError } from '~/server/utils/api-error'
 import { requireUser } from '~/server/utils/auth'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
@@ -33,8 +34,18 @@ export default defineEventHandler(async (event) => {
       createdAt: new Date()
     })
 
-    return {
-      success: true,
+    const response: ApiResponse<{
+      id: string
+      productId: number
+      userId: string
+      username: string
+      userAvatar?: string
+      rating: number
+      content: string
+      createdAt: string
+    }> = {
+      code: 200,
+      message: 'OK',
       data: {
         id: created._id?.toHexString() || '',
         productId: created.productId,
@@ -46,6 +57,7 @@ export default defineEventHandler(async (event) => {
         createdAt: created.createdAt.toISOString()
       }
     }
+    return response
   } catch (error) {
     console.error('Mongo error adding review:', error)
     throw createApiError({

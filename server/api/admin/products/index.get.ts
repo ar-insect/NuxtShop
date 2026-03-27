@@ -2,6 +2,8 @@ import type { H3Event } from 'h3'
 import { getQuery } from 'h3'
 import { requireAdmin } from '~/server/utils/auth'
 import { findProductsWithFilters } from '~/server/utils/product'
+import type { ApiResponse } from '~/types/common'
+import type { AdminProductListItem } from '~/types/admin'
 
 export default defineEventHandler(async (event: H3Event) => {
   await requireAdmin(event)
@@ -23,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
     sort
   })
 
-  return {
+  const response: ApiResponse<{ items: AdminProductListItem[]; total: number }> = {
     code: 200,
     message: 'OK',
     data: {
@@ -31,5 +33,5 @@ export default defineEventHandler(async (event: H3Event) => {
       total: result.total
     }
   }
+  return response
 })
-

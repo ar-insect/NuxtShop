@@ -27,8 +27,8 @@
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4 items-end">
             <div class="md:col-span-3">
               <BaseInput
-                class="h-8"
                 v-model="searchKeywordInput"
+                class="h-8"
                 clearable
                 :placeholder="t('admin.system.admin.searchPlaceholder')"
                 @keyup.enter="applySearch"
@@ -222,6 +222,7 @@ import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
+import type { ApiResponse, PaginationQuery, SearchQuery } from '~/types/common'
 import { useAdminPermission } from '~/modules/admin/composables/useAdminPermission'
 import { useI18n } from '~/composables/useI18n'
 import { useLocaleFormatter } from '~/composables/useLocaleFormatter'
@@ -243,8 +244,8 @@ const { formatDateTime } = useLocaleFormatter()
 const page = ref(1)
 const pageSize = ref(10)
 
-const buildFilterParams = () => {
-  const params: Record<string, string | number> = {
+const buildFilterParams = (): PaginationQuery & Partial<SearchQuery> & Record<string, string | number> => {
+  const params: PaginationQuery & Partial<SearchQuery> & Record<string, string | number> = {
     role: 'admin',
     page: page.value,
     limit: pageSize.value
@@ -257,7 +258,7 @@ const buildFilterParams = () => {
 
 const { data, pending } = await useAsyncData(
   'admin-system-admins',
-  () => http.get<{ code: number; message: string; data: { items: AdminUser[]; total: number } }>(
+  () => http.get<ApiResponse<{ items: AdminUser[]; total: number }>>(
     '/admin/users',
     buildFilterParams()
   ),
@@ -419,7 +420,7 @@ const handleDelete = async (row: AdminUser) => {
 
   try {
     listLoading.value = true
-    await http.delete(`/admin/users/${row._id}`)
+    await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/users/${row._id}`)
     toast.success(t('admin.system.admin.deleteSuccess'))
     await reloadAdmins()
   } finally {

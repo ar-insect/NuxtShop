@@ -1,6 +1,9 @@
 import { useToast } from '~/composables/useToast'
 import { useI18n } from '~/composables/useI18n'
 
+/**
+ * API 错误对象的最小结构定义
+ */
 interface ApiErrorLike {
   statusCode?: number
   message?: string
@@ -11,11 +14,20 @@ interface ApiErrorLike {
   }
 }
 
+/**
+ * 全局 API 错误处理组合式函数
+ * - 根据后端返回的错误码进行本地化提示
+ * - 处理鉴权相关错误（清除会话并跳转登录）
+ */
 export const useApiErrorHandler = () => {
   const toast = useToast()
   const router = useRouter()
   const { t } = useI18n()
 
+  /**
+   * 统一处理接口错误
+   * @param error 未知错误对象（期望为 ApiErrorLike）
+   */
   const handleError = (error: unknown) => {
     const e = error as ApiErrorLike
     const status = e?.statusCode

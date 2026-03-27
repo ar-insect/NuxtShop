@@ -1,8 +1,9 @@
 import { randomUUID } from 'crypto'
 import { useRedis } from '~/server/utils/redis'
 import { createError, readMultipartFormData } from 'h3'
+import type { ApiResponse } from '~/types/common'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{ url: string }>> => {
   const formData = await readMultipartFormData(event)
   
   if (!formData || formData.length === 0) {
@@ -43,7 +44,7 @@ export default defineEventHandler(async (event) => {
     createdAt: new Date().toISOString()
   }))
 
-  return {
+  const response: ApiResponse<{ url: string }> = {
     code: 200,
     message: 'File uploaded successfully',
     data: {
@@ -51,4 +52,5 @@ export default defineEventHandler(async (event) => {
       url: `/api/avatar/${id}`
     }
   }
+  return response
 })

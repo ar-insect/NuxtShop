@@ -196,6 +196,7 @@
 </template>
 <script setup lang="ts">
 import type { AdminDashboardOverview } from '~/types/api'
+import type { ApiResponse } from '~/types/common'
 import { http } from '~/utils/http'
 import AdminOrderTrendChart from '~/modules/admin/components/AdminOrderTrendChart.vue'
 import { useI18n } from '~/composables/useI18n'
@@ -212,7 +213,7 @@ definePageMeta({
 
 const { data } = await useAsyncData(
   'admin-dashboard-overview',
-  () => http.get<{ code: number; message: string; data: AdminDashboardOverview }>('/admin/dashboard/overview'),
+  () => http.get<ApiResponse<AdminDashboardOverview>>('/admin/dashboard/overview'),
   {
     server: false,
     lazy: true

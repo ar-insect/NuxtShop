@@ -170,8 +170,8 @@
         v-if="showBackToTop"
         type="button"
         class="back-to-top-btn"
-        @click="scrollToTop"
         :aria-label="t('pages.products.list.backToTop')"
+        @click="scrollToTop"
       >
         <ArrowUpIcon class="w-5 h-5" />
       </button>
@@ -185,7 +185,9 @@ import ProductAutocomplete from '~/modules/product/components/Autocomplete.vue'
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
-import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { useProducts } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
+import type { ApiResponse } from '~/types/common'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
 
@@ -208,17 +210,17 @@ const activeQuery = computed<string>(() => {
 // 从 MongoDB 动态获取商品分类列表（供前台商品列表和后台商品表单复用）
 const { data: categoryData } = await useAsyncData(
   'product-categories',
-  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  () => http.get<ApiResponse<{ key: string; label: string }[]>>('/products/categories'),
   {
-    default: () => [] as { key: string; label: string }[]
+    default: () => ({ code: 200, message: 'OK', data: [] as { key: string; label: string }[] })
   }
 )
 
-const categories = computed(() => categoryData.value || [])
+const categories = computed(() => categoryData.value?.data || [])
 
 const categoryLabelMap = computed<Record<string, string>>(() => {
   const fromServer: Record<string, string> = {}
-  for (const c of categoryData.value || []) {
+  for (const c of (categoryData.value?.data || [])) {
     fromServer[c.key] = c.label
   }
   return {

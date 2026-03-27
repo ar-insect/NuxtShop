@@ -1,4 +1,4 @@
-import type { Product } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { http } from '~/utils/http'
 
 /**
@@ -19,15 +19,15 @@ export const useWishlist = () => {
   const wishlistInitialized = useState<boolean>('wishlist-fetched', () => false)
 
   if (!wishlistInitialized.value) {
-    const { data } = useFetch<Product[]>('/api/wishlist', {
+    const { data } = useFetch<{ code: number; message: string; data: Product[] }>('/api/wishlist', {
       key: 'wishlist-data',
       lazy: true,
       server: false
     })
 
     watch(data, (newWishlist) => {
-      if (newWishlist) {
-        wishlistItems.value = newWishlist
+      if (newWishlist && Array.isArray(newWishlist.data)) {
+        wishlistItems.value = newWishlist.data
       }
     }, { immediate: true })
 
@@ -36,8 +36,8 @@ export const useWishlist = () => {
 
   const refreshWishlist = async () => {
     try {
-      const fresh = await http.get<Product[]>('/wishlist')
-      wishlistItems.value = fresh
+      const fresh = await http.get<{ code: number; message: string; data: Product[] }>('/wishlist')
+      wishlistItems.value = fresh.data || []
     } catch {
       // 刷新收藏夹失败时静默处理
     }
@@ -50,7 +50,7 @@ export const useWishlist = () => {
    */
   const saveWishlist = async () => {
     try {
-      await http.post('/wishlist', wishlistItems.value)
+      await http.post<{ code: number; message: string; data: boolean }>('/wishlist', wishlistItems.value)
     } catch (e) {
       console.error('Failed to save wishlist', e)
     }

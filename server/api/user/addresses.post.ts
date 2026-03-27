@@ -4,8 +4,9 @@ import type { Address } from '~/types/address';
 import { ObjectId } from 'mongodb';
 import { createApiError } from '~/server/utils/api-error';
 import { requireUserId } from '~/server/utils/auth';
+import type { ApiResponse } from '~/types/common';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ApiResponse<Address>> => {
   const userId = requireUserId(event);
 
   const body = await readBody(event);
@@ -37,11 +38,12 @@ export default defineEventHandler(async (event) => {
       await setDefaultAddress(userId, createdAddress._id!.toHexString());
     }
 
-    return {
+    const response: ApiResponse<Address> = {
       code: 200,
       message: '地址添加成功',
       data: createdAddress,
     };
+    return response;
   } catch (error) {
     console.error('Error adding address:', error);
     throw createApiError({

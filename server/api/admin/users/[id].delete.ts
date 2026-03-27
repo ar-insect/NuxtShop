@@ -4,6 +4,7 @@ import { getCollection } from '~/server/utils/mongodb'
 import { isSuperAdminUser, requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 import type { User } from '~/types/user'
+import type { ApiResponse } from '~/types/common'
 
 const COLLECTION_NAME = 'users'
 
@@ -54,8 +55,10 @@ export default defineEventHandler(async (event: H3Event) => {
 
   await collection.deleteOne({ _id: new ObjectId(idParam) })
 
-  return {
+  const response: ApiResponse<{ deleted: boolean }> = {
     code: 200,
-    message: 'Deleted'
+    message: 'Deleted',
+    data: { deleted: true }
   }
+  return response
 })

@@ -174,6 +174,7 @@ import { CreditCardIcon, QrCodeIcon, PlusIcon, CheckCircleIcon, TrashIcon } from
 import RegionSelect from '~/components/ui/RegionSelect.vue'
 import { validatePhone } from '~/utils/validation'
 import { useI18n } from '~/composables/useI18n'
+import type { ApiResponse } from '~/types/common'
 
 definePageMeta({
   middleware: 'auth'
@@ -198,7 +199,7 @@ const savedAddresses = ref<any[]>([])
 
 const loadServerAddresses = async () => {
   try {
-    const res = await $fetch<{ code: number; message: string; data: any[] }>('/api/user/addresses')
+    const res = await $fetch<ApiResponse<any[]>>('/api/user/addresses')
     if (res.data && res.data.length > 0) {
       savedAddresses.value = res.data.map((a) => ({
         id: String(a._id),
@@ -253,7 +254,7 @@ const deleteAddress = async (e: Event, id: string) => {
   })
 
   if (isConfirmed) {
-    await $fetch(`/api/user/addresses/${id}`, { method: 'DELETE' })
+    await $fetch<ApiResponse<any>>(`/api/user/addresses/${id}`, { method: 'DELETE' })
     savedAddresses.value = savedAddresses.value.filter(a => String(a.id) !== String(id))
     if (String(selectedAddressId.value) === String(id)) {
       if (savedAddresses.value.length > 0) {
@@ -271,20 +272,14 @@ const deleteAddress = async (e: Event, id: string) => {
 
 const { data: systemSettings } = await useAsyncData(
   'system-settings',
-  () => $fetch<{ success: boolean; data: { shipping: { baseFee: number; freeThreshold: number | null }; payments: { alipay: boolean; wechat: boolean; creditCard: boolean } } }>('/api/system/settings'),
+  () => $fetch<ApiResponse<{ shipping: { baseFee: number; freeThreshold: number | null }; payments: { alipay: boolean; wechat: boolean; creditCard: boolean } }>>('/api/system/settings'),
   {
     default: () => ({
-      success: true,
+      code: 200,
+      message: 'OK',
       data: {
-        shipping: {
-          baseFee: 0,
-          freeThreshold: null
-        },
-        payments: {
-          alipay: true,
-          wechat: true,
-          creditCard: true
-        }
+        shipping: { baseFee: 0, freeThreshold: null },
+        payments: { alipay: true, wechat: true, creditCard: true }
       }
     })
   }
@@ -362,7 +357,7 @@ const appliedCouponName = ref('')
 
 const refreshCoupon = async () => {
   try {
-    const res = await http.post<{ code: number; message: string; data: { total: number; discount: number; finalTotal: number; coupon: any | null } }>(
+    const res = await http.post<ApiResponse<{ total: number; discount: number; finalTotal: number; coupon: any | null }>>(
       '/orders/preview',
       { total: orderTotal.value }
     )
@@ -403,7 +398,7 @@ const handleCheckout = async () => {
     }
     // 保存新地址到服务器并设为默认
     try {
-      const res = await $fetch<{ code: number; message: string; data: any }>('/api/user/addresses', {
+      const res = await $fetch<ApiResponse<any>>('/api/user/addresses', {
         method: 'POST',
         body: {
           name: addressData.name,

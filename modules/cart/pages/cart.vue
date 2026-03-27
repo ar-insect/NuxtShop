@@ -144,9 +144,10 @@
 <script setup lang="ts">
 import ProductCard from '~/modules/product/components/ProductCard.vue'
 import ProductCardSkeleton from '~/modules/product/components/ProductCardSkeleton.vue'
-import type { Product } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
+import type { ApiResponse } from '~/types/common'
 
 const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart()
 const toast = useToast()
@@ -174,12 +175,8 @@ watch(
       return
     }
     try {
-      const res = await http.post<{
-        code: number
-        message: string
-        data: { total: number; discount: number }
-      }>('/orders/preview', { total })
-      couponDiscount.value = res.data.discount || 0
+      const res = await http.post<ApiResponse<{ total: number; discount: number }>>('/orders/preview', { total })
+      couponDiscount.value = res.data?.discount || 0
     } catch {
       couponDiscount.value = 0
     }
@@ -190,23 +187,20 @@ watch(
 // Fetch recommended products：最近 7 天全站浏览最多的商品，再排除购物车中已有的
 const { data: recommendedProductsData, pending: recommendedProductsPending } = await useAsyncData(
   'recommendedProducts',
-  () =>
-    http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
-      '/history/top-products',
-      { days: 7, limit: 8 }
-    ),
-  {
-    default: () => ({ success: true, items: [] as { product: Product; views: number }[] })
-  }
+  () => http.get<ApiResponse<{ items: { product: Product; views: number }[] }>>(
+    '/history/top-products',
+    { days: 7, limit: 8 }
+  ),
+  { default: () => ({ code: 200, message: 'OK', data: { items: [] as { product: Product; views: number }[] } }) }
 )
 
 const recommendedProducts = computed<Product[]>(() => {
   const payload = recommendedProductsData.value
-  if (!payload || !payload.items) return []
+  if (!payload?.data?.items) return []
 
   const inCartIds = new Set(cartItems.value.map((item) => item.id))
 
-  return payload.items
+  return payload.data.items
     .map((i) => i.product)
     .filter((p) => !inCartIds.has(p.id))
     .slice(0, 4)

@@ -51,8 +51,8 @@
             </div>
             <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8"
                 v-model="searchKeywordInput"
+                class="h-8"
                 clearable
                 :placeholder="t('admin.goods.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
@@ -134,8 +134,11 @@ import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
-import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { useProducts } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
+import type { ApiResponse } from '~/types/common'
+import type { AdminSearchQuery } from '~/types/admin'
 import { useRouter } from '#imports'
 import { useI18n } from '~/composables/useI18n'
 
@@ -172,7 +175,7 @@ const {
   key: 'admin-products',
   endpoint: '/admin/products',
   getFilterParams: () => {
-    const params: Record<string, string | number> = {}
+    const params: AdminSearchQuery & Record<string, string | number> = {}
     if (filterCategory.value !== 'ALL') {
       params.category = filterCategory.value
     }
@@ -231,9 +234,9 @@ const sortOptions = computed(() => [
 
 const { data: categoryData } = await useAsyncData(
   'admin-goods-filter-categories',
-  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  () => http.get<ApiResponse<{ key: string; label: string }[]>>('/products/categories'),
   {
-    default: () => [] as { key: string; label: string }[]
+    default: () => ({ code: 200, message: 'OK', data: [] as { key: string; label: string }[] })
   }
 )
 
@@ -242,12 +245,8 @@ const categoryFilterOptions = computed(() => {
     { label: t('admin.goods.list.categoryPlaceholder'), value: 'ALL' }
   ]
 
-  const raw = categoryData.value as any
-  const list: { key: string; label: string }[] = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw?.data)
-      ? raw.data
-      : []
+  const raw = categoryData.value
+  const list: { key: string; label: string }[] = Array.isArray(raw?.data) ? raw!.data : []
 
   const items = list.map((c) => ({
     label: categoryLabels[c.key] || c.label || c.key,
@@ -333,7 +332,7 @@ const handleDelete = async (row: AdminProduct) => {
 
   try {
     listLoading.value = true
-    await http.delete(`/admin/products/${row.id}`)
+    await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/products/${row.id}`)
     toast.success(t('admin.goods.list.deleteSuccess', { title: row.title }))
     await reload()
   } finally {

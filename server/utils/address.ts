@@ -6,9 +6,9 @@ import { ObjectId } from 'mongodb';
 const COLLECTION_NAME = 'addresses';
 
 /**
- * 根据用户 ID 查找所有收货地址。
- * @param userId 用户 ID
- * @returns 地址数组
+ * 根据用户 ID 查找所有收货地址
+ * @param userId 用户的字符串形式 ObjectId
+ * @returns Promise<Address[]> 地址数组
  */
 export async function findAddressesByUserId(userId: string): Promise<Address[]> {
   const addressesCollection = await getCollection<Address>(COLLECTION_NAME);
@@ -16,9 +16,9 @@ export async function findAddressesByUserId(userId: string): Promise<Address[]> 
 }
 
 /**
- * 添加新地址。
- * @param address 地址数据 (不包含 _id)
- * @returns 创建成功的地址
+ * 添加新地址
+ * @param address 地址数据（不包含 _id）
+ * @returns Promise<Address> 创建成功的地址
  */
 export async function addAddress(address: Omit<Address, '_id' | 'createdAt' | 'updatedAt'>): Promise<Address> {
   const addressesCollection = await getCollection<Address>(COLLECTION_NAME);
@@ -32,10 +32,10 @@ export async function addAddress(address: Omit<Address, '_id' | 'createdAt' | 'u
 }
 
 /**
- * 更新地址信息。
- * @param addressId 地址 ID
+ * 更新地址信息
+ * @param addressId 地址的字符串形式 ObjectId
  * @param updates 要更新的字段
- * @returns 更新后的地址或 null
+ * @returns Promise<Address | null> 更新后的地址或 null
  */
 export async function updateAddress(addressId: string, updates: Partial<Address>): Promise<Address | null> {
   const addressesCollection = await getCollection<Address>(COLLECTION_NAME);
@@ -52,9 +52,9 @@ export async function updateAddress(addressId: string, updates: Partial<Address>
 }
 
 /**
- * 删除地址。
- * @param addressId 地址 ID
- * @returns 删除结果
+ * 删除地址
+ * @param addressId 地址的字符串形式 ObjectId
+ * @returns Promise<boolean> 删除结果
  */
 export async function deleteAddress(addressId: string): Promise<boolean> {
   const addressesCollection = await getCollection<Address>(COLLECTION_NAME);
@@ -66,10 +66,10 @@ export async function deleteAddress(addressId: string): Promise<boolean> {
 }
 
 /**
- * 设置默认地址。
- * @param userId 用户 ID
- * @param addressId 要设置为默认的地址 ID
- * @returns 操作是否成功
+ * 设置默认地址
+ * @param userId 用户的字符串形式 ObjectId
+ * @param addressId 要设置为默认的地址的字符串形式 ObjectId
+ * @returns Promise<boolean> 操作是否成功
  */
 export async function setDefaultAddress(userId: string, addressId: string): Promise<boolean> {
   const addressesCollection = await getCollection<Address>(COLLECTION_NAME);

@@ -1,6 +1,7 @@
 import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-import type { AdItem, AdsResponse } from '~/types/api'
+import type { AdItem } from '~/types/ad'
+import type { ApiResponse } from '~/types/common'
 
 interface AdDocument {
   _id?: ObjectId
@@ -20,7 +21,7 @@ const toClient = (doc: AdDocument): AdItem => {
   return rest
 }
 
-export default defineEventHandler(async (event): Promise<AdsResponse> => {
+export default defineEventHandler(async (event): Promise<ApiResponse<{ items: AdItem[] }>> => {
   const query = getQuery(event)
   const position = String(query.position || 'home')
 
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event): Promise<AdsResponse> => {
     .toArray() as AdDocument[]
 
   if (docs.length > 0) {
-    return { items: docs.map(toClient) }
+    return { code: 200, message: 'OK', data: { items: docs.map(toClient) } }
   }
 
   const defaults: AdDocument[] = []
@@ -92,8 +93,8 @@ export default defineEventHandler(async (event): Promise<AdsResponse> => {
 
   if (defaults.length > 0) {
     await collection.insertMany(defaults)
-    return { items: defaults.map(toClient) }
+    return { code: 200, message: 'OK', data: { items: defaults.map(toClient) } }
   }
 
-  return { items: [] }
+  return { code: 200, message: 'OK', data: { items: [] } }
 })

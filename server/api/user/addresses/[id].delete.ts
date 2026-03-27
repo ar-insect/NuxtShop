@@ -2,6 +2,7 @@
 import { deleteAddress } from '~/server/utils/address';
 import { ObjectId } from 'mongodb';
 import { createApiError } from '~/server/utils/api-error';
+import type { ApiResponse } from '~/types/common';
 
 export default defineEventHandler(async (event) => {
 
@@ -27,10 +28,12 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    return {
+    const response: ApiResponse<{ deleted: boolean }> = {
       code: 200,
       message: '地址删除成功',
+      data: { deleted: true }
     };
+    return response;
   } catch (error) {
     console.error('Error deleting address:', error);
     throw createApiError({

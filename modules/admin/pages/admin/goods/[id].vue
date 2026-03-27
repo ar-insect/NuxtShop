@@ -120,6 +120,8 @@
 <script setup lang="ts">
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
 import { http } from '~/utils/http'
+import type { ApiResponse } from '~/types/common'
+import type { Product } from '~/types/product'
 import AdminFormField from '~/modules/admin/components/AdminFormField.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseRichTextEditor from '~/components/ui/BaseRichTextEditor.vue'
@@ -143,19 +145,14 @@ const id = Number(idParam)
 
 const { data: categoryData } = await useAsyncData(
   'admin-product-categories-edit',
-  () => http.get<{ key: string; label: string }[]>('/products/categories'),
+  () => http.get<ApiResponse<{ key: string; label: string }[]>>('/products/categories'),
   {
-    default: () => [] as { key: string; label: string }[]
+    default: () => ({ code: 200, message: 'OK', data: [] as { key: string; label: string }[] })
   }
 )
 
 const categoryOptions = computed(() => {
-  const raw = categoryData.value as any
-  const list: { key: string; label: string }[] = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw?.data)
-      ? raw.data
-      : []
+  const list: { key: string; label: string }[] = categoryData.value?.data || []
 
   return list.map((c) => ({
     label: categoryLabels[c.key] || c.label || c.key,
@@ -181,17 +178,8 @@ const loadProduct = async () => {
   if (!Number.isFinite(id)) return
   loading.value = true
   try {
-    const product = await http.get<{
-      id: number
-      title: string
-      price: number
-      description: string
-      detailHtml?: string
-      category: string
-      image: string
-      images: string[]
-      specs?: { label: string; value: string }[]
-    }>(`/products/${id}`)
+    const res = await http.get<ApiResponse<Product>>(`/products/${id}`)
+    const product = res.data as Product
 
     form.title = product.title
     form.category = product.category
@@ -261,7 +249,7 @@ const handleSubmit = async () => {
 
   try {
     submitting.value = true
-    await http.put(`/admin/products/${id}`, {
+    await http.put<ApiResponse<any>>(`/admin/products/${id}`, {
       title: form.title,
       category: form.category,
       price: priceNumber,

@@ -1,5 +1,6 @@
 import { createApiError } from '~/server/utils/api-error'
 import { getReviewSummaryByProductId } from '~/server/utils/review'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   const productIdParam = event.context.params?.productId
@@ -16,12 +17,13 @@ export default defineEventHandler(async (event) => {
 
   const summary = await getReviewSummaryByProductId(productId)
 
-  return {
-    success: true,
+  const response: ApiResponse<{ avgRating: number; reviewCount: number }> = {
+    code: 200,
+    message: 'OK',
     data: {
       avgRating: summary.avgRating,
       reviewCount: summary.reviewCount
     }
   }
+  return response
 })
-

@@ -1,24 +1,5 @@
-import type { ObjectId } from 'mongodb'
 import { getCollection } from '~/server/utils/mongodb'
-
-interface ShippingSetting {
-  baseFee: number
-  freeThreshold: number | null
-}
-
-interface PaymentSetting {
-  alipay: boolean
-  wechat: boolean
-  creditCard: boolean
-}
-
-export interface SystemSettingsDocument {
-  _id?: ObjectId
-  key: 'global'
-  shipping: ShippingSetting
-  payments: PaymentSetting
-  updatedAt: Date
-}
+import type { SystemSettingsDocument } from '~/types/settings'
 
 const COLLECTION_NAME = 'system_settings_app'
 
@@ -38,6 +19,10 @@ const DEFAULT_SETTINGS: SystemSettingsDocument = {
   updatedAt: new Date()
 }
 
+/**
+ * 获取系统配置（若不存在则初始化默认配置并返回）
+ * @returns Promise<SystemSettingsDocument>
+ */
 export async function getSystemSettings(): Promise<SystemSettingsDocument> {
   const collection = getSettingsCollection()
   let doc = await collection.findOne({ key: 'global' })
@@ -50,6 +35,11 @@ export async function getSystemSettings(): Promise<SystemSettingsDocument> {
   return doc
 }
 
+/**
+ * 更新系统配置（仅允许 shipping / payments 字段）
+ * @param partial 局部更新的配置
+ * @returns Promise<SystemSettingsDocument> 更新后的配置
+ */
 export async function updateSystemSettings(partial: Partial<SystemSettingsDocument>): Promise<SystemSettingsDocument> {
   const collection = getSettingsCollection()
 
@@ -80,4 +70,3 @@ export async function updateSystemSettings(partial: Partial<SystemSettingsDocume
 
   return (result.value as SystemSettingsDocument) || (await getSystemSettings())
 }
-

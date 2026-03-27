@@ -1,6 +1,7 @@
 import { readBody, createError } from 'h3'
 import { requireAdmin } from '~/server/utils/auth'
 import { updateProduct } from '~/server/utils/product'
+import type { ApiResponse } from '~/types/common'
 
 interface AdminProductUpdatePayload {
   title?: string
@@ -97,9 +98,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return {
+  const response: ApiResponse<any> = {
     code: 200,
     message: 'Updated',
     data: updated
   }
+  return response
 })

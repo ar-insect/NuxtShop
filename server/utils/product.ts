@@ -7,6 +7,11 @@ type DbProduct = SeedProduct & { _id?: ObjectId }
 
 const COLLECTION_NAME = 'shop_products_app'
 
+/**
+ * 确保商品集合完成首批种子数据初始化
+ * 当集合为空时，插入 server/data/products 中的示例商品
+ * @returns Promise<void>
+ */
 async function ensureProductsSeeded() {
   await connectToMongoDB()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -17,12 +22,21 @@ async function ensureProductsSeeded() {
   }
 }
 
+/**
+ * 获取所有商品（按 id 升序）
+ * @returns Promise<DbProduct[]>
+ */
 export async function findAllProducts(): Promise<DbProduct[]> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
   return collection.find({}).sort({ id: 1 }).toArray()
 }
 
+/**
+ * 根据商品 id 查询单个商品
+ * @param id 商品数字 ID
+ * @returns Promise<DbProduct | null> 找不到时返回 null
+ */
 export async function findProductById(id: number): Promise<DbProduct | null> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -42,6 +56,12 @@ export interface ProductQueryResult {
   total: number
 }
 
+/**
+ * 按条件分页查询商品（支持分类/关键词/排序）
+ * 当 sort 为 'rating-desc' 时，会使用 product_reviews 集合计算综合评分并排序
+ * @param params 查询参数：page、limit、category、query、sort
+ * @returns Promise<ProductQueryResult>
+ */
 export async function findProductsWithFilters(params: ProductQueryParams): Promise<ProductQueryResult> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -143,6 +163,10 @@ export async function findProductsWithFilters(params: ProductQueryParams): Promi
   return { items, total }
 }
 
+/**
+ * 返回去重后的商品分类（字符串数组）
+ * @returns Promise<string[]>
+ */
 export async function findAllCategories(): Promise<string[]> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -150,6 +174,11 @@ export async function findAllCategories(): Promise<string[]> {
   return categories.filter((c): c is string => typeof c === 'string')
 }
 
+/**
+ * 创建新商品（自动生成递增 id，rating 可选）
+ * @param payload 商品字段（不含 id）；rating 可选，默认 { rate: 0, count: 0 }
+ * @returns Promise<DbProduct> 插入后的文档
+ */
 export async function createProduct(payload: Omit<SeedProduct, 'id' | 'rating'> & Partial<Pick<SeedProduct, 'rating'>>): Promise<DbProduct> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -169,6 +198,12 @@ export async function createProduct(payload: Omit<SeedProduct, 'id' | 'rating'> 
   return doc
 }
 
+/**
+ * 根据商品 id 更新部分字段并返回更新后的文档
+ * @param id 商品数字 ID
+ * @param patch 局部更新字段
+ * @returns Promise<DbProduct | null> 找不到时返回 null
+ */
 export async function updateProduct(id: number, patch: Partial<SeedProduct>): Promise<DbProduct | null> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)
@@ -182,6 +217,11 @@ export async function updateProduct(id: number, patch: Partial<SeedProduct>): Pr
   return result.value || null
 }
 
+/**
+ * 根据商品 id 删除商品
+ * @param id 商品数字 ID
+ * @returns Promise<boolean> 成功删除返回 true
+ */
 export async function deleteProduct(id: number): Promise<boolean> {
   await ensureProductsSeeded()
   const collection = getCollection<DbProduct>(COLLECTION_NAME)

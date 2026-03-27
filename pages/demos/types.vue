@@ -33,7 +33,8 @@
 </template>
 
 <script setup lang="ts">
-// 直接使用全局定义的类型，无需 import
+import type { ApiResponse } from '~/types/common'
+// 仍使用全局 IUser 演示；ApiResponse 改为按需 import
 const userData: IUser = {
   id: 1001,
   username: 'trae_user',
@@ -44,8 +45,7 @@ const userData: IUser = {
 const responseData: ApiResponse<IUser> = {
   code: 200,
   message: '成功',
-  data: userData,
-  timestamp: 1689920000000 // 使用固定时间戳避免 hydration mismatch
+  data: userData
 }
 </script>
 

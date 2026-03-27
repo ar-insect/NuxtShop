@@ -5,6 +5,7 @@ import { getCollection } from '~/server/utils/mongodb'
 import { isSuperAdminUser, requireAdmin } from '~/server/utils/auth'
 import type { User } from '~/types/user'
 import type { OrderDetail, UserPublic } from '~/types/api'
+import type { ApiResponse } from '~/types/common'
 
 const COLLECTION_NAME = 'users'
 const ORDER_COLLECTION_NAME = 'user_orders'
@@ -117,7 +118,7 @@ export default defineEventHandler(async (event: H3Event) => {
     }
   })
 
-  return {
+  const response: ApiResponse<AdminUsersListResponse> = {
     code: 200,
     message: 'OK',
     data: {
@@ -125,5 +126,6 @@ export default defineEventHandler(async (event: H3Event) => {
       total
     }
   }
+  return response
 }
 )

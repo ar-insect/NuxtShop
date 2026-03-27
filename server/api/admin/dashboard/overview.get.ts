@@ -1,21 +1,13 @@
-import type { ObjectId } from 'mongodb'
 import { requireAdmin } from '~/server/utils/auth'
 import { getCollection } from '~/server/utils/mongodb'
 import type {
-  OrderDetail,
   AdminDashboardOverview,
   AdminDashboardTopCategory,
   AdminDashboardTopProduct,
   AdminDashboardUserTrendPoint
 } from '~/types/api'
 import type { User } from '~/types/user'
-
-interface OrderDocument extends OrderDetail {
-  _id?: ObjectId
-  userId: ObjectId
-  createdAt: Date
-  updatedAt: Date
-}
+import type { OrderDocument } from '~/types/order'
 
 const ORDER_COLLECTION = 'user_orders'
 const USER_COLLECTION = 'users'

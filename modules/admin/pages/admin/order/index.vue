@@ -55,8 +55,8 @@
             </div>
             <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8 w-full"
                 v-model="searchKeywordInput"
+                class="h-8 w-full"
                 clearable
                 :placeholder="t('admin.order.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
@@ -239,6 +239,8 @@ import AdminTable from '~/modules/admin/components/AdminTable.vue'
 import AdminTag from '~/modules/admin/components/AdminTag.vue'
 import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
+import type { ApiResponse } from '~/types/common'
+import type { AdminSearchQuery } from '~/types/admin'
 import { http } from '~/utils/http'
 import type { OrderDetail, OrderStatus } from '~/types/api'
 import { useI18n } from '~/composables/useI18n'
@@ -285,7 +287,7 @@ const {
   key: 'admin-orders',
   endpoint: '/admin/orders',
   getFilterParams: () => {
-    const params: Record<string, string | number> = {}
+    const params: AdminSearchQuery & Record<string, string | number> = {}
     if (filterStatus.value !== 'ALL') {
       params.status = filterStatus.value
     }
@@ -436,7 +438,7 @@ const updateStatus = async () => {
 
   try {
     listLoading.value = true
-    await http.put(`/admin/orders/${currentOrder.value.id}`, {
+    await http.put<ApiResponse<{ id: string; status: OrderStatus }>>(`/admin/orders/${currentOrder.value.id}`, {
       status: statusEdit.value
     })
     toast.success(t('admin.order.list.statusUpdated', { id: currentOrder.value.id }))
@@ -465,7 +467,7 @@ const handleBatchDelete = async () => {
   try {
     listLoading.value = true
     for (const id of selectedOrderIds.value) {
-      await http.delete(`/admin/orders/${id}`)
+      await http.delete<ApiResponse<any>>(`/admin/orders/${id}`)
     }
     selectedOrderIds.value = []
     await reload()

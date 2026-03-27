@@ -144,6 +144,7 @@
 <script setup lang="ts">
 import { StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import { http } from '~/utils/http'
+import type { ApiResponse } from '~/types/common'
 
 const props = defineProps<{
   productId: number
@@ -178,12 +179,8 @@ const form = reactive({
 const fetchReviews = async () => {
   loading.value = true
   try {
-    const res = await http.get<{ success: boolean; data: Review[] }>(`/reviews/${props.productId}`)
-    if (res?.success) {
-      reviews.value = res.data || []
-    } else {
-      reviews.value = []
-    }
+    const res = await http.get<ApiResponse<{ items: Review[] }>>(`/reviews/${props.productId}`)
+    reviews.value = res?.data?.items || []
   } catch (error) {
     console.error('Failed to fetch reviews', error)
     reviews.value = []
@@ -205,7 +202,7 @@ const submitReview = async () => {
   
   submitting.value = true
   try {
-    await http.post('/reviews/add', {
+    await http.post<ApiResponse<any>>('/reviews/add', {
       productId: props.productId,
       rating: form.rating,
       content: form.content

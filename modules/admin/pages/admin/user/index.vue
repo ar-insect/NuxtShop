@@ -44,8 +44,8 @@
             </div>
             <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8 w-full"
                 v-model="searchKeywordInput"
+                class="h-8 w-full"
                 clearable
                 :placeholder="t('admin.user.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
@@ -190,6 +190,8 @@ import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
+import type { AdminSearchQuery } from '~/types/admin'
+import type { ApiResponse } from '~/types/common'
 import { http } from '~/utils/http'
 import type { UserPublic } from '~/types/api'
 import { useI18n } from '~/composables/useI18n'
@@ -230,7 +232,7 @@ const {
   key: 'admin-users',
   endpoint: '/admin/users',
   getFilterParams: () => {
-    const params: Record<string, string | number> = {}
+    const params: AdminSearchQuery & Record<string, string | number> = {}
     if (filterRole.value !== 'ALL') {
       params.role = filterRole.value
     }
@@ -402,7 +404,7 @@ const handleDelete = async (row: AdminUser) => {
 
   try {
     listLoading.value = true
-    await http.delete('/admin/users/' + row._id)
+    await http.delete<ApiResponse<{ deleted: boolean }>>('/admin/users/' + row._id)
     toast.success(t('admin.user.list.deleteSuccess', { username: row.username }))
     await reload()
   } finally {

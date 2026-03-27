@@ -68,7 +68,7 @@ export const useAuth = () => {
 
       if ('requires2FA' in res && res.requires2FA) {
         if (import.meta.client && res.debugCode) {
-          // eslint-disable-next-line no-console
+           
           console.info('[2FA DEBUG] login code:', res.debugCode)
         }
         return {

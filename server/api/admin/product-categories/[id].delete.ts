@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb'
 import { requireAdmin } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 import { deleteCategory } from '~/server/utils/product-category'
+import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -31,9 +32,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return {
+  const response: ApiResponse<{ deleted: boolean }> = {
     code: 200,
-    message: 'Deleted'
+    message: 'Deleted',
+    data: { deleted: true }
   }
+  return response
 })
-

@@ -1,4 +1,4 @@
-import type { Product } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { http } from '~/utils/http'
 
 /**

@@ -8,14 +8,26 @@ export default defineEventHandler(async (event) => {
 
   if (!userId) {
     // 未登录用户当前不支持服务端收藏夹
-    return []
+    return {
+      code: 200,
+      message: 'OK',
+      data: []
+    }
   }
 
   try {
     const items = await findWishlistByUserId(new ObjectId(userId))
-    return items
+    return {
+      code: 200,
+      message: 'OK',
+      data: items
+    }
   } catch (e) {
     console.error('Failed to fetch wishlist from MongoDB:', e)
-    return []
+    return {
+      code: 500,
+      message: 'Failed to fetch wishlist',
+      data: []
+    }
   }
 })

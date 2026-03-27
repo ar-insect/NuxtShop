@@ -189,11 +189,13 @@
 </template>
 
 <script setup lang="ts">
-import { useProducts, type Product } from '~/modules/product/composables/useProducts'
+import { useProducts } from '~/modules/product/composables/useProducts'
+import type { Product } from '~/types/product'
 import { http } from '~/utils/http'
 import { validateEmail } from '~/utils/validation'
 import { useI18n } from '~/composables/useI18n'
-import type { AdsResponse } from '~/types/api'
+import type { ApiResponse } from '~/types/common'
+import type { AdItem } from '~/types/ad'
 import HomeHero from '~/components/home/HomeHero.vue'
 import CategoryShowcase from '~/components/home/CategoryShowcase.vue'
 import Newsletter from '~/components/home/Newsletter.vue'
@@ -213,13 +215,13 @@ useSeoMeta({
 })
 
 const { data: adsData } = await useAsyncData('ads-home', () =>
-  $fetch<AdsResponse>('/api/ads', {
+  $fetch<ApiResponse<{ items: AdItem[] }>>('/api/ads', {
     query: { position: 'home' }
   })
 )
 
 const ads = computed(() =>
-  (adsData.value?.items || []).map((item) => ({
+  (adsData.value?.data.items || []).map((item) => ({
     id: item.id,
     image: item.image,
     link: item.link,
@@ -260,17 +262,17 @@ interface TrendingItem extends Product {
 
 const { data: trendingData, pending: trendingPending } = await useAsyncData(
   'trending-products',
-  () => http.get<{ success: boolean; items: { product: Product; views: number }[] }>(
+  () => http.get<ApiResponse<{ items: { product: Product; views: number }[] }>>(
     '/history/top-products',
     { days: 7, limit: 8 }
   ),
-  { default: () => ({ success: true, items: [] as { product: Product; views: number }[] }) }
+  { default: () => ({ code: 200, message: 'OK', data: { items: [] as { product: Product; views: number }[] } }) }
 )
 
 const trendingProducts = computed<TrendingItem[]>(() => {
   const payload = trendingData.value
-  if (!payload || !payload.items) return []
-  return payload.items.map((i) => ({
+  if (!payload || !payload.data?.items) return []
+  return payload.data.items.map((i) => ({
     ...i.product,
     views: i.views
   }))
@@ -282,17 +284,17 @@ interface FavoritedItem extends Product {
 
 const { data: favoritedData, pending: favoritedPending } = await useAsyncData(
   'favorited-products',
-  () => http.get<{ success: boolean; items: { product: Product; favorites: number }[] }>(
+  () => http.get<ApiResponse<{ items: { product: Product; favorites: number }[] }>>(
     '/wishlist/top-products',
     { days: 7, limit: 8 }
   ),
-  { default: () => ({ success: true, items: [] as { product: Product; favorites: number }[] }) }
+  { default: () => ({ code: 200, message: 'OK', data: { items: [] as { product: Product; favorites: number }[] } }) }
 )
 
 const favoritedProducts = computed<FavoritedItem[]>(() => {
   const payload = favoritedData.value
-  if (!payload || !payload.items) return []
-  return payload.items.map((i) => ({
+  if (!payload || !payload.data?.items) return []
+  return payload.data.items.map((i) => ({
     ...i.product,
     favorites: i.favorites
   }))

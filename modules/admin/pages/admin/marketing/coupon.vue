@@ -54,8 +54,8 @@
           </div>
           <div class="flex-1 min-w-[220px]">
             <BaseInput
-              class="h-8 w-full"
               v-model="searchKeywordInput"
+              class="h-8 w-full"
               clearable
               :placeholder="t('admin.marketing.coupon.searchPlaceholder')"
               @keyup.enter="applySearch"
@@ -224,6 +224,7 @@ import AdminRowActions from '~/modules/admin/components/AdminRowActions.vue'
 import AdminSearchPanel from '~/modules/admin/components/AdminSearchPanel.vue'
 import BaseTooltip from '~/components/ui/BaseTooltip.vue'
 import { useAdminTable } from '~/modules/admin/composables/useAdminTable'
+import type { PaginationQuery, SearchQuery } from '~/types/common'
 import { http } from '~/utils/http'
 import { useI18n } from '~/composables/useI18n'
 
@@ -281,7 +282,7 @@ const {
   key: 'admin-coupons',
   endpoint: '/admin/coupons',
   getFilterParams: () => {
-    const params: Record<string, string | number> = {
+    const params: PaginationQuery & Partial<SearchQuery> & Record<string, string | number> = {
       page: page.value,
       limit: pageSize.value
     }
@@ -418,7 +419,7 @@ const handleDelete = async (row: AdminCoupon) => {
 
   try {
     listLoading.value = true
-    await http.delete(`/admin/coupons/${row.id}`)
+    await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/coupons/${row.id}`)
     toast.success(t('admin.marketing.coupon.deleteSuccess'))
     await reload()
   } finally {
@@ -434,7 +435,7 @@ const handleBatchDelete = async () => {
   try {
     listLoading.value = true
     for (const id of selectedCouponIds.value) {
-      await http.delete(`/admin/coupons/${id}`)
+      await http.delete<ApiResponse<{ deleted: boolean }>>(`/admin/coupons/${id}`)
     }
     selectedCouponIds.value = []
     await reload()

@@ -11,17 +11,28 @@ interface WishlistDocument {
 
 const COLLECTION_NAME = 'user_wishlists'
 
+/**
+ * 查询用户的收藏夹商品列表
+ * @param userId 用户的 Mongo ObjectId
+ * @returns Promise<Product[]> 当未找到文档时返回空数组
+ */
+
 export async function findWishlistByUserId(userId: ObjectId): Promise<Product[]> {
   const collection = getCollection<WishlistDocument>(COLLECTION_NAME)
   const doc = await collection.findOne({ userId })
   return doc?.items || []
 }
+/**
+ * 保存用户收藏夹（存在则更新，不存在则插入）
+ * @param userId 用户的 Mongo ObjectId
+ * @param items 要持久化的商品列表
+ * @returns Promise<void>
+ */
 
 export async function saveWishlistForUser(userId: ObjectId, items: Product[]): Promise<void> {
   const collection = getCollection<WishlistDocument>(COLLECTION_NAME)
   const updatedAt = new Date()
   await collection.updateOne(
-    { userId },
     {
       $set: {
         userId,
@@ -40,6 +51,12 @@ export interface TopFavoritedProduct {
   lastUpdatedAt: Date
 }
 
+/**
+ * 聚合最近若干天内“被收藏次数最多”的商品
+ * @param days 统计的时间范围（天）
+ * @param limit 返回的最大条数
+ * @returns Promise<TopFavoritedProduct[]>
+ */
 export async function findTopFavoritedProducts(days: number, limit: number): Promise<TopFavoritedProduct[]> {
   const collection = getCollection<WishlistDocument>(COLLECTION_NAME)
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
@@ -71,4 +88,3 @@ export async function findTopFavoritedProducts(days: number, limit: number): Pro
   const docs = await collection.aggregate<TopFavoritedProduct>(pipeline as any).toArray()
   return docs
 }
-

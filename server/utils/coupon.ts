@@ -33,6 +33,11 @@ export interface CouponQueryResult {
   total: number
 }
 
+/**
+ * 按条件分页查询优惠券（支持启用状态与关键词）
+ * @param params 查询参数：page、limit、enabled、keyword
+ * @returns Promise<CouponQueryResult>
+ */
 export async function findCouponsWithFilters(params: CouponQueryParams): Promise<CouponQueryResult> {
   const collection = getCouponCollection()
 
@@ -68,6 +73,11 @@ export async function findCouponsWithFilters(params: CouponQueryParams): Promise
   return { items, total }
 }
 
+/**
+ * 创建优惠券（code 唯一，若已存在则返回 null）
+ * @param payload 优惠券数据
+ * @returns Promise<CouponDocument | null>
+ */
 export async function createCoupon(payload: {
   code: string
   name: string
@@ -104,6 +114,12 @@ export async function createCoupon(payload: {
   return { ...doc, _id: result.insertedId }
 }
 
+/**
+ * 更新优惠券（按 _id），返回更新后的文档
+ * @param id 优惠券 ObjectId
+ * @param patch 局部更新字段
+ * @returns Promise<CouponDocument | null>
+ */
 export async function updateCoupon(id: ObjectId, patch: Partial<CouponDocument>): Promise<CouponDocument | null> {
   const collection = getCouponCollection()
 
@@ -116,12 +132,22 @@ export async function updateCoupon(id: ObjectId, patch: Partial<CouponDocument>)
   return result.value
 }
 
+/**
+ * 删除优惠券（按 _id）
+ * @param id 优惠券 ObjectId
+ * @returns Promise<boolean> 删除成功返回 true
+ */
 export async function deleteCoupon(id: ObjectId): Promise<boolean> {
   const collection = getCouponCollection()
   const res = await collection.deleteOne({ _id: id })
   return res.deletedCount === 1
 }
 
+/**
+ * 根据优惠码查询当前可用的有效优惠券（考虑启用与时间范围）
+ * @param code 优惠码
+ * @returns Promise<CouponDocument | null>
+ */
 export async function findEnabledCouponByCode(code: string): Promise<CouponDocument | null> {
   const collection = getCouponCollection()
   const now = new Date()
@@ -141,6 +167,12 @@ export interface BestCouponResult {
   discount: number
 }
 
+/**
+ * 根据订单金额计算“最佳可用优惠券”及折扣
+ * 遍历当前启用且在有效期内的优惠券，返回折扣最大的一个
+ * @param orderTotal 订单金额
+ * @returns Promise<BestCouponResult>
+ */
 export async function findBestCouponForAmount(orderTotal: number): Promise<BestCouponResult> {
   const collection = getCouponCollection()
   const now = new Date()
@@ -192,6 +224,10 @@ export async function findBestCouponForAmount(orderTotal: number): Promise<BestC
   }
 }
 
+/**
+ * 统计当前可用（启用且在有效期内）的优惠券数量
+ * @returns Promise<number>
+ */
 export async function countAvailableCoupons(): Promise<number> {
   const collection = getCouponCollection()
   const now = new Date()

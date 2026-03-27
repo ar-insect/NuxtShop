@@ -55,8 +55,8 @@
             </div>
             <div class="flex-1 min-w-[220px]">
               <BaseInput
-                class="h-8 w-full"
                 v-model="searchKeywordInput"
+                class="h-8 w-full"
                 clearable
                 :placeholder="t('admin.order.list.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"

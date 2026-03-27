@@ -27,8 +27,8 @@
           </div>
           <div class="md:col-span-2">
             <BaseInput
-              class="h-8"
               v-model="searchKeywordInput"
+              class="h-8"
               clearable
               :placeholder="t('admin.goods.category.searchPlaceholder')"
               @keyup.enter="applySearch"

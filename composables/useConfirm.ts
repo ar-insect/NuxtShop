@@ -34,6 +34,11 @@ const state = reactive<ConfirmState>({
 export const useConfirm = () => {
   const { t } = useI18n()
 
+  /**
+   * 打开确认对话框（返回 Promise）
+   * @param options 配置对象或纯字符串消息
+   * @returns Promise<boolean> 点击确认返回 true，取消/关闭返回 false
+   */
   const confirm = (options: ConfirmOptions | string): Promise<boolean> => {
     // Reset state defaults（使用当前语言）
     state.title = t('ui.modal.title')
@@ -60,6 +65,9 @@ export const useConfirm = () => {
     })
   }
 
+  /**
+   * 确认按钮事件处理：关闭并 resolve(true)
+   */
   const handleConfirm = () => {
     state.isOpen = false
     if (state.resolve) {
@@ -68,6 +76,9 @@ export const useConfirm = () => {
     }
   }
 
+  /**
+   * 取消按钮或关闭事件处理：关闭并 resolve(false)
+   */
   const handleCancel = () => {
     state.isOpen = false
     if (state.resolve) {

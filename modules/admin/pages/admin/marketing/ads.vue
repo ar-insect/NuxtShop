@@ -33,8 +33,8 @@
             </div>
             <div class="flex-1">
               <BaseInput
-                class="h-8 w-full"
                 v-model="searchKeywordInput"
+                class="h-8 w-full"
                 clearable
                 :placeholder="t('admin.marketing.ads.searchKeywordPlaceholder')"
                 @keyup.enter="applySearch"
@@ -309,15 +309,6 @@ const ads = computed(() => data.value?.data.items || [])
 const totalAds = computed(() => data.value?.data.total || 0)
 
 const filteredAds = computed(() => ads.value)
-
-const clearSearch = async () => {
-  searchKeywordInput.value = ''
-  searchKeyword.value = ''
-  filterPosition.value = 'ALL'
-  filterStatus.value = 'ALL'
-  page.value = 1
-  await reloadAds()
-}
 
 const applySearch = async () => {
   searchKeyword.value = searchKeywordInput.value.trim()

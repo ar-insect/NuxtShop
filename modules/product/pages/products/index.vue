@@ -170,8 +170,8 @@
         v-if="showBackToTop"
         type="button"
         class="back-to-top-btn"
-        @click="scrollToTop"
         :aria-label="t('pages.products.list.backToTop')"
+        @click="scrollToTop"
       >
         <ArrowUpIcon class="w-5 h-5" />
       </button>

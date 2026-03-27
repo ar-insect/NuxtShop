@@ -27,8 +27,8 @@
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4 items-end">
             <div class="md:col-span-3">
               <BaseInput
-                class="h-8"
                 v-model="searchKeywordInput"
+                class="h-8"
                 clearable
                 :placeholder="t('admin.system.admin.searchPlaceholder')"
                 @keyup.enter="applySearch"

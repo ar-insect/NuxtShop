@@ -117,7 +117,7 @@ const passwordForm = reactive({
 const updatingPassword = ref(false)
 const twoFactorEnabled = ref(false)
 
-const { data: loginHistoryData, pending: loginHistoryPending } = await useAsyncData(
+const { data: loginHistoryData } = await useAsyncData(
   'user-login-history',
   () => $fetch<{ code: number; message: string; data: { id: string; device: string; ip: string; time: string; status: string }[] }>(
     '/api/user/login-history'

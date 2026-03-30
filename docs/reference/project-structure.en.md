@@ -119,10 +119,10 @@ Each module typically contains:
 To avoid conflicts and keep things discoverable, each module exposes
 namespaced APIs:
 
-112→- Cart: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`
-113→- Order: `modules/order/server/api/orders/index.ts` → `/api/orders`
-114→- Product: `modules/product/server/api/products/index.get.ts` → `/api/products`
-115→- Admin: `modules/admin/server/api/admin/**` → `/api/admin/**`
+- Cart: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`
+- Order: `modules/order/server/api/orders/index.ts` → `/api/orders`
+- Product: `server/api/products*.ts` → `/api/products`, `/api/products/:id` and other public product endpoints
+- Admin: `modules/admin/server/api/admin/**` and `server/api/admin/**` → `/api/admin/**`
 
 Global APIs that are not tied to a single domain live under `server/api/`,
 for example:

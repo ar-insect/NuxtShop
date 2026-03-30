@@ -225,6 +225,41 @@ For codes starting with `AUTH_`:
 This unifies the experience for expired/invalid tokens, while still treating
 “wrong password” as a normal form error.
 
+### 4.3 Error code → frontend behavior mapping
+
+The following table summarizes recommended UI behavior for common error codes
+(for both web and mobile clients):
+
+| Code                                | Typical scenario                     | Recommended frontend behavior                            |
+| ----------------------------------- | ------------------------------------ | -------------------------------------------------------- |
+| `AUTH_MISSING_CREDENTIALS`         | Missing username/password on login   | Stay on form, focus inputs, show form‑level validation   |
+| `AUTH_INVALID_CREDENTIALS`         | Wrong username or password           | Stay on form, show “invalid credentials” style message   |
+| `AUTH_UNAUTHORIZED`                | Accessing protected resource logged‑out | Clear auth state, redirect to `/login`, show toast   |
+| `AUTH_INVALID_TOKEN`               | Token invalid/expired                | Clear auth state, redirect to `/login`, show toast       |
+| `AUTH_USER_NOT_FOUND`              | Token refers to non‑existent user    | Clear auth state, redirect to `/login`, show toast       |
+| `AUTH_FORBIDDEN`                   | Insufficient privileges (non‑admin)  | Keep auth state, redirect to 403/home, show toast        |
+| `USER_UPDATE_EMPTY`                | Profile update with no changes       | Stay on page, show inline validation message             |
+| `USER_UPDATE_FAILED`               | Internal error updating profile      | Keep form values, show toast “save failed, please retry” |
+| `ADDRESS_MISSING_FIELDS`           | Required address fields missing      | Highlight fields, show field‑level errors                |
+| `ADDRESS_INVALID_ID` / `ADDRESS_NOT_FOUND` | Invalid or missing address  | Show toast, refresh list; if needed, navigate back       |
+| `ADDRESS_CREATE_FAILED` / `ADDRESS_UPDATE_FAILED` | Saving address failed | Keep modal/form open, show toast                         |
+| `ADDRESS_DELETE_FAILED`            | Failed to delete address             | Keep list, show toast                                    |
+| `ADDRESS_FETCH_FAILED`             | Failed to load address list          | Show error state in list area + “retry” action           |
+| `REVIEW_MISSING_FIELDS`            | Missing rating/content in review     | Show form errors, keep dialog open                       |
+| `REVIEW_CREATE_FAILED`             | Failed to submit review              | Preserve input, show toast, allow retry                  |
+| `THEME_UPDATE_FAILED`              | Failed to update theme/preferences   | Show toast, revert to previous theme                     |
+| `CART_SAVE_FAILED`                 | Failed to persist cart server‑side   | Keep local cart as‑is, show toast, optionally retry      |
+
+Notes:
+
+- “Form‑level error” typically means inline validation messages rather than
+  only a toast.
+- Auth‑related cleanup (clearing cookies/state, redirecting to `/login`) is
+  already handled by `useApiErrorHandler`, so feature code should not duplicate
+  this logic.
+- Mobile apps can follow the same mapping, replacing toast with the platform’s
+  native message/toast component. 
+
 ---
 
 ## 5. Overall error flow (text diagram)

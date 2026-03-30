@@ -88,10 +88,12 @@ interface OrderDocument extends OrderDetail {
 
 文件：`modules/order/server/api/orders/index.ts`
 
-- 认证：
-  - 使用 `auth-token` Cookie；
-  - 要求 token 形如 `user-jwt-token-<id>`，并校验 `<id>` 是否为合法 ObjectId；
-  - 非法或缺失 token 时返回 401。
+91→- 认证：
+92→  - 使用 `server/utils/auth.ts` 中的 `requireUser` / `requireUserId`；
+93→  - 支持两种 token 传递方式：
+94→    - Cookie：`auth-token`；
+95→    - Header：`Authorization: Bearer user-jwt-token-<id>`；
+96→  - 非法或缺失 token 时抛出 `AUTH_UNAUTHORIZED` / `AUTH_INVALID_TOKEN`。
 
 - GET – 获取当前用户订单列表：
   - 调用 `findOrdersByUserId(userObjectId)`；
@@ -212,12 +214,22 @@ interface OrderDocument extends OrderDetail {
 - **Product**：
   - `OrderItem` 结构与 `Product` 类似，便于在订单详情中复用商品展示组件或价格计算逻辑。
 
-## 8. 扩展建议
+## 8. 客户端集成要点
+
+- 建议统一通过 `useOrders` 访问订单数据：
+  - 列表页使用 `orders` 状态与 `refreshOrders()`；
+  - 结算流程通过 `createOrder(items, total, address)` 写入订单后再跳转到订单详情；
+- 与购物车的协作：
+  - 创建订单成功后调用 `clearCart()`；
+- 与认证的协作：
+  - 订单相关页面通过 `middleware: 'auth'` 保护；
+  - 接口通过 `requireUser` 校验 token，既支持 Cookie，也支持 Authorization 头。
+
+## 9. 扩展建议
 
 你可以在现有订单模块基础上继续扩展：
 
 - 支持更多订单状态（如已退款、部分发货等）；
 - 在订单详情中增加物流信息、支付信息等字段；
-/- 为订单引入“操作日志”（状态流转记录），便于售后追踪；
+- 为订单引入“操作日志”（状态流转记录），便于售后追踪；
 - 在 MongoDB 中按索引优化订单查询（如按 `userId` + `date` 建复合索引）。
-

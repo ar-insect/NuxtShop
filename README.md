@@ -135,7 +135,7 @@ npm run test:unit # 单元测试（Vitest）
 - **全局组件**: 封装了弹窗 (Modal)、消息提示 (Toast)、加载 (Loading) 等常用组件。
 - **插件系统**: 演示了如何创建和使用全局插件。
 - **中间件**: 包含全局路由中间件示例，以及身份验证中间件 (Auth Middleware)。
-- **TypeScript**: 完善的类型定义和类型扩展。
+- **TypeScript**: 完善的类型定义和类型扩展（详情见 `docs/architecture/types.md`）。
 - **TSX 支持**: 原生支持使用 TSX/JSX 编写组件。
 - **Styled Components**: 集成 `vue3-styled-components` 支持 CSS-in-JS 样式编写。
 - **Tailwind CSS**: 集成 Tailwind CSS 进行快速 UI 开发。

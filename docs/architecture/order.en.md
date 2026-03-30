@@ -87,15 +87,18 @@ Mapping:
 
 ## 3. Server APIs
 
-### 3.1 `/api/orders` – list / create / delete / clear
-
-File: `modules/order/server/api/orders/index.ts`
-
-Auth:
-
-- Relies on the `auth-token` cookie with a `user-jwt-token-<id>` style value;
-- `<id>` must be a valid Mongo `ObjectId`;
-- Invalid or missing tokens result in `401`.
+90→### 3.1 `/api/orders` – list / create / delete / clear
+91→
+92→File: `modules/order/server/api/orders/index.ts`
+93→
+94→Auth:
+95→
+96→- Uses `requireUser` / `requireUserId` from `server/utils/auth.ts`;
+97→- Supports two token transport mechanisms:
+98→  - Cookie: `auth-token`;
+99→  - Header: `Authorization: Bearer user-jwt-token-<id>`;
+100→- Invalid or missing tokens result in `AUTH_UNAUTHORIZED` /
+101→  `AUTH_INVALID_TOKEN` errors.
 
 Handlers:
 
@@ -252,7 +255,21 @@ Key points:
 
 ---
 
-## 8. Extension ideas
+## 8. Client integration notes
+
+- The `useOrders` composable is the single source of truth for order data:
+  - The list page uses `orders` state and `deleteOrder` / `refreshOrders()` to
+    keep data in sync with `/api/orders`;
+  - The checkout flow calls `createOrder(items, total, address)` and then
+    redirects to the order detail page.
+- Collaboration with Cart:
+  - After `createOrder` succeeds, `clearCart()` is called to reset the cart.
+- Collaboration with Auth:
+  - Pages are protected by `definePageMeta({ middleware: 'auth' })`;
+  - APIs rely on `requireUser`, which supports both cookie and Authorization
+    header token transport.
+
+## 9. Extension ideas
 
 To further enhance the Order module, consider:
 
@@ -260,5 +277,4 @@ To further enhance the Order module, consider:
 - Storing and showing shipment tracking information;
 - Recording an order “activity log” (status change history) for support;
 - Adding indexes on `userId` and `date` to optimize listing queries;
-- Integrating payment providers and persisting payment status per order.
-
+- Integrating payment providers and persisting payment status per order. 

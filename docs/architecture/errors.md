@@ -213,6 +213,36 @@ const handleError = (error: unknown) => {
 
 这样可以统一处理 token 过期、无效等场景，而不会误伤登录时的表单校验错误。
 
+### 4.3 错误码 → 前端行为映射表
+
+下表总结了常见错误码在前端的推荐处理方式（供 Web 与移动端参考）：
+
+| 错误码                               | 场景                         | 前端推荐行为                                    |
+| ------------------------------------ | ---------------------------- | ----------------------------------------------- |
+| `AUTH_MISSING_CREDENTIALS`          | 登录缺少用户名/密码         | 不跳转，聚焦登录表单，显示表单级错误提示       |
+| `AUTH_INVALID_CREDENTIALS`          | 用户名或密码错误             | 不跳转，显示「账号或密码错误」类提示           |
+| `AUTH_UNAUTHORIZED`                 | 未登录访问受保护资源         | 清空本地登录态，跳转 `/login`，Toast 提示      |
+| `AUTH_INVALID_TOKEN`                | token 无效/过期              | 清空登录态，跳转 `/login`，Toast 提示           |
+| `AUTH_USER_NOT_FOUND`               | token 指向的用户不存在       | 清空登录态，跳转 `/login`，Toast 提示           |
+| `AUTH_FORBIDDEN`                    | 权限不足（非管理员）         | 保持当前登录态，跳转到 403/首页，Toast 提示     |
+| `USER_UPDATE_EMPTY`                 | 更新个人资料时无任何字段     | 留在当前页面，显示表单级错误                    |
+| `USER_UPDATE_FAILED`                | 更新个人资料内部错误         | 保持表单，Toast 显示「保存失败，请稍后重试」   |
+| `ADDRESS_MISSING_FIELDS`            | 地址必填字段缺失             | 高亮对应字段，显示表单错误                      |
+| `ADDRESS_INVALID_ID`/`ADDRESS_NOT_FOUND` | 地址 ID 无效或不存在    | Toast 提示后刷新地址列表，必要时回退到列表页   |
+| `ADDRESS_CREATE_FAILED`/`ADDRESS_UPDATE_FAILED` | 地址保存失败        | 保持弹窗/表单内容，Toast 提示                   |
+| `ADDRESS_DELETE_FAILED`             | 删除地址失败                 | 保持列表不变，Toast 提示                        |
+| `ADDRESS_FETCH_FAILED`              | 获取地址列表失败             | 空态区域显示错误文案 + 重试按钮                 |
+| `REVIEW_MISSING_FIELDS`             | 评价缺少评分/内容            | 显示表单错误，不关闭评价弹窗                    |
+| `REVIEW_CREATE_FAILED`              | 提交评价失败                 | 保留已填内容，Toast 提示，可重试                |
+| `THEME_UPDATE_FAILED`               | 更新主题/偏好失败            | Toast 提示，回退到原主题                        |
+| `CART_SAVE_FAILED`                  | 持久化购物车失败             | 本地状态不清空，Toast 提示，稍后自动重试或手动重试 |
+
+注意：
+
+- “表单级错误”推荐在组件内部用校验提示展示，而不是仅通过 Toast；
+- “登录态清理 + 跳转”由 `useApiErrorHandler` 自动完成，业务代码无需重复实现；
+- 移动端可以沿用同一套规则，只需将 Toast 替换为对应平台的消息组件。 
+
 ---
 
 ## 5. 错误处理整体流程图（文字版）

@@ -26,13 +26,13 @@
   - `modules/product/pages/products/[id].vue` – 商品详情页。
 - 服务端：
   - `server/utils/product.ts` – 商品在 MongoDB 中的存储与查询；
-  - `modules/product/server/api/products/*.ts` – 商品相关 API。
+  - `server/api/products*.ts` – 前台商品列表与详情 API。
 
-## 2. 商品数据模型与数据来源
+## 2. 核心类型与数据来源
 
-### 2.1 TypeScript 模型
+### 2.1 TypeScript 模型（Product）
 
-在 `useProducts.ts` 中定义了前端使用的 `Product` 类型：
+在 `types/product.ts` 中定义了前后端共享的 `Product` 类型：
 
 ```ts
 export interface Product {
@@ -63,7 +63,21 @@ export interface Product {
 
 - `findAllProducts()` – 返回全部商品；
 - `findProductById(id: number)` – 按 id 查单个商品；
-- `queryProducts(params: ProductQueryParams)` – 支持分页、分类、搜索、排序。
+- `findProductsWithFilters(params: ProductQueryParams)` – 支持分页、分类、搜索、排序。
+
+其中：
+
+```ts
+export interface ProductQueryParams {
+  page?: number
+  limit?: number
+  category?: string
+  query?: string
+  sort?: 'default' | 'price-asc' | 'price-desc' | 'rating-desc'
+}
+```
+
+`/api/products` 与 `/api/admin/products` 均基于这些类型构建分页接口，返回值统一包裹在 `ApiResponse<{ items: Product[]; total: number }>` 中。
 
 ## 3. 列表页数据流：`/products`
 
@@ -83,9 +97,9 @@ export interface Product {
    - `category` – 当前分类；
    - `q` – 搜索关键词；
    - `sort` – 排序方式。
-2. 使用 `useProducts().getProducts(page, limit, category, query, sort)` 调用 API `/products`：
-   - 参数通过 `utils/http.ts` 发送；
-   - 后端使用 `queryProducts` 访问 MongoDB。
+2. 使用 `useProducts().getProducts(page, limit, category, query, sort)` 调用 API `/api/products`：
+   - 实际请求为 `http.get<ApiResponse<{ items: Product[]; total: number }>>('/products', params)`；
+   - 后端使用 `findProductsWithFilters` 访问 MongoDB。
 3. 将返回的 `{ items, total }` 映射为：
    - `products` – 商品列表；
    - `total` / `totalPages` – 总数与总页数。
@@ -109,7 +123,7 @@ export interface Product {
 
 数据与交互：
 
-- `useProducts().getProductById(id)` 从 `/products/:id` API 获取单个商品；
+- `useProducts().getProductById(id)` 从 `/api/products/:id` API 获取单个商品；
 - 评分摘要通过 `/reviews/summary/:id` 请求获取平均评分和评价数；
 - 通过 `useHistory` 维护浏览历史列表，在详情页底部展示“最近浏览”；
 - “加入购物车”按钮调用 `useCart().addToCart`，未登录则触发登录弹窗；
@@ -131,7 +145,15 @@ Product 模块与多个领域模块协作：
 - **Reviews**：详情页通过 `/reviews/*` API 集成评价模块；
 - **History**：`useHistory` 在详情页中写入浏览记录，从 MongoDB 拉取历史列表。
 
-## 6. 扩展建议
+## 6. 客户端集成要点
+
+- 组合式 `useProducts` 是前端访问商品数据的统一入口：
+  - `getProducts(page, limit, category, query, sort)` – 命中 `/api/products`，返回 `{ items, total }` 并更新本地缓存；
+  - `getProductById(id)` – 命中 `/api/products/:id`，返回单个 `Product` 或 `undefined`；
+- 页面与组件应尽量复用 `Product` 类型，不在局部重新声明结构；
+- 与其他模块的协作（购物车、收藏、订单）也都围绕 `Product` 和 `OrderItem` 展开，便于复用组件与逻辑。
+
+## 7. 扩展建议
 
 如需扩展商品模块，可以从以下方向入手：
 
@@ -139,4 +161,3 @@ Product 模块与多个领域模块协作：
 - 在 `ProductQueryParams` 和 `getProducts` 中加入更多筛选条件（价格区间、是否新品等）；
 - 在列表页新增“推荐排序”或个性化排序逻辑；
 - 为 Product 增加库存字段，并在下单 / 取消订单时更新库存。
-

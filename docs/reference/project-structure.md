@@ -90,10 +90,10 @@ NuxtShop 采用领域驱动设计 (DDD) 的思想，将核心业务逻辑拆分�
 
 为避免路由冲突，每个模块的 API 都遵循命名空间规范：
 
-- Cart API: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`；
-- Order API: `modules/order/server/api/orders/index.ts` → `/api/orders`；
-- Product API: `modules/product/server/api/products/index.get.ts` → `/api/products`；
-- Admin API: `modules/admin/server/api/admin/**` → `/api/admin/**`（后台各业务管理接口）。
+93→- Cart API: `modules/cart/server/api/cart/index.get.ts` → `/api/cart`；
+94→- Order API: `modules/order/server/api/orders/index.ts` → `/api/orders`；
+95→- Product API: `server/api/products*.ts` → `/api/products`、`/api/products/:id` 等前台商品接口；
+96→- Admin API: `modules/admin/server/api/admin/**` 与 `server/api/admin/**` → `/api/admin/**`（后台各业务管理接口）。
 
 ### 2.3 全局共享资源
 

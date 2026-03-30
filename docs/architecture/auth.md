@@ -36,6 +36,29 @@ user-jwt-token-<MongoUserId>
 
 所有需要鉴权的 API（地址、主题偏好、购物车持久化、评价等）都只依赖这两个入口函数，因此后续更换 Token 方案时只需要更新这一处实现。
 
+### 1.3 客户端集成与传参方式
+
+当前客户端和移动端有两种等价的 token 传递方式：
+
+- Cookie：登录成功后，前端将后端返回的 token 写入 `auth-token` Cookie；
+- Header：在发起请求时设置 `Authorization: Bearer user-jwt-token-<MongoUserId>`。
+
+`getAuthToken(event)` 会按照以下优先级读取：
+
+1. `auth-token` Cookie；
+2. `Authorization` 请求头。
+
+因此：
+
+- Web/SSR 场景推荐使用 Cookie（自动携带，便于同源控制）；
+- 移动端或第三方调用推荐使用 Authorization 头。
+
+`useAuth` 组合式负责：
+
+- 调用 `/api/auth/login` 与 `/api/auth/verify-2fa`；
+- 将登录成功返回的 token 写入 Cookie；
+- 维护 `user: UserPublic | null` 状态，并在 401 / token 失效时触发登出与跳转。
+
 ---
 
 ## 2. 从 demo token 升级到 JWT

@@ -52,6 +52,34 @@ All protected APIs (addresses, theme preferences, cart persistence, reviews,
 etc.) only depend on these helpers, so switching to a real JWT/OAuth scheme
 is mostly a matter of updating this file and the login endpoint.
 
+### 1.3 Client integration & token transport
+
+From a client perspective (web or mobile), there are two equivalent ways to
+send the token:
+
+- Cookie: after login, the frontend writes the token into the `auth-token`
+  cookie;
+- Header: for API clients or mobile apps, send
+  `Authorization: Bearer user-jwt-token-<MongoUserId>`.
+
+`getAuthToken(event)` reads in this order:
+
+1. `auth-token` cookie;
+2. `Authorization` header.
+
+This means:
+
+- Web/SSR flows can rely on cookies for convenience;
+- Mobile / third‑party clients can rely on the Authorization header without
+  needing browser cookies.
+
+On the client side, the `useAuth` composable:
+
+- Calls `/api/auth/login` and `/api/auth/verify-2fa`;
+- Stores the returned token in the `auth-token` cookie;
+- Manages `user: UserPublic | null` state;
+- On 401/invalid token, clears auth state and navigates to the login page. 
+
 ---
 
 ## 2. Upgrading to JWT
@@ -191,4 +219,3 @@ When you switch to JWT/OAuth, revisit these settings and ensure:
 - Secrets are not committed to the repo;
 - Cookies are `HttpOnly` + `Secure` in production;
 - Token lifetimes and refresh policies match your security requirements.
-

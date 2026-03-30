@@ -30,11 +30,11 @@ Key files:
 
 ---
 
-## 2. Data model & data source
+## 2. Core types & data source
 
-### 2.1 Frontend Product type
+### 2.1 Product type
 
-Defined in `useProducts.ts`:
+Defined in `types/product.ts` and shared between frontend and server:
 
 ```ts
 export interface Product {
@@ -66,14 +66,22 @@ Utility functions:
 
 - `findAllProducts()`
 - `findProductById(id: number)`
-- `queryProducts(params: ProductQueryParams)` – paged, filterable query
+- `findProductsWithFilters(params: ProductQueryParams)` – paged, filterable query
 
-`ProductQueryParams` typically includes:
+`ProductQueryParams` includes:
 
-- `page`, `limit`
-- `category`
-- `query` (search term)
-- `sort` (e.g. price, rating, newest)
+```ts
+export interface ProductQueryParams {
+  page?: number
+  limit?: number
+  category?: string
+  query?: string
+  sort?: 'default' | 'price-asc' | 'price-desc' | 'rating-desc'
+}
+```
+
+Both `/api/products` and `/api/admin/products` are built on top of these types
+and return `ApiResponse<{ items: Product[]; total: number }>`.
 
 ---
 
@@ -93,7 +101,8 @@ Data flow:
 1. Read query params from the route:
    - `page`, `category`, `q`, `sort`
 2. Call `useProducts().getProducts(page, limit, category, query, sort)`
-   which hits the `/products` API.
+   which hits the `/api/products` API via
+   `http.get<ApiResponse<{ items: Product[]; total: number }>>('/products', params)`.
 3. Map the response `{ items, total }` to:
    - `products` – list of `Product`
    - `total`, `totalPages`
@@ -122,7 +131,8 @@ Responsibilities:
 
 Data & interactions:
 
-- `useProducts().getProductById(id)` calls `/products/:id` to load the product.
+- `useProducts().getProductById(id)` calls `/api/products/:id` via
+  `http.get<ApiResponse<Product | null>>` to load the product.
 - Rating summary is fetched from `/reviews/summary/:id`.
 - Browse history is maintained via `useHistory` and displayed as a “recently
   viewed” section.
@@ -162,7 +172,19 @@ The page uses i18n keys and ARIA attributes extensively:
 
 ---
 
-## 6. Extension ideas
+## 6. Client integration notes
+
+- `useProducts` is the single entry point for product data on the frontend:
+  - `getProducts(page, limit, category, query, sort)` – calls `/api/products`
+    and returns `{ items, total }` while updating internal state;
+  - `getProductById(id)` – calls `/api/products/:id` and returns a `Product`
+    or `undefined`.
+- Pages and components should reuse the shared `Product` type instead of
+  redefining ad‑hoc shapes.
+- Other modules (Cart, Wishlist, Orders) all build on top of `Product` /
+  `OrderItem`, which makes it easy to reuse UI and logic.
+
+## 7. Extension ideas
 
 Depending on your needs, you can extend the Product module by:
 
@@ -173,5 +195,4 @@ Depending on your needs, you can extend the Product module by:
 - Adding a “compare products” feature powered by shared types
 
 The existing structure (composables + pages + Mongo utils) is designed to make
-these changes straightforward without breaking existing flows.
-
+these changes straightforward without breaking existing flows. 

@@ -103,7 +103,64 @@ CI 可以根据 `v*` 标签触发部署脚本（例如构建 Docker 镜像、部
 
 或记录在 CHANGELOG 中，为读者提供版本上下文。
 
-## 6. 后续可以考虑的自动化
+## 6. 使用 Docker 发布推荐流程（基于 `docker-compose.prod.yml`）
+
+仓库中提供了一份生产推荐配置：`docker-compose.prod.yml`。你可以按如下步骤基于该文件发布某个版本（例如 `v0.13.0`）：
+
+1. **（可选）在 Git 中打版本标签**
+
+   ```bash
+   git tag v0.13.0
+   git push origin v0.13.0
+   ```
+
+2. **准备生产环境变量**
+
+   ```bash
+   cp .env.production.example .env.production
+   ```
+
+   然后编辑 `.env.production`，至少配置：
+
+   - `MONGODB_URI` / `MONGODB_DB_NAME`：指向生产 Mongo 实例；
+   - `REDIS_PASSWORD`：如需为 Redis 启用密码；
+   - `ADMIN_USERNAME` / `ADMIN_PASSWORD`：后台管理员账号（请改为强密码）；
+   - `NUXT_PUBLIC_DISABLE_CAPTCHA`：是否关闭前端验证码（`0` 启用、`1` 关闭）。
+
+3. **在服务器上构建并启动容器**
+
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+   ```
+
+   - `app` 服务会基于当前代码构建镜像（或改为使用预先构建好的镜像）；
+   - `redis` 服务仅暴露在内部网络，数据持久化到 `redis_data` 卷；
+   - 上传文件挂载到宿主机 `./public/uploads`。
+
+4. **验证与回滚**
+
+   - 访问 `http(s)://<server-host>:4000` 验证应用是否正常；
+   - 如需回滚到上一个标签，可在服务器上：
+
+     ```bash
+     git checkout v0.12.0
+     docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+     ```
+
+5. **后续优化：镜像仓库**
+
+   - 在 CI 或本地使用：  
+     `docker build -t your-registry/nuxtshop:v0.13.0 .` 构建镜像；
+   - 推送到镜像仓库后，在 `docker-compose.prod.yml` 中将
+     `build: .` 替换为：
+
+     ```yaml
+     image: your-registry/nuxtshop:v0.13.0
+     ```
+
+   - 这样服务器只负责拉取镜像与运行，构建过程由 CI 或本地完成。
+
+## 7. 后续可以考虑的自动化
 
 在目前「主分支 + 标签 + 手写 CHANGELOG」的基础上，将来可以逐步引入：
 
@@ -113,4 +170,3 @@ CI 可以根据 `v*` 标签触发部署脚本（例如构建 Docker 镜像、部
   在 PR 中提交 changeset 文件，合入后自动 bump 版本和更新 changelog。
 
 但对当前仓库而言，先按本页流程做“轻量手工发布”就已经足够清晰可控。
-

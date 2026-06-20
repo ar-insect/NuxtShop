@@ -4,16 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // 统一 mock ofetch 的 $fetch
 const $fetchMock = vi.fn()
 
-vi.mock('ofetch', () => ({
-  $fetch: $fetchMock
-}))
-
 describe('utils/http', () => {
   let http: any
 
   beforeEach(async () => {
     vi.resetModules()
     $fetchMock.mockReset()
+    ;(globalThis as any).$fetch = $fetchMock
 
     const { http: httpInstance } = await import('~/utils/http')
     http = httpInstance
@@ -27,7 +24,7 @@ describe('utils/http', () => {
     expect($fetchMock).toHaveBeenCalledTimes(1)
     const [url, options] = $fetchMock.mock.calls[0]
 
-    expect(url).toBe('/test')
+    expect(url).toBe('/api/test')
     expect(options.method).toBe('GET')
     expect(options.query).toEqual({ foo: 'bar' })
     expect(result).toEqual({ ok: true })
@@ -41,7 +38,7 @@ describe('utils/http', () => {
 
     const [url, options] = $fetchMock.mock.calls[0]
 
-    expect(url).toBe('/items')
+    expect(url).toBe('/api/items')
     expect(options.method).toBe('POST')
     expect(options.body).toEqual(payload)
     expect(result).toEqual({ created: true })
@@ -54,7 +51,7 @@ describe('utils/http', () => {
 
     const [url, options] = $fetchMock.mock.calls[0]
 
-    expect(url).toBe('/items/1')
+    expect(url).toBe('/api/items/1')
     expect(options.method).toBe('DELETE')
     expect(options.query).toEqual({ force: true })
   })
@@ -117,7 +114,7 @@ describe('utils/http', () => {
 
     expect($fetchMock).toHaveBeenCalledTimes(1)
     const [url, options] = $fetchMock.mock.calls[0]
-    expect(url).toBe('/files/report.txt')
+    expect(url).toBe('/api/files/report.txt')
     expect(options.responseType).toBe('blob')
 
     expect(createObjectURLSpy).toHaveBeenCalledWith(blob)
@@ -128,5 +125,67 @@ describe('utils/http', () => {
     createObjectURLSpy.mockRestore()
     revokeObjectURLSpy.mockRestore()
     appendChildSpy.mockRestore()
+  })
+
+  it('请求失败时会向 /api/log 上报 HTTP 错误日志', async () => {
+    const fetchError: any = new Error('Request failed with status code 500')
+    fetchError.response = {
+      status: 500,
+      statusText: 'Internal Server Error',
+      _data: { message: 'server exploded' }
+    }
+
+    $fetchMock
+      .mockRejectedValueOnce(fetchError)
+      .mockResolvedValueOnce({ success: true })
+
+    await expect(http.get('/broken', { id: 1 })).rejects.toThrow('Request failed with status code 500')
+
+    expect($fetchMock).toHaveBeenCalledTimes(2)
+
+    const [requestUrl, requestOptions] = $fetchMock.mock.calls[0]
+    expect(requestUrl).toBe('/api/broken')
+    expect(requestOptions.method).toBe('GET')
+
+    const [logUrl, logOptions] = $fetchMock.mock.calls[1]
+    expect(logUrl).toBe('/api/log')
+    expect(logOptions.method).toBe('POST')
+    expect(logOptions.body.type).toBe('HTTP Error')
+    expect(logOptions.body.method).toBe('GET')
+    expect(logOptions.body.requestUrl).toBe('/api/broken')
+    expect(logOptions.body.statusCode).toBe(500)
+    expect(logOptions.body.responseData).toEqual({ message: 'server exploded' })
+  })
+
+  it('日志接口自身失败时不会递归上报', async () => {
+    const fetchError = new Error('log endpoint failed')
+    $fetchMock.mockRejectedValueOnce(fetchError)
+
+    await expect(http.post('/log', { type: 'test' })).rejects.toThrow('log endpoint failed')
+
+    expect($fetchMock).toHaveBeenCalledTimes(1)
+    const [url, options] = $fetchMock.mock.calls[0]
+    expect(url).toBe('/api/log')
+    expect(options.method).toBe('POST')
+  })
+
+  it('可忽略指定状态码的错误日志输出与上报', async () => {
+    const fetchError: any = new Error('Unauthorized')
+    fetchError.statusCode = 401
+    fetchError.response = {
+      status: 401,
+      statusText: 'Unauthorized'
+    }
+
+    $fetchMock.mockRejectedValueOnce(fetchError)
+
+    await expect(http.get('/orders', undefined, {
+      ignoreErrorStatusCodes: [401]
+    })).rejects.toThrow('Unauthorized')
+
+    expect($fetchMock).toHaveBeenCalledTimes(1)
+    const [url, options] = $fetchMock.mock.calls[0]
+    expect(url).toBe('/api/orders')
+    expect(options.ignoreErrorStatusCodes).toEqual([401])
   })
 })

@@ -38,7 +38,9 @@ export const useOrders = () => {
 
   const refreshOrders = async () => {
     try {
-      const fresh = await http.get<Order[]>('/orders')
+      const fresh = await http.get<Order[]>('/orders', undefined, {
+        ignoreErrorStatusCodes: [401]
+      })
       orders.value = fresh
     } catch {
       // 刷新订单失败时静默处理，避免在控制台输出错误

@@ -1,5 +1,69 @@
-import { $fetch as ofetch } from 'ofetch'
-import type { FetchOptions } from 'ofetch'
+type FetchOptions<T = any> = {
+  method?: string
+  query?: any
+  body?: any
+  headers?: Record<string, any>
+  responseType?: string
+  onRequest?: (context?: T) => void
+  onResponse?: (context: { response: any }) => void
+  ignoreErrorStatusCodes?: number[]
+}
+
+const LOG_ENDPOINT = '/api/log'
+
+function getRuntimeFetch() {
+  const runtimeFetch = (globalThis as any).$fetch
+  if (!runtimeFetch) {
+    throw new Error('Global $fetch is not available in the current runtime.')
+  }
+  return runtimeFetch
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === '[object Object]'
+}
+
+function serializeLogValue(value: unknown) {
+  if (value == null) {
+    return undefined
+  }
+
+  if (value instanceof FormData) {
+    return '[form-data]'
+  }
+
+  if (value instanceof Blob) {
+    return `[blob:${value.type || 'application/octet-stream'}]`
+  }
+
+  if (Array.isArray(value) || isPlainObject(value)) {
+    return JSON.parse(JSON.stringify(value))
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value
+  }
+
+  return String(value)
+}
+
+async function reportHttpError(log: Record<string, unknown>) {
+  if (log.requestUrl === LOG_ENDPOINT) {
+    return
+  }
+
+  try {
+    await getRuntimeFetch()(LOG_ENDPOINT, {
+      method: 'POST',
+      body: {
+        type: 'HTTP Error',
+        ...log
+      }
+    } as any)
+  } catch {
+    // Swallow log reporting failures to avoid cascading request errors.
+  }
+}
 
 /**
  * 基于 `ofetch` 的 HTTP 请求封装类。
@@ -29,6 +93,8 @@ class Http {
   private async request<T>(url: string, options: FetchOptions<any> = {}): Promise<T> {
     // 手动拼接基础路径，避免在 Node 环境中使用相对 baseURL 导致 URL 解析错误
     const finalUrl = `${this.baseUrl}${url}`
+    const method = String(options.method || 'GET').toUpperCase()
+    const startedAt = Date.now()
 
     const defaultOptions: FetchOptions<any> = {
       onRequest() {},
@@ -47,9 +113,6 @@ class Http {
           }
           throw err
         }
-      },
-      onResponseError({ response }) {
-        console.error('Response Error:', response.statusText)
       }
     }
 
@@ -65,9 +128,36 @@ class Http {
 
     // 优先使用 Nuxt 运行时提供的全局 $fetch（已与 Nitro 集成，支持相对路径 /api/...）
     // 回退到 ofetch 的 $fetch，便于在测试环境中复用
-    const runtimeFetch = (globalThis as any).$fetch || ofetch
+    const runtimeFetch = getRuntimeFetch()
 
-    return runtimeFetch(finalUrl as any, newOptions as any) as any
+    try {
+      return await runtimeFetch(finalUrl as any, newOptions as any) as any
+    } catch (error: any) {
+      const response = error?.response
+      const statusCode = error?.statusCode ?? response?.status
+      const ignoredStatusCodes = newOptions.ignoreErrorStatusCodes || []
+      if (statusCode && ignoredStatusCodes.includes(statusCode)) {
+        throw error
+      }
+
+      const responseData = error?.data ?? response?._data
+      const logPayload = {
+        method,
+        requestUrl: finalUrl,
+        statusCode,
+        statusMessage: response?.statusText,
+        message: error instanceof Error ? error.message : String(error),
+        durationMs: Date.now() - startedAt,
+        requestQuery: serializeLogValue(options.query),
+        requestBody: serializeLogValue(options.body),
+        responseData: serializeLogValue(responseData),
+        timestamp: new Date().toISOString()
+      }
+
+      console.error('HTTP Request Error:', logPayload)
+      void reportHttpError(logPayload)
+      throw error
+    }
   }
 
   /**

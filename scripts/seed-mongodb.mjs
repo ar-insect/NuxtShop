@@ -1,11 +1,15 @@
+import process from 'node:process'
 import { MongoClient } from 'mongodb'
 import bcrypt from 'bcryptjs'
+
+// Load local .env automatically when running the seed script directly.
+process.loadEnvFile?.('.env')
 
 const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'
 const dbName = process.env.MONGODB_DB_NAME || 'NuxtShop'
 
-const adminUsername = process.env.NUXTSHOP_ADMIN_USERNAME || 'admin'
-const adminPassword = process.env.NUXTSHOP_ADMIN_PASSWORD || 'admin123'
+const adminUsername = process.env.NUXTSHOP_ADMIN_USERNAME || process.env.ADMIN_USERNAME || 'admin'
+const adminPassword = process.env.NUXTSHOP_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'admin123'
 
 const homeAds = [
   {

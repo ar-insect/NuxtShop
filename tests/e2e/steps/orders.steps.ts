@@ -1,11 +1,24 @@
 import { createBdd } from 'playwright-bdd'
 import { expect } from '@playwright/test'
+import fs from 'node:fs/promises'
 
 const { Given, When, Then } = createBdd()
 
+const readAdminCredentials = async () => {
+  let username = process.env.ADMIN_USERNAME || 'admin'
+  let password = process.env.ADMIN_PASSWORD || '123456'
+  try {
+    const env = await fs.readFile('.env', 'utf8')
+    username = env.match(/^ADMIN_USERNAME=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || username
+    password = env.match(/^ADMIN_PASSWORD=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || password
+  } catch {}
+  return { username, password }
+}
+
 const ensureLoggedIn = async (page: any) => {
+  const { username, password } = await readAdminCredentials()
   const res = await page.request.post('/api/auth/login', {
-    data: { username: 'admin', password: '123456' }
+    data: { username, password }
   })
   const data = await res.json()
   const token = data?.token || ''

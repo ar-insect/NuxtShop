@@ -19,6 +19,11 @@ export default defineConfig({
   reporter: [['json', { outputFile: 'test-results/report.json' }]],
   use: {
     baseURL: `http://localhost:${port}`,
+    locale: 'zh-CN',
+    extraHTTPHeaders: {
+      'Accept-Language': 'zh-CN,zh;q=0.9'
+    },
+    storageState: 'tests/e2e/.playwright/zh-cn-state.json',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

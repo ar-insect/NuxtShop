@@ -61,8 +61,8 @@ importers:
         specifier: ^1.15.2
         version: 1.16.0(@typescript-eslint/utils@8.61.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(@vue/compiler-sfc@3.5.38)(crossws@0.4.6(srvx@0.11.17))(eslint@9.39.4(jiti@2.7.0))(magicast@0.5.3)(oxc-parser@0.132.0)(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.21)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))
       '@playwright/test':
-        specifier: ^1.58.2
-        version: 1.61.0
+        specifier: 1.58.2
+        version: 1.58.2
       '@tailwindcss/postcss':
         specifier: ^4.2.1
         version: 4.3.1
@@ -97,8 +97,8 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
       playwright-bdd:
-        specifier: ^8.4.2
-        version: 8.5.1(@playwright/test@1.61.0)
+        specifier: 8.4.2
+        version: 8.4.2(@playwright/test@1.58.2)
       postcss:
         specifier: ^8.5.6
         version: 8.5.15
@@ -1599,8 +1599,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.61.0':
-    resolution: {integrity: sha512-cKA5B6lpFEMyMGjxF54QihfYpB4FkEGH+qZhtArDEG+wezQAJY8Pq6C7T1SjWz+FFzt3TbyoXBQYk/0292TdJA==}
+  '@playwright/test@1.58.2':
+    resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4769,20 +4769,20 @@ packages:
   pkg-types@2.3.1:
     resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
 
-  playwright-bdd@8.5.1:
-    resolution: {integrity: sha512-lDNaDzW8RvbvsKuR8cZaP9LBnRbG9juCOE3tgwm3pr1O0W1ooGPz7X8xH7zdUbqGgHbdOQ+5XpUTlOJrvpY6Tw==}
+  playwright-bdd@8.4.2:
+    resolution: {integrity: sha512-ViugP5vj2UdDkXFao/BTVnau+tWFF9ADsuAL1+o+RUuq6sny+b+RM1CS9ekoFY+sQuHoaP1IiUwSoWyANmOE4Q==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
       '@playwright/test': '>=1.44'
 
-  playwright-core@1.61.0:
-    resolution: {integrity: sha512-caX7TrY3Ml6egyDX0WUcTHDxodl/b51y5wJOdCEA36QviK/s2g081hvmGs8eaE3DWb6NYZQ6BjO/QkNRPenoPA==}
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.61.0:
-    resolution: {integrity: sha512-Z+7BeeqQPRRzklHsVFP4KTGIyMxKUmfeRA4WisM6G3/XW6nwGeX6fX9qYaDa+CiUqpOkb2f6X3nar05R3kSuJQ==}
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5848,7 +5848,6 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@11.0.5:
@@ -7754,9 +7753,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.61.0':
+  '@playwright/test@1.58.2':
     dependencies:
-      playwright: 1.61.0
+      playwright: 1.58.2
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -11434,7 +11433,7 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
-  playwright-bdd@8.5.1(@playwright/test@1.61.0):
+  playwright-bdd@8.4.2(@playwright/test@1.58.2):
     dependencies:
       '@cucumber/cucumber-expressions': 18.0.1
       '@cucumber/gherkin': 32.2.0
@@ -11443,18 +11442,18 @@ snapshots:
       '@cucumber/junit-xml-formatter': 0.7.1(@cucumber/messages@27.2.0)
       '@cucumber/messages': 27.2.0
       '@cucumber/tag-expressions': 6.2.0
-      '@playwright/test': 1.61.0
+      '@playwright/test': 1.58.2
       cli-table3: 0.6.5
       commander: 13.1.0
       fast-glob: 3.3.3
       mime-types: 3.0.2
       xmlbuilder: 15.1.1
 
-  playwright-core@1.61.0: {}
+  playwright-core@1.58.2: {}
 
-  playwright@1.61.0:
+  playwright@1.58.2:
     dependencies:
-      playwright-core: 1.61.0
+      playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
 

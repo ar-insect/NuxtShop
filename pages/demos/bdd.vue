@@ -39,9 +39,17 @@
         <section v-if="testReport" class="bg-[var(--card-bg)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden mt-8">
           <div class="border-b border-[var(--border-color)] bg-[var(--muted-bg)] px-6 py-4 flex items-center justify-between">
             <h2 class="text-lg font-medium text-[var(--text-color)]">测试报告</h2>
-            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">BDD</span>
+            <div class="flex items-center gap-2">
+              <span v-if="testReport.phaseLabel" class="px-2 py-1 text-xs font-medium rounded-full" :class="phaseBadgeClass">
+                {{ testReport.phaseLabel }}
+              </span>
+              <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">BDD</span>
+            </div>
           </div>
           <div class="p-6">
+            <div v-if="testReport.message" class="mb-4 rounded-lg border px-4 py-3 text-sm" :class="reportPassed ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'">
+              {{ testReport.message }}
+            </div>
             <div v-if="testReport.summary" class="mb-4 text-[var(--text-color)]">
               <p>总测试: {{ testReport.summary.total }}</p>
               <p>通过: {{ testReport.summary.passed }}</p>
@@ -80,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useToast } from '~/composables/useToast'
 import type { ApiResponse } from '~/types/common'
 
@@ -96,6 +104,42 @@ const fetchingFeatures = ref(false)
 const runningTest = ref<string | null>(null)
 const runningAllTests = ref(false)
 const testReport = ref<any | null>(null)
+const reportPassed = ref(true)
+
+type RunTestsResponse = {
+  success: boolean
+  report: any
+}
+
+const phaseBadgeClass = computed(() => {
+  if (testReport.value?.phase === 'generate_failed') {
+    return 'bg-amber-100 text-amber-700'
+  }
+  if (testReport.value?.phase === 'execute_failed') {
+    return 'bg-red-100 text-red-700'
+  }
+  return 'bg-green-100 text-green-700'
+})
+
+const applyRunResult = (result: RunTestsResponse | null, successMessage: string, failureMessage: string) => {
+  if (!result?.report) {
+    toast.error(failureMessage)
+    return
+  }
+
+  testReport.value = result.report
+  reportPassed.value = result.success !== false
+
+  if (result.success === false) {
+    toast.error(failureMessage)
+  } else {
+    toast.success(successMessage)
+  }
+}
+
+const extractRunResultFromError = (error: any): RunTestsResponse | null => {
+  return error?.data?.data || error?.data || null
+}
 
 const fetchFeatures = async () => {
   fetchingFeatures.value = true
@@ -114,15 +158,18 @@ const runTest = async (feature: string) => {
   runningTest.value = feature
   testReport.value = null
   try {
-    const response = await $fetch<ApiResponse<{ report: any }>>('/api/tests/run', {
+    const response = await $fetch<ApiResponse<RunTestsResponse>>('/api/tests/run', {
       method: 'POST',
       body: { feature }
     })
-    testReport.value = response.data?.report
-    toast.success(`${feature}.feature 测试运行完成`)
+    applyRunResult(response.data, `${feature}.feature 测试运行完成`, `${feature}.feature 测试运行失败`)
   } catch (error) {
     console.error(`Failed to run ${feature}.feature test:`, error)
-    toast.error(`${feature}.feature 测试运行失败`)
+    applyRunResult(
+      extractRunResultFromError(error),
+      `${feature}.feature 测试运行完成`,
+      `${feature}.feature 测试运行失败`
+    )
   } finally {
     runningTest.value = null
   }
@@ -132,15 +179,14 @@ const runAllTests = async () => {
   runningAllTests.value = true
   testReport.value = null
   try {
-    const response = await $fetch<ApiResponse<{ report: any }>>('/api/tests/run', {
+    const response = await $fetch<ApiResponse<RunTestsResponse>>('/api/tests/run', {
       method: 'POST',
       body: { feature: 'all' }
     })
-    testReport.value = response.data?.report
-    toast.success('所有测试运行完成')
+    applyRunResult(response.data, '所有测试运行完成', '所有测试运行失败')
   } catch (error) {
     console.error('Failed to run all tests:', error)
-    toast.error('所有测试运行失败')
+    applyRunResult(extractRunResultFromError(error), '所有测试运行完成', '所有测试运行失败')
   } finally {
     runningAllTests.value = false
   }

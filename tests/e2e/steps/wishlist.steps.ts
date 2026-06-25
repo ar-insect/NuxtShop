@@ -1,7 +1,19 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
+import fs from 'node:fs/promises';
 
 const { Given, When, Then } = createBdd();
+
+const readAdminCredentials = async () => {
+  let username = process.env.ADMIN_USERNAME || 'admin'
+  let password = process.env.ADMIN_PASSWORD || '123456'
+  try {
+    const env = await fs.readFile('.env', 'utf8')
+    username = env.match(/^ADMIN_USERNAME=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || username
+    password = env.match(/^ADMIN_PASSWORD=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || password
+  } catch {}
+  return { username, password }
+}
 
 const loginViaModalIfNeeded = async (page: any) => {
   const loginHintBtn = page.getByRole('button', { name: '立即登录' }).first()
@@ -11,8 +23,9 @@ const loginViaModalIfNeeded = async (page: any) => {
   await loginHintBtn.click()
   const modal = page.locator('.modal-mask')
   await expect(modal).toBeVisible({ timeout: 10000 })
-  await modal.locator('input[name="username"]').fill('admin')
-  await modal.locator('input[name="password"]').fill('123456')
+  const { username, password } = await readAdminCredentials()
+  await modal.locator('input[name="username"]').fill(username)
+  await modal.locator('input[name="password"]').fill(password)
   await modal.locator('button[type="submit"]').click()
   await expect(modal).toBeHidden({ timeout: 15000 })
   await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible({ timeout: 15000 })

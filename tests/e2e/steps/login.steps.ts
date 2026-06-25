@@ -1,7 +1,85 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
+import fs from 'node:fs/promises';
 
 const { Given, When, Then } = createBdd();
+
+const readAdminCredentials = async () => {
+  let username = process.env.ADMIN_USERNAME || 'admin'
+  let password = process.env.ADMIN_PASSWORD || '123456'
+
+  try {
+    const env = await fs.readFile('.env', 'utf8')
+    username = env.match(/^ADMIN_USERNAME=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || username
+    password = env.match(/^ADMIN_PASSWORD=(.+)$/m)?.[1]?.replace(/^"|"$/g, '') || password
+  } catch {}
+
+  return { username, password }
+}
+
+// #region debug-point A:reporter
+const debugReport = async (hypothesisId: string, location: string, msg: string, data: Record<string, unknown>) => {
+  let url = 'http://127.0.0.1:7777/event'
+  let sessionId = 'auth-me-empty'
+  try {
+    const env = await fs.readFile('.dbg/auth-me-empty.env', 'utf8')
+    url = env.match(/DEBUG_SERVER_URL=(.+)/)?.[1] || url
+    sessionId = env.match(/DEBUG_SESSION_ID=(.+)/)?.[1] || sessionId
+  } catch {}
+  await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      sessionId,
+      runId: 'post-fix',
+      hypothesisId,
+      location,
+      msg: `[DEBUG] ${msg}`,
+      data,
+      ts: Date.now()
+    })
+  }).catch(() => {})
+}
+// #endregion
+
+const setAuthTokenCookie = async (page: any, token: string) => {
+  const origin = new URL(page.url()).origin
+  await page.context().addCookies([{
+    name: 'auth-token',
+    value: token,
+    url: origin
+  }])
+}
+
+const waitForAuthenticatedDisplayName = async (page: any) => {
+  let displayName = ''
+
+  await expect
+    .poll(async () => {
+      return await page.request.get('/api/auth/me').then(async (res: any) => {
+        const data = await res.json().catch(() => null)
+        // #region debug-point C:auth-me-poll
+        await debugReport('C', 'tests/e2e/steps/login.steps.ts:42', 'polled /api/auth/me', {
+          ok: !!res?.ok,
+          status: typeof res?.status === 'function' ? res.status() : null,
+          userId: data?.user?._id || null,
+          username: data?.user?.username || null,
+          name: data?.user?.name || null,
+          url: page.url()
+        })
+        // #endregion
+        if (!res?.ok) return ''
+        return data?.user?.name || data?.user?.username || ''
+      })
+    }, { timeout: 15000 })
+    .not.toBe('')
+
+  displayName = await page.request.get('/api/auth/me').then(async (res: any) => {
+    const data = await res.json()
+    return data?.user?.name || data?.user?.username || ''
+  })
+
+  return displayName
+}
 
 // Given('我在首页', async ({ page }) => {
 //   await page.goto('/');
@@ -44,22 +122,13 @@ When('我点击弹窗中的登录按钮', async ({ page }) => {
       // 按钮被禁用时，直接通过页面上下文调用登录 API 设置 Cookie
       const username = await page.locator('input[name="username"]').inputValue();
       const password = await page.locator('input[name="password"]').inputValue();
-      const token = await page.evaluate(async ({ u, p }) => {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ username: u, password: p })
-        });
-        const data = await res.json();
-        return data?.token || '';
-      }, { u: username, p: password });
+      const res = await page.request.post('/api/auth/login', {
+        data: { username, password }
+      })
+      const data = await res.json()
+      const token = data?.token || ''
       if (token) {
-        await page.context().addCookies([{
-          name: 'auth-token',
-          value: token,
-          domain: 'localhost',
-          path: '/'
-        }]);
+        await setAuthTokenCookie(page, token)
       }
       // 刷新以载入用户状态
       await page.goto('/');
@@ -76,29 +145,48 @@ Then('我应该看到退出登录按钮', async ({ page }) => {
   if (isStillOnLogin) {
     await page.waitForURL((url) => !url.toString().includes('/login'), { timeout: 15000 }).catch(() => {})
   }
-  await expect(page.getByRole('button', { name: '一个不存在的按钮' })).toBeVisible({ timeout: 15000 })
+  const displayName = await waitForAuthenticatedDisplayName(page)
+  const userMenuTrigger = page.locator('header button').filter({ hasText: displayName }).first()
+  await expect(userMenuTrigger).toBeVisible({ timeout: 15000 })
+  await userMenuTrigger.click()
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible({ timeout: 15000 })
 });
 
 Given('我已经登录', async ({ page }) => {
   await page.goto('/');
-  // 直接通过 API 获取 token，并设置浏览器 Cookie 以保证稳定性
-  const token = await page.evaluate(async () => {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ username: 'admin', password: '123456' })
-    });
-    const data = await res.json();
-    return data?.token || '';
-  });
+  // 直接通过 Playwright request API 获取 token，并写入当前 origin 的 Cookie
+  const { username, password } = await readAdminCredentials()
+  const res = await page.request.post('/api/auth/login', {
+    data: { username, password }
+  })
+  const data = await res.json()
+  const token = data?.token || ''
+  // #region debug-point A:login-response
+  await debugReport('A', 'tests/e2e/steps/login.steps.ts:140', 'received /api/auth/login response', {
+    ok: !!res?.ok,
+    status: typeof res?.status === 'function' ? res.status() : null,
+    hasToken: !!token,
+    requires2FA: !!data?.requires2FA,
+    userId: data?.user?._id || null,
+    username: data?.user?.username || null,
+    requestedUsername: username
+  })
+  // #endregion
   if (token) {
-    await page.context().addCookies([{
-      name: 'auth-token',
-      value: token,
-      domain: 'localhost',
-      path: '/'
-    }]);
+    await setAuthTokenCookie(page, token)
   }
+  // #region debug-point B:cookies-after-set
+  await debugReport('B', 'tests/e2e/steps/login.steps.ts:151', 'cookies after auth-token set', {
+    tokenLength: token.length,
+    cookies: (await page.context().cookies()).map((cookie) => ({
+      name: cookie.name,
+      domain: cookie.domain,
+      path: cookie.path,
+      expires: cookie.expires
+    }))
+  })
+  // #endregion
   await page.reload();
-  await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
+  const displayName = await waitForAuthenticatedDisplayName(page)
+  await expect(page.locator('header button').filter({ hasText: displayName }).first()).toBeVisible({ timeout: 15000 });
 });

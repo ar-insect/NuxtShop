@@ -1,8 +1,59 @@
 import { execa } from 'execa'
 import path from 'node:path'
 import fs from 'node:fs/promises' // 导入 fs 模块
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody } from 'h3'
 import type { H3Event } from 'h3'
+import type { ApiResponse } from '~/types/common'
+
+type BddTestReport = {
+  summary: {
+    total: number
+    passed: number
+    failed: number
+    skipped: number
+  }
+  tests: Array<{
+    title: string
+    status: string
+    errors: string
+    screenshots: string[]
+  }>
+  message?: string
+  phase?: 'generate_failed' | 'execute_failed' | 'passed'
+  phaseLabel?: string
+}
+
+const buildFailureResponse = (
+  message: string,
+  details: string,
+  title: string,
+  phase: 'generate_failed' | 'execute_failed'
+): ApiResponse<{ success: boolean; report: BddTestReport }> => ({
+  code: 200,
+  message,
+  data: {
+    success: false,
+    report: {
+      summary: {
+        total: 1,
+        passed: 0,
+        failed: 1,
+        skipped: 0,
+      },
+      tests: [
+        {
+          title,
+          status: 'failed',
+          errors: details || message,
+          screenshots: [],
+        },
+      ],
+      message,
+      phase,
+      phaseLabel: phase === 'generate_failed' ? '生成失败' : '执行失败',
+    },
+  },
+})
 
 export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody(event)
@@ -17,11 +68,12 @@ export default defineEventHandler(async (event: H3Event) => {
     await execa('npx', ['bddgen'], { cwd: projectRoot })
   } catch (bddgenError: any) {
     console.error('Failed to run bddgen:', bddgenError)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to generate BDD test files',
-      data: bddgenError.stdout + bddgenError.stderr || bddgenError.message
-    })
+    return buildFailureResponse(
+      'Failed to generate BDD test files',
+      bddgenError.stdout + bddgenError.stderr || bddgenError.message,
+      'BDD 用例生成失败',
+      'generate_failed'
+    )
   }
 
   const args = ['test']
@@ -60,10 +112,12 @@ export default defineEventHandler(async (event: H3Event) => {
     structuredReport = JSON.parse(reportContent)
   } catch (readReportError: any) {
     console.error('Failed to read or parse JSON report:', readReportError)
-    return {
-      success: false,
-      report: `无法生成结构化报告: ${readReportError.message}\n原始输出:\n${rawReport}`
-    }
+    return buildFailureResponse(
+      '无法生成结构化报告',
+      `无法生成结构化报告: ${readReportError.message}\n原始输出:\n${rawReport}`,
+      'BDD 测试报告生成失败',
+      'execute_failed'
+    )
   }
 
   const processedTests: any[] = []
@@ -122,11 +176,20 @@ export default defineEventHandler(async (event: H3Event) => {
 
   await processSuites(structuredReport.suites)
 
-  return {
-    success: allTestsPassed,
-    report: {
-      summary: structuredReport.stats,
-      tests: processedTests
-    }
+  const response: ApiResponse<{ success: boolean; report: BddTestReport }> = {
+    code: 200,
+    message: allTestsPassed ? 'OK' : 'BDD tests completed with failures',
+    data: {
+      success: allTestsPassed,
+      report: {
+        summary: structuredReport.stats,
+        tests: processedTests,
+        message: allTestsPassed ? '测试全部通过' : '测试已完成，包含失败项',
+        phase: allTestsPassed ? 'passed' : 'execute_failed',
+        phaseLabel: allTestsPassed ? '执行成功' : '执行失败',
+      },
+    },
   }
+
+  return response
 })

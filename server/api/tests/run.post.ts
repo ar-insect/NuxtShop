@@ -23,6 +23,13 @@ type BddTestReport = {
   phaseLabel?: string
 }
 
+type PlaywrightJsonStats = {
+  expected?: number
+  unexpected?: number
+  skipped?: number
+  flaky?: number
+}
+
 const buildFailureResponse = (
   message: string,
   details: string,
@@ -54,6 +61,20 @@ const buildFailureResponse = (
     },
   },
 })
+
+const normalizeSummary = (stats: PlaywrightJsonStats | undefined): BddTestReport['summary'] => {
+  const passed = stats?.expected ?? 0
+  const failed = stats?.unexpected ?? 0
+  const skipped = stats?.skipped ?? 0
+  const flaky = stats?.flaky ?? 0
+
+  return {
+    total: passed + failed + skipped + flaky,
+    passed,
+    failed,
+    skipped,
+  }
+}
 
 export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody(event)
@@ -182,7 +203,7 @@ export default defineEventHandler(async (event: H3Event) => {
     data: {
       success: allTestsPassed,
       report: {
-        summary: structuredReport.stats,
+        summary: normalizeSummary(structuredReport.stats),
         tests: processedTests,
         message: allTestsPassed ? '测试全部通过' : '测试已完成，包含失败项',
         phase: allTestsPassed ? 'passed' : 'execute_failed',

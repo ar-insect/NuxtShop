@@ -30,3 +30,4 @@ blob-report/
 # playwright-bdd generated specs
 .features-gen/
 .trae/
+.features-gen/

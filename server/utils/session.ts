@@ -9,16 +9,6 @@ import { randomUUID } from 'crypto'
  * @returns {string} 会话 ID
  */
 export const getSessionId = (event: H3Event): string => {
-  const authToken = getCookie(event, 'auth-token')
-  if (authToken) {
-    if (authToken.startsWith('user-jwt-token-')) {
-      const username = authToken.replace('user-jwt-token-', '')
-      return `user:${username}`
-    }
-    if (authToken.startsWith('mock-jwt-token-')) {
-      return 'user:admin'
-    }
-  }
   let sessionId = getCookie(event, 'session_id')
   
   if (!sessionId) {

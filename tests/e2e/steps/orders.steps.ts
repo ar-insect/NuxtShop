@@ -4,19 +4,14 @@ import { expect } from '@playwright/test'
 const { Given, When, Then } = createBdd()
 
 const ensureLoggedIn = async (page: any) => {
-  const res = await page.request.post('/api/auth/login', {
-    data: { username: 'admin', password: '123456' }
+  await page.evaluate(async () => {
+    await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username: 'admin', password: '123456' })
+    })
   })
-  const data = await res.json()
-  const token = data?.token || ''
-  if (token) {
-    const origin = new URL(page.url()).origin
-    await page.context().addCookies([{
-      name: 'auth-token',
-      value: token,
-      url: origin
-    }])
-  }
 }
 
 const selectRegion = async (page: any) => {

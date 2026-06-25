@@ -1,10 +1,9 @@
 import { ObjectId } from 'mongodb'
 import { findCartByUserId } from '~/server/utils/cart'
-import { getAuthToken, parseUserIdFromToken } from '~/server/utils/auth'
+import { getOptionalUserId } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const token = getAuthToken(event)
-  const userId = parseUserIdFromToken(token)
+  const userId = await getOptionalUserId(event)
 
   if (!userId) {
     // 未登录用户目前不支持服务端购物车，前端也会禁用加入购物车按钮

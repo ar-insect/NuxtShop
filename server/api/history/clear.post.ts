@@ -1,14 +1,13 @@
 import { ObjectId } from 'mongodb'
 import { getSessionId } from '../../utils/session'
 import { clearHistory } from '~/server/utils/history'
-import { getAuthToken, parseUserIdFromToken } from '~/server/utils/auth'
+import { getOptionalUserId } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const sessionId = getSessionId(event)
 
   let userObjectId: ObjectId | undefined
-  const token = getAuthToken(event)
-  const userId = parseUserIdFromToken(token)
+  const userId = await getOptionalUserId(event)
 
   if (userId) {
     userObjectId = new ObjectId(userId)

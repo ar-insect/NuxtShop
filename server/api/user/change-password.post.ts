@@ -5,7 +5,7 @@ import { findUserById, updateUser, verifyPassword } from '~/server/utils/user'
 import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event): Promise<ApiResponse<{ success: boolean }>> => {
-  const userId = requireUserId(event)
+  const userId = await requireUserId(event)
   const body = await readBody<{ currentPassword?: string; newPassword?: string; confirmPassword?: string }>(event)
   const { currentPassword, newPassword, confirmPassword } = body
 

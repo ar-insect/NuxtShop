@@ -2,26 +2,11 @@ import { ObjectId } from 'mongodb'
 import { findOrdersByUserId, insertOrder, deleteOrderByUser, clearOrdersByUser } from '~/server/utils/order'
 import { findBestCouponForAmount } from '~/server/utils/coupon'
 import type { OrderSummary, OrderDetail } from '~/types/api'
+import { requireUserId } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const method = event.method
-  const token = getCookie(event, 'auth-token')
-
-  if (!token || !token.startsWith('user-jwt-token-')) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: '请先登录'
-    })
-  }
-
-  const userId = token.replace('user-jwt-token-', '')
-
-  if (!ObjectId.isValid(userId)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid token'
-    })
-  }
+  const userId = await requireUserId(event)
 
   const userObjectId = new ObjectId(userId)
 

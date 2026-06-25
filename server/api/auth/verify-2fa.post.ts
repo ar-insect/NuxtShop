@@ -5,6 +5,7 @@ import type { LoginSuccessResponse, UserPublic } from '~/types/api'
 import { useRuntimeConfig } from '#imports'
 import { verifyTwoFactorCode } from '~/server/utils/two-factor'
 import { insertLoginHistory } from '~/server/utils/login-history'
+import { createAuthSession } from '~/server/utils/auth-session'
 
 export default defineEventHandler(async (event): Promise<LoginSuccessResponse> => {
   const body = await readBody<{ userId?: string; code?: string }>(event)
@@ -42,8 +43,6 @@ export default defineEventHandler(async (event): Promise<LoginSuccessResponse> =
     })
   }
 
-  const token = `user-jwt-token-${user._id}`
-
   const config = useRuntimeConfig()
   const isSuperAdmin = user.role === 'admin' && user.username === config.admin.username
 
@@ -61,10 +60,9 @@ export default defineEventHandler(async (event): Promise<LoginSuccessResponse> =
   }
 
   await insertLoginHistory(event, String(user._id), 'success')
+  await createAuthSession(event, String(user._id))
 
   return {
-    token,
     user: userPayload
   }
 })
-

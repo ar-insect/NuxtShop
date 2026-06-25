@@ -93,7 +93,7 @@ describe('useAuth composable', () => {
     vi.stubGlobal('nextTick', () => Promise.resolve())
   })
 
-  it('login 成功时会设置 token 和 user，返回 true', async () => {
+  it('login 成功时会设置 user 并返回 success', async () => {
     const mockUser = {
       id: 1,
       username: 'admin',
@@ -103,18 +103,16 @@ describe('useAuth composable', () => {
     }
 
     const fetchMock = vi.fn().mockResolvedValue({
-      token: 'mock-token',
       user: mockUser
     })
     vi.stubGlobal('$fetch', fetchMock)
 
     const { useAuth } = await import('~/composables/useAuth')
-    const { login, user, token, isAuthenticated } = useAuth()
+    const { login, user, isAuthenticated } = useAuth()
 
-    const ok = await login('admin', '123456', { redirect: false })
+    const result = await login('admin', '123456', { redirect: false })
 
-    expect(ok).toBe(true)
-    expect(token.value).toBe('mock-token')
+    expect(result).toEqual({ success: true })
     expect(user.value).toEqual(mockUser)
     expect(isAuthenticated.value).toBe(true)
 
@@ -133,28 +131,26 @@ describe('useAuth composable', () => {
     vi.stubGlobal('$fetch', fetchMock)
 
     const { useAuth } = await import('~/composables/useAuth')
-    const { login, user, token } = useAuth()
+    const { login, user } = useAuth()
 
-    const ok = await login('admin', 'wrong', { redirect: false })
+    const result = await login('admin', 'wrong', { redirect: false })
 
-    expect(ok).toBe(false)
+    expect(result).toEqual({ success: false })
     expect(toastErrorMock).toHaveBeenCalled()
     expect(user.value).toBeNull()
-    expect(token.value).toBeNull()
   })
 
-  it('logout 会清空 token 和 user，并重置本地状态', async () => {
+  it('logout 会清空 user，并重置本地状态', async () => {
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ success: true }))
     const { useAuth } = await import('~/composables/useAuth')
-    const { user, token, logout, isAuthenticated } = useAuth()
+    const { user, logout, isAuthenticated } = useAuth()
 
     // 手动设置已登录状态
     user.value = { id: 1, username: 'admin', name: 'Admin', role: 'admin', avatar: '' }
-    token.value = 'mock-token'
 
-    logout()
+    await logout()
 
     expect(user.value).toBeNull()
-    expect(token.value).toBeNull()
     expect(isAuthenticated.value).toBe(false)
 
     expect(resetCartLocalMock).toHaveBeenCalled()

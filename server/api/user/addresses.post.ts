@@ -7,7 +7,7 @@ import { requireUserId } from '~/server/utils/auth';
 import type { ApiResponse } from '~/types/common';
 
 export default defineEventHandler(async (event): Promise<ApiResponse<Address>> => {
-  const userId = requireUserId(event);
+  const userId = await requireUserId(event);
 
   const body = await readBody(event);
   const { name, phone, region, detail, isDefault } = body;

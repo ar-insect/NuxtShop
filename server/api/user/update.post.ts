@@ -16,7 +16,7 @@ export default defineEventHandler(async (event): Promise<ApiResponse<{
   const body = await readBody(event);
   const { name, avatar, phone, language, timezone } = body;
 
-  const userId = requireUserId(event);
+  const userId = await requireUserId(event);
 
   try {
     const updates: Record<string, any> = {};

@@ -41,28 +41,21 @@ When('我点击弹窗中的登录按钮', async ({ page }) => {
     if (enabled) {
       await submit.click();
     } else {
-      // 按钮被禁用时，直接通过页面上下文调用登录 API 设置 Cookie
+      // 按钮被禁用时，直接通过页面上下文调用登录 API 建立服务端 session
       const username = await page.locator('input[name="username"]').inputValue();
       const password = await page.locator('input[name="password"]').inputValue();
-      const token = await page.evaluate(async ({ u, p }) => {
+      const ok = await page.evaluate(async ({ u, p }) => {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ username: u, password: p })
         });
-        const data = await res.json();
-        return data?.token || '';
+        return res.ok;
       }, { u: username, p: password });
-      if (token) {
-        await page.context().addCookies([{
-          name: 'auth-token',
-          value: token,
-          domain: 'localhost',
-          path: '/'
-        }]);
+      if (ok) {
+        await page.goto('/');
       }
-      // 刷新以载入用户状态
-      await page.goto('/');
     }
   } else {
     const submitBtn = modal.locator('button[type="submit"]');
@@ -81,24 +74,17 @@ Then('我应该看到退出登录按钮', async ({ page }) => {
 
 Given('我已经登录', async ({ page }) => {
   await page.goto('/');
-  // 直接通过 API 获取 token，并设置浏览器 Cookie 以保证稳定性
-  const token = await page.evaluate(async () => {
+  const ok = await page.evaluate(async () => {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ username: 'admin', password: '123456' })
     });
-    const data = await res.json();
-    return data?.token || '';
+    return res.ok;
   });
-  if (token) {
-    await page.context().addCookies([{
-      name: 'auth-token',
-      value: token,
-      domain: 'localhost',
-      path: '/'
-    }]);
+  if (ok) {
+    await page.reload();
   }
-  await page.reload();
   await expect(page.locator('button', { hasText: '退出登录' })).toBeVisible({ timeout: 15000 });
 });

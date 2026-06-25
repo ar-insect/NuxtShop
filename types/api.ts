@@ -108,7 +108,6 @@ export interface OrderDetail extends OrderSummary {
 
 
 export interface LoginSuccessResponse {
-  token: string
   user: UserPublic
 }
 

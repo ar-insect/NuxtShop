@@ -6,7 +6,7 @@ import { requireUserId } from '~/server/utils/auth';
 import type { ApiResponse } from '~/types/common';
 
 export default defineEventHandler(async (event): Promise<ApiResponse<{ success: boolean }>> => {
-  const userId = requireUserId(event);
+  const userId = await requireUserId(event);
 
   const addressId = event.context.params?.id;
   if (!addressId || !ObjectId.isValid(addressId)) {

@@ -5,7 +5,7 @@ import { updateUser } from '~/server/utils/user'
 import type { ApiResponse } from '~/types/common'
 
 export default defineEventHandler(async (event): Promise<ApiResponse<{ enabled: boolean }>> => {
-  const userId = requireUserId(event)
+  const userId = await requireUserId(event)
   const body = await readBody<{ enabled?: boolean }>(event)
 
   if (typeof body.enabled !== 'boolean') {

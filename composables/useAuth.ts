@@ -20,17 +20,12 @@ type LoginOptions = {
  * 
  * @returns {Object} 认证状态与方法
  * @property {Ref<User | null>} user - 当前登录用户状态
- * @property {CookieRef<string | null>} token - 认证 token（Cookie）
  * @property {ComputedRef<boolean>} isAuthenticated - 是否已登录
  * @property {Function} login - 登录方法
  * @property {Function} logout - 退出登录方法
  */
 export const useAuth = () => {
   const user = useState<User | null>('auth-user', () => null)
-  const token = useCookie('auth-token', {
-    maxAge: 60 * 60 * 24 * 7, // 1 周
-    sameSite: 'lax'
-  })
   const toast = useToast()
   const router = useRouter()
   const { resetCartLocal, refreshCart } = useCart()
@@ -40,7 +35,6 @@ export const useAuth = () => {
   const { t } = useI18n()
 
   const applyLoginPayload = async (payload: LoginSuccessResponse, options: LoginOptions) => {
-    token.value = payload.token
     user.value = payload.user as User
     resetCartLocal()
     resetWishlistLocal()
@@ -120,10 +114,7 @@ export const useAuth = () => {
         phone
       })
       toast.success(t('toast.registerSuccess'))
-      // 注册成功后自动登录
-      token.value = `user-jwt-token-${res.user._id}` // 使用新用户的 _id 生成 token
-      user.value = res.user
-      await login(username, password) // 重新调用 login 确保所有状态正确设置
+      await login(username, password)
       return true
     } catch (e: any) {
       handleError(e)
@@ -132,11 +123,18 @@ export const useAuth = () => {
   }
 
   /**
-   * 退出当前用户：清空 token 与用户状态。
+   * 退出当前用户：清空服务端 session 与本地用户状态。
    * 退出后跳转到登录页。
    */
-  const logout = () => {
-    token.value = null
+  const logout = async () => {
+    try {
+      await http.post('/auth/logout', {}, {
+        ignoreErrorStatusCodes: [401]
+      })
+    } catch {
+      // Ignore logout request failures and still clear local state.
+    }
+
     user.value = null
     // toast.info('已退出登录')
     resetCartLocal()
@@ -147,7 +145,6 @@ export const useAuth = () => {
 
   return {
     user,
-    token,
     isAuthenticated: computed(() => !!user.value),
     login,
     verifyTwoFactorLogin,

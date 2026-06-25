@@ -4,7 +4,7 @@ import { requireUserId } from '~/server/utils/auth'
 import { createApiError } from '~/server/utils/api-error'
 
 export default defineEventHandler(async (event) => {
-  const userId = requireUserId(event)
+  const userId = await requireUserId(event)
 
   const body = await readBody(event)
 

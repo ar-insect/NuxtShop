@@ -1,45 +1,17 @@
 import type { H3Event } from 'h3'
-import { ObjectId } from 'mongodb'
 import { findUserById } from '~/server/utils/user'
 import { createApiError } from '~/server/utils/api-error'
 import { useRuntimeConfig } from '#imports'
+import { getAuthSessionUserId } from './auth-session'
 
-const TOKEN_PREFIX = 'user-jwt-token-'
-
-export const getAuthToken = (event: H3Event) => {
-  let token = getCookie(event, 'auth-token')
-
-  if (!token) {
-    const authHeader = getHeader(event, 'authorization')
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.slice(7)
-    }
-  }
-
-  return token || null
+export const getOptionalUserId = async (event: H3Event): Promise<string | null> => {
+  return await getAuthSessionUserId(event)
 }
 
-export const parseUserIdFromToken = (token: string | null): string | null => {
-  if (!token) {
-    return null
-  }
+export const requireUserId = async (event: H3Event): Promise<string> => {
+  const userId = await getOptionalUserId(event)
 
-  if (!token.startsWith(TOKEN_PREFIX)) {
-    return null
-  }
-
-  const userId = token.slice(TOKEN_PREFIX.length)
-  if (!userId || !ObjectId.isValid(userId)) {
-    return null
-  }
-
-  return userId
-}
-
-export const requireUserId = (event: H3Event): string => {
-  const token = getAuthToken(event)
-
-  if (!token) {
+  if (!userId) {
     throw createApiError({
       statusCode: 401,
       code: 'AUTH_UNAUTHORIZED',
@@ -48,22 +20,11 @@ export const requireUserId = (event: H3Event): string => {
     })
   }
 
-  const userId = parseUserIdFromToken(token)
-
-  if (!userId) {
-    throw createApiError({
-      statusCode: 401,
-      code: 'AUTH_INVALID_TOKEN',
-      message: 'Invalid token',
-      details: null
-    })
-  }
-
   return userId
 }
 
 export const requireUser = async (event: H3Event) => {
-  const userId = requireUserId(event)
+  const userId = await requireUserId(event)
   const user = await findUserById(userId)
 
   if (!user) {

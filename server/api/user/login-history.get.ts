@@ -27,7 +27,7 @@ const simplifyDevice = (ua: string | undefined): string => {
 }
 
 export default async (event: H3Event): Promise<ApiResponse<{ id: string; device: string; ip: string; status: string; time: string }[]>> => {
-  const userId = requireUserId(event)
+  const userId = await requireUserId(event)
 
   const items = await findRecentLoginHistory(userId, 10)
 

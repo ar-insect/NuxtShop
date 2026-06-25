@@ -17,31 +17,22 @@ export type Order = OrderSummary
  */
 export const useOrders = () => {
   const orders = useState<Order[]>('orders', () => [])
-
-  // 首次调用时从服务端拉取一次订单数据
+  const user = useState<{ _id?: string } | null>('auth-user', () => null)
   const ordersInitialized = useState<boolean>('orders-fetched', () => false)
 
-  if (!ordersInitialized.value) {
-    const { data } = useFetch<Order[]>('/api/orders', {
-      key: 'orders-data',
-      lazy: true
-    })
-
-    watch(data, (newOrders) => {
-      if (newOrders) {
-        orders.value = newOrders
-      }
-    }, { immediate: true })
-
-    ordersInitialized.value = true
-  }
-
   const refreshOrders = async () => {
+    if (!user.value?._id) {
+      orders.value = []
+      ordersInitialized.value = false
+      return
+    }
+
     try {
       const fresh = await http.get<Order[]>('/orders', undefined, {
         ignoreErrorStatusCodes: [401]
       })
       orders.value = fresh
+      ordersInitialized.value = true
     } catch {
       // 刷新订单失败时静默处理，避免在控制台输出错误
     }
@@ -112,6 +103,7 @@ export const useOrders = () => {
 
   const resetOrdersLocal = () => {
     orders.value = []
+    ordersInitialized.value = false
   }
 
   return {

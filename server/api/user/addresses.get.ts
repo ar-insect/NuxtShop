@@ -5,7 +5,7 @@ import type { ApiResponse } from '~/types/common';
 import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event): Promise<ApiResponse<any[]>> => {
-  const userId = requireUserId(event);
+  const userId = await requireUserId(event);
 
   try {
     const addresses = await findAddressesByUserId(userId);

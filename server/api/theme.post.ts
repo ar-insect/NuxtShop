@@ -1,11 +1,11 @@
 // server/api/theme.post.ts
 import { updateUser } from '~/server/utils/user';
-import type { ThemeConfig } from '~/stores/theme';
+import type { ThemeConfig } from '~/types/theme';
 import { createApiError } from '~/server/utils/api-error';
 import { requireUserId } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const userId = requireUserId(event);
+  const userId = await requireUserId(event);
 
   const body = await readBody(event);
   const { config } = body; // 期望 body 中包含一个 config 对象，即 ThemeConfig

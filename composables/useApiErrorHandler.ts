@@ -50,10 +50,11 @@ export const useApiErrorHandler = () => {
         code !== 'AUTH_INVALID_CREDENTIALS' &&
         code !== 'AUTH_MISSING_CREDENTIALS'
       ) {
-        const token = useCookie('auth-token')
         const user = useState('auth-user', () => null)
-        token.value = null
         user.value = null
+        void $fetch('/api/auth/logout', {
+          method: 'POST'
+        }).catch(() => {})
         router.push('/login')
       }
       return

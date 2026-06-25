@@ -2,26 +2,51 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { H3Event } from 'h3'
 
-// 简单的 createError mock，直接抛出 Error，方便用 rejects.toThrow 断言
-vi.stubGlobal('createError', (opts: any) => new Error(opts?.statusMessage || 'error'))
-
 describe('server/api/auth/login.post', () => {
   beforeEach(() => {
     vi.resetModules()
     vi.unstubAllGlobals()
-    vi.stubGlobal('createError', (opts: any) => new Error(opts?.statusMessage || 'error'))
+    vi.stubGlobal('defineEventHandler', (fn: any) => fn)
   })
 
-  it('admin 正确凭据登录成功，返回 token 和 user', async () => {
-    // 先 stub 全局函数，再动态导入 handler，避免 defineEventHandler 未定义
-    vi.stubGlobal('defineEventHandler', (fn: any) => fn)
+  it('admin 正确凭据登录成功，写入 session 并返回 user', async () => {
     vi.stubGlobal('readBody', vi.fn().mockResolvedValue({
       username: 'admin',
       password: '123456'
     }))
 
-    vi.mock('~/server/utils/redis', () => ({
-      useRedis: () => null
+    const createAuthSession = vi.fn().mockResolvedValue(undefined)
+    vi.doMock('~/server/utils/user', () => ({
+      findUserByUsername: vi.fn().mockResolvedValue({
+        _id: '507f1f77bcf86cd799439011',
+        username: 'admin',
+        password: 'hashed-password',
+        role: 'admin',
+        name: 'Admin User',
+        avatar: '',
+        phone: '13800000000',
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
+        twoFactorEnabled: false
+      }),
+      verifyPassword: vi.fn().mockResolvedValue(true)
+    }))
+    vi.doMock('#imports', () => ({
+      useRuntimeConfig: () => ({
+        admin: {
+          username: 'admin'
+        }
+      })
+    }))
+    vi.doMock('~/server/utils/login-history', () => ({
+      insertLoginHistory: vi.fn().mockResolvedValue(undefined)
+    }))
+    vi.doMock('~/server/utils/two-factor', () => ({
+      createTwoFactorCode: vi.fn(),
+      maskPhone: vi.fn()
+    }))
+    vi.doMock('~/server/utils/auth-session', () => ({
+      createAuthSession
     }))
 
     const { default: loginHandler } = await import('~/server/api/auth/login.post')
@@ -31,18 +56,40 @@ describe('server/api/auth/login.post', () => {
     expect(res).toBeTruthy()
     expect(res.user).toBeTruthy()
     expect(res.user.username).toBe('admin')
-    expect(res.token).toMatch(/mock-jwt-token-/)
+    expect(createAuthSession).toHaveBeenCalledWith(event, '507f1f77bcf86cd799439011')
+    expect(res.token).toBeUndefined()
   })
 
   it('admin 错误密码时抛出认证错误', async () => {
-    vi.stubGlobal('defineEventHandler', (fn: any) => fn)
     vi.stubGlobal('readBody', vi.fn().mockResolvedValue({
       username: 'admin',
       password: 'wrong'
     }))
 
-    vi.mock('~/server/utils/redis', () => ({
-      useRedis: () => null
+    vi.doMock('~/server/utils/user', () => ({
+      findUserByUsername: vi.fn().mockResolvedValue({
+        _id: '507f1f77bcf86cd799439011',
+        username: 'admin',
+        password: 'hashed-password'
+      }),
+      verifyPassword: vi.fn().mockResolvedValue(false)
+    }))
+    vi.doMock('~/server/utils/login-history', () => ({
+      insertLoginHistory: vi.fn().mockResolvedValue(undefined)
+    }))
+    vi.doMock('~/server/utils/two-factor', () => ({
+      createTwoFactorCode: vi.fn(),
+      maskPhone: vi.fn()
+    }))
+    vi.doMock('~/server/utils/auth-session', () => ({
+      createAuthSession: vi.fn()
+    }))
+    vi.doMock('#imports', () => ({
+      useRuntimeConfig: () => ({
+        admin: {
+          username: 'admin'
+        }
+      })
     }))
 
     const { default: loginHandler } = await import('~/server/api/auth/login.post')

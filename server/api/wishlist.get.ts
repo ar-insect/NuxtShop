@@ -1,10 +1,9 @@
 import { ObjectId } from 'mongodb'
 import { findWishlistByUserId } from '~/server/utils/wishlist'
-import { getAuthToken, parseUserIdFromToken } from '~/server/utils/auth'
+import { getOptionalUserId } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const token = getAuthToken(event)
-  const userId = parseUserIdFromToken(token)
+  const userId = await getOptionalUserId(event)
 
   if (!userId) {
     // 未登录用户当前不支持服务端收藏夹

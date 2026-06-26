@@ -1,8 +1,5 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-[var(--text-color)]">{{ t('profile.title') }}</h1>
-    </div>
     <div class="lg:grid lg:grid-cols-12 lg:gap-x-8">
       <!-- Sidebar -->
       <aside class="py-6 px-2 sm:px-6 lg:py-0 lg:px-0 lg:col-span-3 space-y-4">

@@ -19,16 +19,7 @@
       @navigate="goToProducts" 
     />
 
-    <section class="space-y-6">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.recommendTitle') }}</h2>
-          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.recommendSubtitle') }}</p>
-        </div>
-        <NuxtLink to="/products" class="text-sm font-medium text-[var(--text-color)] hover:text-[var(--primary-color)]">
-          {{ t('pages.home.recommendMore') }} →
-        </NuxtLink>
-      </div>
+    <section>
 
       <div v-if="pending" class="px-4">
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -57,6 +48,7 @@
                   v-for="p in slide"
                   :key="p.id"
                   :product="p"
+                  no-shadow
                   @click="navigateTo(`/products/${p.id}`)"
                 />
               </div>
@@ -107,13 +99,6 @@
       v-if="trendingPending || trendingProducts.length > 0"
       class="px-4 sm:px-6 lg:px-8"
     >
-      <div class="flex items-end justify-between gap-4 mb-4">
-        <div>
-          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.trendingTitle') }}</h2>
-          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.trendingSubtitle') }}</p>
-        </div>
-      </div>
-
       <div v-if="trendingPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <ProductCardSkeleton v-for="n in 4" :key="n" />
       </div>
@@ -131,13 +116,6 @@
       v-if="favoritedPending || favoritedProducts.length > 0"
       class="px-4 sm:px-6 lg:px-8"
     >
-      <div class="flex items-end justify-between gap-4 mb-4">
-        <div>
-          <h2 class="text-2xl font-bold text-[var(--text-color)]">{{ t('pages.home.favoritedTitle') }}</h2>
-          <p class="mt-1 text-[var(--text-secondary)]">{{ t('pages.home.favoritedSubtitle') }}</p>
-        </div>
-      </div>
-
       <div v-if="favoritedPending" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <ProductCardSkeleton v-for="n in 4" :key="n" />
       </div>

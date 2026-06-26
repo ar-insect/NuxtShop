@@ -1,12 +1,5 @@
 <template>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <div class="border-b border-[var(--border-color)] pb-5 mb-8">
-      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.products.list.title') }}</h1>
-      <p class="mt-2 text-lg text-[var(--text-secondary)]">
-        {{ t('pages.products.list.subtitle') }}
-      </p>
-    </div>
-
     <!-- Search and Filter -->
     <div class="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div class="flex-1">
@@ -73,9 +66,6 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="text-sm text-[var(--text-secondary)] whitespace-nowrap">
-          {{ t('pages.products.list.sortLabel') }}
-        </span>
         <BaseSelect
           v-model="sortKey"
           :options="sortOptions"

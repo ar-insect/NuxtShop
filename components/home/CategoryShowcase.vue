@@ -1,23 +1,5 @@
 <template>
-  <section class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-[var(--text-color)]">
-          {{ t('pages.home.categoryShowcase.title') }}
-        </h2>
-        <p class="mt-1 text-sm text-[var(--text-secondary)]">
-          {{ t('pages.home.categoryShowcase.description') }}
-        </p>
-      </div>
-      <button 
-        class="hidden sm:flex items-center text-sm font-medium text-[var(--primary-color)] hover:text-[var(--primary-color-dark)] transition-colors"
-        @click="goToProducts()"
-      >
-        {{ t('pages.home.categoryShowcase.viewAll') }}
-        <ArrowRightIcon class="ml-1 h-4 w-4" />
-      </button>
-    </div>
-
+  <section>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div 
         v-for="category in categories" 
@@ -69,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 import SvgIcon from '~/components/ui/SvgIcon.vue'
 import { useI18n } from '~/composables/useI18n'
 

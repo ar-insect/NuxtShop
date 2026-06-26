@@ -49,18 +49,20 @@
           <h4 class="text-sm font-medium text-[var(--text-color)] mb-4">
             {{ t('profile.preferences.primaryColorTitle') }}
           </h4>
-          <div class="flex flex-wrap gap-3">
+          <div class="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-8 gap-3">
             <button
               v-for="color in colors"
-              :key="color"
+              :key="color.value"
               type="button"
               class="h-9 w-9 rounded-full border transition-transform active:scale-95"
               :style="{
-                backgroundColor: color,
-                borderColor: currentPrimaryColor === color ? 'var(--text-color)' : 'var(--border-color)',
-                transform: currentPrimaryColor === color ? 'scale(1.05)' : undefined
+                backgroundColor: color.value,
+                borderColor: currentPrimaryColor === color.value ? 'var(--text-color)' : 'var(--border-color)',
+                transform: currentPrimaryColor === color.value ? 'scale(1.08)' : undefined
               }"
-              @click="setPrimaryColor(color)"
+              :title="color.label"
+              :aria-label="color.label"
+              @click="setPrimaryColor(color.value)"
             />
           </div>
        </div>
@@ -165,12 +167,22 @@ const fontSizes = computed(() => ([
 ] as const))
 
 const colors = [
-  '#3b82f6',
-  '#ef4444',
-  '#10b981',
-  '#f59e0b',
-  '#8b5cf6',
-  '#ec4899'
+  { value: '#3b82f6', label: 'Sky Blue' },
+  { value: '#2563eb', label: 'Royal Blue' },
+  { value: '#0ea5e9', label: 'Ocean Blue' },
+  { value: '#14b8a6', label: 'Teal' },
+  { value: '#10b981', label: 'Emerald' },
+  { value: '#84cc16', label: 'Lime' },
+  { value: '#eab308', label: 'Amber' },
+  { value: '#f59e0b', label: 'Orange' },
+  { value: '#f97316', label: 'Deep Orange' },
+  { value: '#ef4444', label: 'Red' },
+  { value: '#ec4899', label: 'Pink' },
+  { value: '#d946ef', label: 'Fuchsia' },
+  { value: '#a855f7', label: 'Purple' },
+  { value: '#8b5cf6', label: 'Violet' },
+  { value: '#6366f1', label: 'Indigo' },
+  { value: '#64748b', label: 'Slate' }
 ]
 
 const radii = computed(() => ([

@@ -215,7 +215,7 @@ const enUS = {
       buttonEmpty: 'Please add items first',
       buttonCheckout: 'Proceed to checkout',
       recommendedTitle: 'Recommended products',
-      recommendedDesc: 'Recommended based on site-wide views in the last 7 days, excluding items in your cart.',
+      recommendedDesc: 'There is always one you will love~',
       recommendedEmpty: 'No recommended products found.',
       removeConfirmTitle: 'Remove item',
       removeConfirmMessage: 'Remove this item from your cart?',

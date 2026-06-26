@@ -215,7 +215,7 @@ const zhCN = {
       buttonEmpty: '请先添加商品',
       buttonCheckout: '去结算',
       recommendedTitle: '推荐商品',
-      recommendedDesc: '根据最近 7 天全站浏览数据推荐，已排除你购物车中的商品。',
+      recommendedDesc: '总有一款是您喜欢的哦~',
       recommendedEmpty: '没有找到推荐商品。',
       removeConfirmTitle: '移除商品',
       removeConfirmMessage: '确定要从购物车移除这件商品吗？',

@@ -1,10 +1,6 @@
 <template>
   <ClientOnly>
   <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <div class="border-b border-[var(--border-color)] pb-5 mb-8">
-      <h1 class="text-3xl font-bold leading-tight text-[var(--text-color)]">{{ t('pages.cart.title') }}</h1>
-    </div>
-
     <BaseEmpty
       v-if="cartItems.length === 0"
       :title="t('pages.cart.emptyTitle')"
@@ -19,7 +15,7 @@
       <section aria-labelledby="cart-heading" class="lg:col-span-7">
         <h2 id="cart-heading" class="sr-only">{{ t('pages.cart.itemsHeading') }}</h2>
 
-        <ul role="list" class="border-t border-b border-[var(--border-color)] divide-y divide-[var(--border-color)]">
+        <ul role="list">
           <li v-for="item in cartItems" :key="item.id" class="flex py-6 sm:py-10">
             <NuxtLink :to="`/products/${item.id}`" class="flex-shrink-0">
               <img 

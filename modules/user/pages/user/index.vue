@@ -8,9 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import userAuth from '../../middleware/user-auth'
 definePageMeta({
-  middleware: userAuth,
+  middleware: 'auth',
   layout: 'dashboard'
 })
 </script>

@@ -60,7 +60,7 @@ watch(() => user.value?._id, async (newId) => {
   if (newId) {
     await themeStore.fetchTheme()
   } else {
-    themeStore.resetTheme()
+    themeStore.resetTheme({ persist: false })
   }
 })
 

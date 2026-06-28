@@ -1,30 +1,30 @@
 import Redis from 'ioredis'
+import { useRuntimeConfig } from '#imports'
 
-const config = useRuntimeConfig()
+let redis: Redis | null = null
 
-// 初始化 Redis 客户端
-const redisOptions = {
-  host: config.redis.host,
-  port: config.redis.port,
-  password: config.redis.password || undefined,
-  db: config.redis.db,
+const createRedisClient = () => {
+  const config = useRuntimeConfig()
+  const redisOptions = {
+    host: config.redis.host,
+    port: config.redis.port,
+    password: config.redis.password || undefined,
+    db: config.redis.db,
+  }
+  const client = process.env.REDIS_URL
+    ? new Redis(process.env.REDIS_URL)
+    : new Redis(redisOptions)
+
+  client.on('error', (err) => {
+    console.error('Redis Client Error', err)
+  })
+
+  client.on('connect', () => {
+    console.log('Redis Client Connected')
+  })
+
+  return client
 }
-
-/**
- * 全局共享的 Redis 客户端实例。
- * 可通过运行时配置或 REDIS_URL 环境变量进行配置。
- */
-const redis = process.env.REDIS_URL 
-  ? new Redis(process.env.REDIS_URL) 
-  : new Redis(redisOptions)
-
-redis.on('error', (err) => {
-  console.error('Redis Client Error', err)
-})
-
-redis.on('connect', () => {
-  console.log('Redis Client Connected')
-})
 
 /**
  * 获取当前可用的 Redis 客户端实例。
@@ -32,5 +32,12 @@ redis.on('connect', () => {
  * 
  * @returns {Redis} Redis 客户端实例
  */
-export const useRedis = () => redis
-export default redis
+export const useRedis = () => {
+  if (!redis) {
+    redis = createRedisClient()
+  }
+
+  return redis
+}
+
+export default useRedis

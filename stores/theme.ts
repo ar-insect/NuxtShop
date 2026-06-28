@@ -46,6 +46,10 @@ const DEFAULT_THEME: ThemeConfig = {
   borderRadius: '0.5rem',
 }
 
+type ResetThemeOptions = {
+  persist?: boolean
+}
+
 const resolveMode = (mode: ThemeMode) => {
   if (mode !== 'system') return mode
   if (!import.meta.client) return 'light'
@@ -173,10 +177,14 @@ body { background-color: var(--bg-color); color: var(--text-color); }`
       }
     },
 
-    resetTheme() {
+    resetTheme(options: ResetThemeOptions = {}) {
       this.theme = { ...DEFAULT_THEME }
       this.applyTheme()
       this.syncSystemModeListener()
+
+      if (options.persist === false) {
+        return
+      }
 
       http.post('/theme', { config: this.theme }).catch(() => {})
     },

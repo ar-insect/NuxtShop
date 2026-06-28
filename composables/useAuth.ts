@@ -9,6 +9,20 @@ import { useI18n } from '~/composables/useI18n'
 
 export type User = UserPublic
 
+const AUTH_LOCAL_STORAGE_KEYS = [
+  'nuxtshop-admin-tabs'
+]
+
+const clearPersistedAuthState = () => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return
+  }
+
+  for (const key of AUTH_LOCAL_STORAGE_KEYS) {
+    window.localStorage.removeItem(key)
+  }
+}
+
 type LoginOptions = {
   redirect?: boolean
   redirectTo?: string
@@ -140,6 +154,7 @@ export const useAuth = () => {
     resetCartLocal()
     resetWishlistLocal()
     resetOrdersLocal()
+    clearPersistedAuthState()
     router.push('/login')
   }
 

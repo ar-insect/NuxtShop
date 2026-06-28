@@ -32,6 +32,10 @@ const resetOrdersLocalMock = vi.fn()
 const refreshOrdersMock = vi.fn()
 const toastSuccessMock = vi.fn()
 const toastErrorMock = vi.fn()
+const localStorageRemoveItemMock = vi.fn()
+const handleErrorMock = vi.fn((error?: Error) => {
+  toastErrorMock(error?.message || 'error')
+})
 
 // 顶层模块 mock：useCart / useWishlist / useOrders
 vi.mock('~/modules/cart/composables/useCart', () => ({
@@ -50,6 +54,16 @@ vi.mock('~/modules/order/composables/useOrders', () => ({
   useOrders: () => ({
     resetOrdersLocal: resetOrdersLocalMock,
     refreshOrders: refreshOrdersMock
+  })
+}))
+vi.mock('~/composables/useApiErrorHandler', () => ({
+  useApiErrorHandler: () => ({
+    handleError: handleErrorMock
+  })
+}))
+vi.mock('~/composables/useI18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => key
   })
 }))
 
@@ -72,6 +86,8 @@ describe('useAuth composable', () => {
     refreshOrdersMock.mockReset()
     toastSuccessMock.mockReset()
     toastErrorMock.mockReset()
+    localStorageRemoveItemMock.mockReset()
+    handleErrorMock.mockClear()
 
     vi.stubGlobal('useState', useState)
     vi.stubGlobal('useCookie', useCookie)
@@ -91,6 +107,11 @@ describe('useAuth composable', () => {
     }))
 
     vi.stubGlobal('nextTick', () => Promise.resolve())
+    vi.stubGlobal('window', {
+      localStorage: {
+        removeItem: localStorageRemoveItemMock
+      }
+    })
   })
 
   it('login 成功时会设置 user 并返回 success', async () => {
@@ -156,6 +177,7 @@ describe('useAuth composable', () => {
     expect(resetCartLocalMock).toHaveBeenCalled()
     expect(resetWishlistLocalMock).toHaveBeenCalled()
     expect(resetOrdersLocalMock).toHaveBeenCalled()
+    expect(localStorageRemoveItemMock).toHaveBeenCalledWith('nuxtshop-admin-tabs')
     expect(routerPushMock).toHaveBeenCalledWith('/login')
   })
 })

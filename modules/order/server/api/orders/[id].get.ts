@@ -1,8 +1,9 @@
-import redis from '~/server/utils/redis'
+import { useRedis } from '~/server/utils/redis'
 import { getSessionId } from '~/server/utils/session'
 import type { OrderDetail } from '~/types/api'
 
 export default defineEventHandler(async (event): Promise<OrderDetail> => {
+  const redis = useRedis()
   const id = event.context.params?.id
   const userId = getSessionId(event)
 

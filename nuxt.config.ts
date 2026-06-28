@@ -106,6 +106,7 @@ export default defineNuxtConfig({
     '/products/**': { swr: process.env.NODE_ENV === 'production' ? 3600 : false },
   },
   nitro: {
+    errorHandler: '~/server/error',
     storage: {
       cache: {
         driver: 'redis',

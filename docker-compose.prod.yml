@@ -1,39 +1,53 @@
-version: '3.8'
-
 services:
   app:
-    # 生产环境推荐使用预先构建并推送到镜像仓库的镜像
-    # 例如：image: your-registry/nuxtshop:latest
-    # 为了本地快速体验，这里仍保留 build 配置
     build: .
     restart: always
     ports:
-      - '4000:4000'
+      - '${APP_PORT:-4000}:4000'
     env_file:
       - .env.production
     environment:
-      # 强制生产运行模式
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=4000
-      # Nitro node-server 运行预设
-      - NITRO_PRESET=node-server
-      # Redis 在 compose 网络中的主机名与端口
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      # 如果 .env.production 中未显式设置 REDIS_DB，则默认 0
-      - REDIS_DB=${REDIS_DB:-0}
-      # Mongo 连接与 DB 名、管理员账号等从 .env.production 注入：
-      # - MONGODB_URI
-      # - MONGODB_DB_NAME
-      # - ADMIN_USERNAME
-      # - ADMIN_PASSWORD
-      # - NUXT_PUBLIC_DISABLE_CAPTCHA
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4000
+      NITRO_PRESET: node-server
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/admin?authSource=admin}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME:-NuxtShop}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-please-change-me}
+      NUXT_PUBLIC_DISABLE_CAPTCHA: ${NUXT_PUBLIC_DISABLE_CAPTCHA:-0}
     depends_on:
-      - redis
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      # 挂载上传目录，避免容器重启后丢失用户上传的头像等文件
       - ./public/uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4000/api/test').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mongo:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-nuxtshop}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-please-change-me}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 })' | mongosh mongodb://127.0.0.1:27017/admin --quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
@@ -52,10 +66,13 @@ services:
       - .env.production
     volumes:
       - redis_data:/data
-    # 生产环境不暴露 Redis 端口，只在内部网络访问
-    # 如需本地调试，可临时添加：
-    # ports:
-    #   - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -n \"$$REDIS_PASSWORD\" ]; then redis-cli -a \"$$REDIS_PASSWORD\" ping; else redis-cli ping; fi"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
+  mongo_data:
   redis_data:

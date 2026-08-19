@@ -1,37 +1,40 @@
-# 使用 Node.js 20 Alpine 作为基础镜像
-FROM node:20-alpine AS builder
+FROM node:22-bookworm-slim AS base
 
-# 设置工作目录
 WORKDIR /app
 
-# 复制依赖文件
-COPY package.json package-lock.json ./
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
-# 安装依赖
-RUN npm ci
+RUN corepack enable
 
-# 复制源代码
+FROM base AS deps
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update && apt-get install -y --no-install-recommends \
+  python3 \
+  make \
+  g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+FROM deps AS builder
+
 COPY . .
+RUN pnpm run build
 
-# 构建应用
-RUN npm run build
-
-# 运行阶段
-FROM node:20-alpine AS runner
+FROM node:22-bookworm-slim AS runner
 
 WORKDIR /app
 
-# 复制构建产物
-COPY --from=builder /app/.output ./.output
-COPY --from=builder /app/public ./public
-
-# 暴露端口
-EXPOSE 4000
-
-# 设置环境变量
 ENV HOST=0.0.0.0
 ENV PORT=4000
 ENV NODE_ENV=production
 
-# 启动应用
+COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/public ./public
+
+EXPOSE 4000
+
 CMD ["node", ".output/server/index.mjs"]

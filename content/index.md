@@ -121,10 +121,49 @@ node scripts/seed-mongodb.mjs
 ```bash
 npm run dev       # 开发模式
 npm run build     # 生产构建
+npm run docker:up # Docker 一键启动（应用 + MongoDB + Redis）
+npm run docker:down # Docker 停止并移除容器
 npm run lint      # 代码检查（ESLint）
 npm run test:unit # 单元测试（Vitest）
 # Playwright E2E / BDD 可按 README 下方测试章节执行
 ```
+
+### 6) Docker 一键部署运行
+
+如果你希望直接用 Docker 跑完整系统（NuxtShop + MongoDB + Redis），项目现在支持一键启动：
+
+```bash
+npm run docker:up
+```
+
+这个命令会自动完成以下事情：
+
+- 若 `.env.production` 不存在，则从 `.env.production.example` 自动生成；
+- 自动创建 `public/uploads` 挂载目录；
+- 使用 `docker-compose.prod.yml` 启动 `app`、`mongo`、`redis` 三个服务；
+- 自动构建 NuxtShop 镜像并在后台运行。
+
+默认访问地址：
+
+- <http://localhost:4000>
+
+停止容器：
+
+```bash
+npm run docker:down
+```
+
+如果你不想走 npm 包装脚本，也可以直接使用 Docker Compose：
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+```
+
+首次运行前，建议至少检查并修改 `.env.production` 中这些字段：
+
+- `MONGO_INITDB_ROOT_PASSWORD`
+- `REDIS_PASSWORD`
+- `ADMIN_PASSWORD`
 
 ***
 

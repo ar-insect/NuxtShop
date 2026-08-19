@@ -76,8 +76,9 @@
 
 <script setup lang="ts">
 import { useCategoryMapper } from '~/modules/product/composables/useCategoryMapper'
-import type { Product } from '~/modules/product/composables/useProducts'
+
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import type { Product } from '~/types/product';
 
 const props = defineProps<{
   modelValue: string
